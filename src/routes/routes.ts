@@ -17,9 +17,6 @@ export const PublicRoutes = {
   MAIN: {
     static: "/"
   },
-  AUTH: {
-    static: "/auth",
-  },
   ADMINISTRATION: {
     static: "/administration",
   },

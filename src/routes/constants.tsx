@@ -3,7 +3,6 @@ import { UserRole } from "../api/a7-service/model";
 import { PublicRoutes } from "./routes";
 import MainPage from "../pages/Main/Main";
 import AdministrationPage from "../pages/Administration/Administration";
-import AuthPage from "../pages/Auth/Auth";
 import ProjectsPage from "../pages/Projects/Projects";
 import ReportsPage from "../pages/Reports/Reports";
 import SettingsPage from "../pages/Settings/Settings";
@@ -49,45 +48,19 @@ export const ROUTES: Routes[] = [
   {
     id: "administration",
     path: PublicRoutes.ADMINISTRATION.static,
-    roles: [
-      UserRole.admin,
-      UserRole.manager,
-      UserRole.photographer,
-      UserRole.seller,
-    ],
+    roles: [UserRole.admin],
     component: <AdministrationPage />,
-  },
-  {
-    id: "auth",
-    path: PublicRoutes.AUTH.static,
-    roles: [
-      UserRole.admin,
-      UserRole.manager,
-      UserRole.photographer,
-      UserRole.seller,
-    ],
-    component: <AuthPage />,
   },
   {
     id: "projects",
     path: PublicRoutes.PROJECTS.static,
-    roles: [
-      UserRole.admin,
-      UserRole.manager,
-      UserRole.photographer,
-      UserRole.seller,
-    ],
+    roles: [UserRole.admin, UserRole.photographer],
     component: <ProjectsPage />,
   },
   {
     id: "reports",
     path: PublicRoutes.REPORTS.static,
-    roles: [
-      UserRole.admin,
-      UserRole.manager,
-      UserRole.photographer,
-      UserRole.seller,
-    ],
+    roles: [UserRole.admin],
     component: <ReportsPage />,
   },
   {
@@ -104,12 +77,7 @@ export const ROUTES: Routes[] = [
   {
     id: "statistics",
     path: PublicRoutes.STATISTICS.static,
-    roles: [
-      UserRole.admin,
-      UserRole.manager,
-      UserRole.photographer,
-      UserRole.seller,
-    ],
+    roles: [UserRole.admin, UserRole.seller],
     component: <StatisticsPage />,
   },
 ];
