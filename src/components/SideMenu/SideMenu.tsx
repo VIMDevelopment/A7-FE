@@ -24,8 +24,9 @@ const SideMenu = () => {
         />
       </div>
       <div className={css.menuItemsContainer}>
-        {menuItems.map((item) => (
+        {menuItems.map((item, index) => (
           <SideMenuItem
+            key={`${item.title}${index}`}
             icon={item.icon}
             title={item.title}
             route={item.route}
