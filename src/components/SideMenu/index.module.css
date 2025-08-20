@@ -1,0 +1,50 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(201, 243, 255);
+  padding: 30px 20px;
+  row-gap: 40px;
+}
+
+.profileContainer {
+  display: flex;
+  column-gap: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.avatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: white;
+}
+
+.userInfoContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  padding: 8px 0px;
+}
+
+.userName {
+  width: max-content;
+  color: rgba(69, 86, 92, 1)
+}
+
+.userRole {
+  font-size: 14px;
+  color: rgba(69, 86, 92, 1);
+  opacity: 0.5;
+}
+
+.menuItemsContainer {
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+}

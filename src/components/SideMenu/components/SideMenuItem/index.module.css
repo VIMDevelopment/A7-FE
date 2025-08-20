@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  cursor: pointer;
+}
+
+.iconContainer > svg {
+  width: 28px;
+}
+
+.itemTitle {
+  font-size: 14px;
+  color: rgba(69, 86, 92, 1);
+}

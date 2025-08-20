@@ -1,0 +1,9 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.pageContainer {
+  width: 100%;
+  background-color: rgba(151, 199, 204, 1);
+}

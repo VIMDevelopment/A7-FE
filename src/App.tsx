@@ -9,6 +9,8 @@ import { getProfileFx, useProfile } from "./auth/auth";
 import { useShowPermissions } from "./auth/userData";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { REDIRECTS, ROUTES } from "./routes/constants";
+import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
+import PageWrapper from "./components/PageWrapper/PageWrapper";
 
 const config = new QueryClient({
   defaultOptions: {
@@ -63,6 +65,10 @@ const App = () => {
     return isHaveUserRoles;
   }, [data?.role]);
 
+  if (isFetching) {
+    return <></>;
+  }
+
   if (error) {
     return <>Пользователь не найден</>;
   }
@@ -74,7 +80,11 @@ const App = () => {
   return (
     <QueryClientProvider client={config}>
       <Router>
-        <Routes>{routes}</Routes>
+        <SideMenuWrapper>
+          <PageWrapper>
+            <Routes>{routes}</Routes>
+          </PageWrapper>
+        </SideMenuWrapper>
       </Router>
     </QueryClientProvider>
   );
