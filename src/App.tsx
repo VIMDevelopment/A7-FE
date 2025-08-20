@@ -1,0 +1,83 @@
+import React, { useEffect, useMemo } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { getProfileFx, useProfile } from "./auth/auth";
+import { useShowPermissions } from "./auth/userData";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { REDIRECTS, ROUTES } from "./routes/constants";
+
+const config = new QueryClient({
+  defaultOptions: {
+    mutations: {
+      onError: (e) => console.log("errooooorrr ===>", e),
+    },
+    queries: {
+      onError: (e) => console.log("errooooorrr ===>", e),
+      retry: false,
+      staleTime: 20_000,
+      refetchOnWindowFocus: false,
+      cacheTime: 20_000,
+    },
+  },
+});
+
+const App = () => {
+  const { data, isFetching, error } = useProfile();
+  const { getRoutePrivileges, hasPrivileges } = useShowPermissions();
+
+  useEffect(() => {
+    void getProfileFx();
+  }, []);
+
+  const routes = useMemo(() => {
+    const routes = ROUTES.filter((route) =>
+      hasPrivileges(getRoutePrivileges(route))
+    ).map((item) => (
+      <Route key={item.id} path={item.path} element={item.component} />
+    ));
+
+    const redirects = REDIRECTS.filter((route) =>
+      hasPrivileges(getRoutePrivileges(route))
+    ).map((item) => (
+      <Route
+        key={item.id}
+        path="*"
+        element={<Navigate replace to={item.path} />}
+      />
+    ));
+
+    return [...routes, ...redirects];
+  }, [getRoutePrivileges, hasPrivileges]);
+
+  const isHaveUserRoles = useMemo(() => {
+    const acceptedRoles = new Set(ROUTES.flatMap((elem) => elem.roles));
+
+    const isHaveUserRoles = (data?.role ? [data?.role] : []).some((role) =>
+      acceptedRoles.has(role)
+    );
+
+    return isHaveUserRoles;
+  }, [data?.role]);
+
+  if (error) {
+    return <>Пользователь не найден</>;
+  }
+
+  if (data && !isHaveUserRoles && !isFetching) {
+    return <>У вас нет прав доступа</>;
+  }
+
+  return (
+    <QueryClientProvider client={config}>
+      <Router>
+        <Routes>{routes}</Routes>
+      </Router>
+    </QueryClientProvider>
+  );
+};
+
+export default App;
