@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { REDIRECTS, ROUTES } from "./routes/constants";
 import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
+import AuthPage from "./pages/Auth/Auth";
 
 const config = new QueryClient({
   defaultOptions: {
@@ -70,7 +71,11 @@ const App = () => {
   }
 
   if (error) {
-    return <>Пользователь не найден</>;
+    return (
+      <QueryClientProvider client={config}>
+        <AuthPage />
+      </QueryClientProvider>
+    );
   }
 
   if (data && !isHaveUserRoles && !isFetching) {

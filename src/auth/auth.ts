@@ -1,7 +1,7 @@
 import { createEffect, createStore } from "effector";
 import { useUnit } from "effector-react";
 import { User } from "../api/a7-service/model";
-import { postApiAuthLogin } from "../api/a7-service";
+import { getApiAuthProfile, postApiAuthLogin } from "../api/a7-service";
 import { defaultApiAxiosParams } from "../api/helpers";
 
 export const $currentProfile = createStore<{
@@ -10,14 +10,7 @@ export const $currentProfile = createStore<{
 }>({});
 
 export const getProfileFx = createEffect({
-  handler: () =>
-    postApiAuthLogin(
-      {
-        email: "macsy.gavr.job@gmail.com",
-        password: "fbkAQJuL7s@cry",
-      },
-      defaultApiAxiosParams
-    ),
+  handler: () => getApiAuthProfile(defaultApiAxiosParams)
 });
 
 $currentProfile

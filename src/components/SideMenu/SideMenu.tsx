@@ -4,9 +4,16 @@ import css from "./index.module.css";
 import { useProfile } from "../../auth/auth";
 import { getRoleDescription, menuItems } from "./helpers";
 import SideMenuItem from "./components/SideMenuItem/SideMenuItem";
+import Cookies from "js-cookie";
+import { Tooltip } from "antd";
 
 const SideMenu = () => {
   const { data: user } = useProfile();
+
+  const handleLogout = () => {
+    Cookies.remove("accessToken");
+    window.location.reload();
+  };
 
   return (
     <div className={css.container}>
@@ -18,10 +25,12 @@ const SideMenu = () => {
           <div className={css.userName}>{user?.username}</div>
           <div className={css.userRole}>{getRoleDescription(user?.role)}</div>
         </div>
-        <LogoutOutlined
-          style={{ opacity: "0.5", paddingTop: "8px" }}
-          onClick={() => console.log("logout")}
-        />
+        <Tooltip title="Выйти из аккаунта">
+          <LogoutOutlined
+            style={{ opacity: "0.5", paddingTop: "8px" }}
+            onClick={handleLogout}
+          />
+        </Tooltip>
       </div>
       <div className={css.menuItemsContainer}>
         {menuItems.map((item, index) => (

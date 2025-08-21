@@ -1,3 +1,93 @@
 .container {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(151, 199, 204, 1);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 30px;
+  width: 500px;
+  border-radius: 20px;
+  background-color: rgb(201, 243, 255);
+}
+
+.title {
+  font-size: 22px;
+  color: rgba(69, 86, 92, 1);
+  margin-bottom: 40px;
+}
+
+.fieldContainer {
+  display: flex;
+  flex-direction: column;
+  row-gap: 4px;
+  width: 100%;
+}
+
+.fieldTitle {
+  font-size: 18px;
+  color: rgba(69, 86, 92, 1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  row-gap: 10px;
+  width: 100%;
+}
+
+.input {
+  border: none;
+  font-size: 20px;
+  border-radius: 0px 20px 20px 20px;
+  height: 50px;
+  padding: 0px 40px 0px 20px;
+  width: 100%;
+}
+
+.input::placeholder {
+  font-size: 20px;
+  color: rgba(50, 87, 96, 0.35)
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.error {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: red
+}
+
+.btn {
+  height: 50px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  color: white;
+  background-color: rgb(112, 131, 138);
+  width: 100%;
+  margin-top: 20px;
+}
+
+.passwordInputContainer {
+  display: flex;
+}
+
+.eyeContainer {
+  position: relative;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  width: 0px;
 }
