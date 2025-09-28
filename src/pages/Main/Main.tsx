@@ -2,8 +2,7 @@ import React from "react";
 import css from "./index.module.css";
 
 const MainPage = () => {
-
-  return <div className={css.container}>Main</div>;
+  return <></>;
 };
 
-export default MainPage;
+export default MainPage; 

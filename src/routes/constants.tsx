@@ -48,19 +48,19 @@ export const ROUTES: Routes[] = [
   {
     id: "administration",
     path: PublicRoutes.ADMINISTRATION.static,
-    roles: [UserRole.admin],
+    roles: [UserRole.admin, UserRole.manager],
     component: <AdministrationPage />,
   },
   {
     id: "projects",
     path: PublicRoutes.PROJECTS.static,
-    roles: [UserRole.admin, UserRole.photographer],
+    roles: [UserRole.admin, UserRole.photographer, UserRole.manager],
     component: <ProjectsPage />,
   },
   {
     id: "reports",
     path: PublicRoutes.REPORTS.static,
-    roles: [UserRole.admin],
+    roles: [UserRole.admin, UserRole.manager],
     component: <ReportsPage />,
   },
   {
@@ -77,7 +77,7 @@ export const ROUTES: Routes[] = [
   {
     id: "statistics",
     path: PublicRoutes.STATISTICS.static,
-    roles: [UserRole.admin, UserRole.seller],
+    roles: [UserRole.admin, UserRole.seller, UserRole.manager],
     component: <StatisticsPage />,
   },
 ];

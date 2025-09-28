@@ -11,9 +11,10 @@ import {
 import { Spin } from "antd";
 import Cookies from "js-cookie";
 import { PublicRoutes } from "../../routes/routes";
+import Input from "../../components/Input/Input";
+import Button from "../../components/Button/Button";
 
 const AuthPage = () => {
-  const [isVisiblePassword, setIsVisiblePassword] = useState(false);
   const [formState, setFormState] = useState<LoginRequest>({
     email: "",
     password: "",
@@ -47,74 +48,49 @@ const AuthPage = () => {
       <div className={css.modal}>
         <div className={css.title}>Авторизация</div>
         <div className={css.form}>
-          <div className={css.fieldContainer}>
-            <div className={css.fieldTitle}>E-mail</div>
-            <input
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  email: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleLoginClick();
-              }}
-              disabled={isLoading}
-              className={css.input}
-              placeholder="Введите E-mail"
-              type="email"
-            />
-          </div>
-          <div className={css.fieldContainer}>
-            <div className={css.fieldTitle}>Пароль</div>
-            <div className={css.passwordInputContainer}>
-              <input
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    password: e.target.value,
-                  }))
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleLoginClick();
-                }}
-                disabled={isLoading}
-                className={css.input}
-                placeholder="Введите пароль"
-                type={isVisiblePassword ? "text" : "password"}
-              />
-              <div className={css.eyeContainer}>
-                {!isVisiblePassword ? (
-                  <EyeOutlined
-                    onClick={() => setIsVisiblePassword((prev) => !prev)}
-                  />
-                ) : (
-                  <EyeInvisibleOutlined
-                    onClick={() => setIsVisiblePassword((prev) => !prev)}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
+          <Input
+            label="E-mail"
+            onChange={(e) =>
+              setFormState((prev) => ({
+                ...prev,
+                email: e.target.value,
+              }))
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLoginClick();
+            }}
+            disabled={isLoading}
+            placeholder="Введите E-mail"
+            type="email"
+          />
+          <Input
+            label="Пароль"
+            isPasswordInput
+            onChange={(e) =>
+              setFormState((prev) => ({
+                ...prev,
+                password: e.target.value,
+              }))
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLoginClick();
+            }}
+            disabled={isLoading}
+            placeholder="Введите пароль"
+          />
           {isError && (
             <>
               {/* @ts-ignore */}
               <div className={css.error}>{error?.response?.data?.message}</div>
             </>
           )}
-          <button
+          <Button
             disabled={isLoading}
-            className={css.btn}
             onClick={handleLoginClick}
+            showSpinner={isLoading}
           >
-            Войти &nbsp;
-            {isLoading && (
-              <Spin
-                indicator={<LoadingOutlined spin style={{ color: "white" }} />}
-                size="default"
-              />
-            )}
-          </button>
+            Войти
+          </Button>
         </div>
       </div>
     </div>
