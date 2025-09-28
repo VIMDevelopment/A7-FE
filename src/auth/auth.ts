@@ -1,21 +1,21 @@
 import { createEffect, createStore } from "effector";
 import { useUnit } from "effector-react";
-import { User } from "../api/a7-service/model";
-import { getApiAuthProfile, postApiAuthLogin } from "../api/a7-service";
 import { defaultApiAxiosParams } from "../api/helpers";
+import { getUsersInfo } from "../apiV2/a7-service";
+import { UserInfoResponse } from "../apiV2/a7-service/model";
 
 export const $currentProfile = createStore<{
-  data?: User;
+  data?: UserInfoResponse;
   error?: Error;
 }>({});
 
 export const getProfileFx = createEffect({
-  handler: () => getApiAuthProfile(defaultApiAxiosParams)
+  handler: () => getUsersInfo(defaultApiAxiosParams)
 });
 
 $currentProfile
   .on(getProfileFx.doneData, (_, res) => ({
-    data: res.data?.user,
+    data: res.data,
   }))
   .on(getProfileFx.failData, (_, value) => ({
     error: value,

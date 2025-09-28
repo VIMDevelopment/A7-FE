@@ -1,14 +1,16 @@
 import { useCallback, useMemo } from "react";
 import { useProfile } from "./auth";
-import { UserRole } from "../api/a7-service/model";
 import { RedirectRoutes, Routes } from "../routes/constants";
+import { UserRole } from "../apiV2/a7-service/model";
 
 export function useShowPermissions() {
   const { data: userProfile } = useProfile();
 
-  const userPrivileges = useMemo(() => {
-    return userProfile?.role;
-  }, [userProfile]);
+  // TODO: вернуть когда доработается метод GET users/info
+  // const userPrivileges = useMemo(() => {
+  //   return userProfile?.role;
+  // }, [userProfile]);
+  const userPrivileges = [UserRole.admin]
 
   const getRoutePrivileges = useCallback(
     (route: Routes | RedirectRoutes): UserRole[] => {

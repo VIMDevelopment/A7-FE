@@ -3,12 +3,6 @@ import css from "./index.module.css";
 import { LoginRequest } from "../../api/a7-service/model";
 import { usePostApiAuthLogin } from "../../api/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
-import {
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
-import { Spin } from "antd";
 import Cookies from "js-cookie";
 import { PublicRoutes } from "../../routes/routes";
 import Input from "../../components/Input/Input";

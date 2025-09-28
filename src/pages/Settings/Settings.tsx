@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import css from "./index.module.css";
-import { PutApiUsersIdBody, UserRole } from "../../api/a7-service/model";
+import { UserRole } from "../../api/a7-service/model";
 import { usePutApiUsersId } from "../../api/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { useProfile } from "../../auth/auth";
@@ -10,27 +10,31 @@ import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import Select from "../../components/Select/Select";
 import { getRoleDescription } from "../../components/SideMenu/helpers";
+import { usePutUsersUpdate } from "../../apiV2/a7-service";
+import { UserUpdateDto } from "../../apiV2/a7-service/model";
 
 const SettingsPage = () => {
-  const { data: user } = useProfile();
-  const [formState, setFormState] = useState<PutApiUsersIdBody>();
+  // const { data: user } = useProfile();
+  const [formState, setFormState] = useState<UserUpdateDto>({
+    name: "",
+    password: "",
+  });
 
   const {
-    data,
+    // data,
     isLoading,
     isError,
     error,
-    mutate: updale,
-  } = usePutApiUsersId({
+    mutate: update,
+  } = usePutUsersUpdate({
     axios: defaultApiAxiosParams,
   });
 
-  console.log(formState)
+  console.log(formState);
 
-  const handleLoginClick = () => {
-    updale({
-      id: user?.id ?? "",
-      data: formState ?? {},
+  const handleUpdateClick = () => {
+    update({
+      data: formState,
     });
   };
 
@@ -50,13 +54,26 @@ const SettingsPage = () => {
           onChange={(e) =>
             setFormState((prev) => ({
               ...prev,
-              username: e.target.value,
+              name: e.target.value,
             }))
           }
           disabled={isLoading}
           placeholder="Имя"
         />
         <Input
+          label="Пароль"
+          isPasswordInput
+          onChange={(e) =>
+            setFormState((prev) => ({
+              ...prev,
+              password: e.target.value,
+            }))
+          }
+          disabled={isLoading}
+          placeholder="Введите пароль"
+        />
+        {/* TODO: вернуть когда доработается метод PUT users/update */}
+        {/* <Input
           label="E-mail"
           onChange={(e) =>
             setFormState((prev) => ({
@@ -93,7 +110,7 @@ const SettingsPage = () => {
               label: getRoleDescription(UserRole.manager),
             },
           ]}
-        />
+        /> */}
         {isError && (
           <>
             {/* @ts-ignore */}
@@ -102,8 +119,8 @@ const SettingsPage = () => {
         )}
         <Button
           className={css.btn}
-          disabled={isLoading || !formState}
-          onClick={handleLoginClick}
+          disabled={isLoading || (!formState.name && !formState.password)}
+          onClick={handleUpdateClick}
           showSpinner={isLoading}
         >
           Сохранить
