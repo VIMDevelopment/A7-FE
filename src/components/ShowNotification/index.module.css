@@ -1,0 +1,3 @@
+.notificationStyle :global(.ant-notification-notice-description) {
+  white-space: pre-line;
+}

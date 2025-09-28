@@ -7,7 +7,7 @@ module.exports = {
   ],
   rules: {
     "@typescript-eslint/no-explicit-any": "warn",
-    "no-redeclare": "error",
+    "@typescript-eslint/no-redeclare": "error",
     "@typescript-eslint/no-unnecessary-condition": "warn",
   },
 };

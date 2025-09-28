@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import css from "./index.module.css";
 import { LoginRequest } from "../../api/a7-service/model";
-import { usePostApiAuthLogin } from "../../api/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import Cookies from "js-cookie";
 import { PublicRoutes } from "../../routes/routes";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
+import { usePostUsersLogin } from "../../apiV2/a7-service";
 
 const AuthPage = () => {
   const [formState, setFormState] = useState<LoginRequest>({
@@ -17,10 +17,8 @@ const AuthPage = () => {
   const {
     data,
     isLoading,
-    isError,
-    error,
     mutate: login,
-  } = usePostApiAuthLogin({
+  } = usePostUsersLogin({
     axios: defaultApiAxiosParams,
   });
 
@@ -32,7 +30,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (data) {
-      Cookies.set("accessToken", data?.data?.user?.accessToken ?? "", {});
+      Cookies.set("accessToken", data?.data?.jwt ?? "", {});
       window.location.replace(PublicRoutes.MAIN.static);
     }
   }, [data]);
@@ -72,12 +70,6 @@ const AuthPage = () => {
             disabled={isLoading}
             placeholder="Введите пароль"
           />
-          {isError && (
-            <>
-              {/* @ts-ignore */}
-              <div className={css.error}>{error?.response?.data?.message}</div>
-            </>
-          )}
           <Button
             disabled={isLoading}
             onClick={handleLoginClick}

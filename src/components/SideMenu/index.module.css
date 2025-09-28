@@ -4,21 +4,21 @@
   background-color: rgb(201, 243, 255);
   padding: 30px 20px;
   row-gap: 40px;
+  width: 340px;
 }
 
 .profileContainer {
   display: flex;
   column-gap: 10px;
   align-items: flex-start;
-  justify-content: space-between;
 }
 
 .avatarContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 55px;
-  height: 55px;
+  min-width: 55px;
+  min-height: 55px;
   border-radius: 50%;
   overflow: hidden;
   background-color: white;
@@ -33,7 +33,6 @@
 }
 
 .userName {
-  width: max-content;
   color: rgba(69, 86, 92, 1)
 }
 
@@ -47,4 +46,12 @@
   display: flex;
   flex-direction: column;
   row-gap: 20px;
+}
+
+.profileInfoCpntainer {
+  display: flex;
+  column-gap: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
 }

@@ -21,17 +21,19 @@ const SideMenu = () => {
         <div className={css.avatarContainer}>
           <UserOutlined style={{ fontSize: "30px" }} />
         </div>
-        <div className={css.userInfoContainer}>
-          <div className={css.userName}>{user?.name}</div>
-          {/* TODO: вернуть когда доработается метод GET users/info */}
-          {/* <div className={css.userRole}>{getRoleDescription(user?.role)}</div> */}
+        <div className={css.profileInfoCpntainer}>
+          <div className={css.userInfoContainer}>
+            <div className={css.userName}>{user?.name}</div>
+            {/* TODO: вернуть когда доработается метод GET users/info */}
+            {/* <div className={css.userRole}>{getRoleDescription(user?.role)}</div> */}
+          </div>
+          <Tooltip title="Выйти из аккаунта">
+            <LogoutOutlined
+              style={{ opacity: "0.5", paddingTop: "8px" }}
+              onClick={handleLogout}
+            />
+          </Tooltip>
         </div>
-        <Tooltip title="Выйти из аккаунта">
-          <LogoutOutlined
-            style={{ opacity: "0.5", paddingTop: "8px" }}
-            onClick={handleLogout}
-          />
-        </Tooltip>
       </div>
       <div className={css.menuItemsContainer}>
         {menuItems.map((item, index) => (

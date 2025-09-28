@@ -12,14 +12,25 @@ import { REDIRECTS, ROUTES } from "./routes/constants";
 import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import AuthPage from "./pages/Auth/Auth";
+import { showNotification } from "./components/ShowNotification";
 
 const config = new QueryClient({
   defaultOptions: {
     mutations: {
-      onError: (e) => console.log("errooooorrr ===>", e),
+      onError: (err) =>
+        showNotification({
+          type: "error",
+          // @ts-ignore
+          message: err?.response?.data?.message ?? "",
+        }),
     },
     queries: {
-      onError: (e) => console.log("errooooorrr ===>", e),
+      onError: (err) =>
+        showNotification({
+          type: "error",
+          // @ts-ignore
+          message: err?.response?.data?.message ?? "",
+        }),
       retry: false,
       staleTime: 20_000,
       refetchOnWindowFocus: false,
@@ -29,7 +40,7 @@ const config = new QueryClient({
 });
 
 const App = () => {
-  const { data, isFetching, error } = useProfile();
+  const { data, error } = useProfile();
   const { getRoutePrivileges, hasPrivileges } = useShowPermissions();
 
   useEffect(() => {
@@ -69,10 +80,6 @@ const App = () => {
 
   const isHaveUserRoles = true;
 
-  if (isFetching) {
-    return <></>;
-  }
-
   if (error) {
     return (
       <QueryClientProvider client={config}>
@@ -81,7 +88,7 @@ const App = () => {
     );
   }
 
-  if (data && !isHaveUserRoles && !isFetching) {
+  if (data && !isHaveUserRoles) {
     return <>У вас нет прав доступа</>;
   }
 
