@@ -2,13 +2,17 @@ import React, { FC, useEffect } from "react";
 import { Upload } from "antd";
 import { showNotification } from "../../../../components/ShowNotification";
 import css from "./index.module.css";
-import { usePostPhotosUpload } from "../../../../apiV2/a7-service";
+import {
+  usePostPhotosUpload,
+  usePutAlbumsCover,
+} from "../../../../apiV2/a7-service";
 import { beforeUpload, normalizeFile } from "./helpers";
 import { ENV } from "../../../../env";
 import { apiGetToken } from "../../../../auth/apiGetToken";
 import { stringify } from "qs";
 import { useQueryClient } from "react-query";
 import cn from "classnames";
+import { defaultApiAxiosParams } from "../../../../api/helpers";
 
 const { Dragger } = Upload;
 
@@ -20,7 +24,11 @@ type Props = {
 const UploadBox: FC<Props> = ({ size, albumId }) => {
   const queryClient = useQueryClient();
 
-  const { isSuccess, mutate: upload } = usePostPhotosUpload({
+  const {
+    data,
+    isSuccess,
+    mutate: upload,
+  } = usePostPhotosUpload({
     axios: {
       baseURL: ENV.REACT_APP_API_URL,
       headers: {
@@ -32,6 +40,10 @@ const UploadBox: FC<Props> = ({ size, albumId }) => {
     },
   });
 
+  const { mutate: setAlbumCover } = usePutAlbumsCover({
+    axios: defaultApiAxiosParams,
+  });
+
   useEffect(() => {
     if (isSuccess) {
       showNotification({
@@ -41,8 +53,17 @@ const UploadBox: FC<Props> = ({ size, albumId }) => {
       void queryClient.invalidateQueries({
         queryKey: `/photos/album/${albumId}`,
       });
+
+      if (size === "big") {
+        setAlbumCover({
+          data: {
+            photoId: data?.data?.id ?? "",
+            albumId: albumId,
+          },
+        });
+      }
     }
-  }, [isSuccess]);
+  }, [isSuccess, data, size]);
 
   return (
     <div className={cn(size === "big" ? css.container : css.smallContainer)}>

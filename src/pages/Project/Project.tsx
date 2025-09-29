@@ -1,6 +1,9 @@
 import React from "react";
 import css from "./index.module.css";
-import { useGetAlbumsProjectProjectId, useGetProjects, useGetProjectsId } from "../../apiV2/a7-service";
+import {
+  useGetAlbumsProjectProjectId,
+  useGetProjectsId,
+} from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { useNavigate, useParams } from "react-router-dom";
 import AlbumCard from "./components/AlbumCard/AlbumCard";
@@ -46,7 +49,13 @@ const ProjectPage = () => {
       />
       <div className={css.grid}>
         {albumsData?.data?.map((item) => (
-          <AlbumCard projectId={projectId} key={item.id} id={item.id} name={item.title} />
+          <AlbumCard
+            projectId={projectId}
+            key={item.id}
+            id={item.id}
+            name={item.title}
+            coverId={item.coverPhotoId}
+          />
         ))}
         <AddAlbumCard projectId={projectId ?? ""} />
       </div>

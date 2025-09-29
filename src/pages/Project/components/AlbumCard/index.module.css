@@ -29,3 +29,16 @@
   background-color: rgba(69, 86, 92, 1);
   opacity: 0.1;
 }
+
+.imgContainer {
+  height: 210px;
+  width: 210px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}

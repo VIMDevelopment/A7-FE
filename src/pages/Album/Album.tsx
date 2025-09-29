@@ -28,6 +28,12 @@ const AlbumPage = () => {
     axios: defaultApiAxiosParams,
   });
 
+  const albumPhotos = albumPhotosData?.data?.sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return dateA - dateB;
+  });
+
   const handleProjectsClick = () => {
     navigate(PublicRoutes.PROJECTS.static);
   };
@@ -59,11 +65,11 @@ const AlbumPage = () => {
           },
         ]}
       />
-      {albumPhotosData?.data?.length === 0 ? (
+      {albumPhotos?.length === 0 ? (
         <UploadBox size="big" albumId={albumId ?? ""} />
       ) : (
         <div className={css.grid}>
-          {albumPhotosData?.data?.map((item) => (
+          {albumPhotos?.map((item) => (
             <PhotoCard key={item.id} url={item.fileUrl} name={item.fileName} />
           ))}
           <UploadBox size="small" albumId={albumId ?? ""} />
