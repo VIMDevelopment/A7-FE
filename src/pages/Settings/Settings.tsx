@@ -32,7 +32,7 @@ const SettingsPage = () => {
     setFormState((prev) => ({
       ...prev,
       name: user?.name,
-      email: user?.email
+      email: user?.email,
     }));
   }, [user]);
 
@@ -56,9 +56,7 @@ const SettingsPage = () => {
     if (validPasswords) {
       update({
         data: {
-          // TODO
-          // id: user.id,
-          id: "68d9b7db4823509bc15898d7",
+          id: user?.id,
           name: formState.name,
           password: formState.password,
           email: formState.email,
@@ -70,8 +68,9 @@ const SettingsPage = () => {
       showNotification({
         type: "error",
         message: "Пароли не совпадают",
-        description: "Для обновления пароля нужно ввести одинаковые пароли в оба поля"
-      })
+        description:
+          "Для обновления пароля нужно ввести одинаковые пароли в оба поля",
+      });
     }
   };
 
@@ -89,7 +88,7 @@ const SettingsPage = () => {
           }
           value={formState.name}
           disabled={isLoading}
-          placeholder="Имя"
+          placeholder="Введите имя"
         />
         <Input
           label="Новый пароль"

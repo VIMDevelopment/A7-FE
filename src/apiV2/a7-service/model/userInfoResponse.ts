@@ -8,6 +8,8 @@
 import type { UserInfoResponseRole } from './userInfoResponseRole';
 
 export interface UserInfoResponse {
+  /** ID пользователя */
+  id?: string;
   /** Email пользователя */
   email?: string;
   /** Имя пользователя */
