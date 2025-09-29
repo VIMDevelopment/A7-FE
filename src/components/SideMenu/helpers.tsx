@@ -44,7 +44,7 @@ export const menuItems: SideMenuItemProps[] = [
   },
   {
     icon: <SettingsIcon />,
-    title: "Настройки",
+    title: "Настройки профиля",
     route: PublicRoutes.SETTINGS.static,
   },
   {

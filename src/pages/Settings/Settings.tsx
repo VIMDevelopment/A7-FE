@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from "react";
 import css from "./index.module.css";
-import { UserRole } from "../../api/a7-service/model";
-import { usePutApiUsersId } from "../../api/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { getProfileFx, useProfile } from "../../auth/auth";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Option } from "antd/es/mentions";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
-import Select from "../../components/Select/Select";
-import { getRoleDescription } from "../../components/SideMenu/helpers";
 import { usePutUsersUpdate } from "../../apiV2/a7-service";
-import { UserUpdateDto } from "../../apiV2/a7-service/model";
-import Cookies from "js-cookie";
-import { PublicRoutes } from "../../routes/routes";
 import { showNotification } from "../../components/ShowNotification";
+import { UserUpdateDto } from "../../apiV2/a7-service/model";
 
 type UserUpdateForm = UserUpdateDto & {
   repeatPassword?: string;
@@ -25,15 +17,11 @@ const SettingsPage = () => {
   const [isPasswordError, setIsPasswordError] = useState(false);
   const [formState, setFormState] = useState<UserUpdateForm>({
     name: user?.name,
-    password: "",
-    repeatPassword: "",
   });
 
   const {
     data,
     isLoading,
-    isError,
-    error,
     isSuccess,
     mutate: update,
   } = usePutUsersUpdate({
@@ -44,6 +32,7 @@ const SettingsPage = () => {
     setFormState((prev) => ({
       ...prev,
       name: user?.name,
+      email: user?.email
     }));
   }, [user]);
 
@@ -67,19 +56,28 @@ const SettingsPage = () => {
     if (validPasswords) {
       update({
         data: {
+          // TODO
+          // id: user.id,
+          id: "68d9b7db4823509bc15898d7",
           name: formState.name,
           password: formState.password,
+          email: formState.email,
         },
       });
       setIsPasswordError(false);
     } else {
       setIsPasswordError(true);
+      showNotification({
+        type: "error",
+        message: "Пароли не совпадают",
+        description: "Для обновления пароля нужно ввести одинаковые пароли в оба поля"
+      })
     }
   };
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>Настройки</div>
+      <div className={css.pageTitle}>Настройки профиля</div>
       <div className={css.form}>
         <Input
           label="Новое имя пользователя"
@@ -104,7 +102,7 @@ const SettingsPage = () => {
             setIsPasswordError(false);
           }}
           disabled={isLoading}
-          placeholder="Введите пароль"
+          placeholder="Введите новый пароль"
         />
         <Input
           label="Подтвердите новый пароль"
@@ -117,50 +115,21 @@ const SettingsPage = () => {
             setIsPasswordError(false);
           }}
           disabled={isLoading}
-          placeholder="Повторно введите пароль"
+          placeholder="Повторно введите новый пароль"
         />
-        {/* TODO: вернуть когда доработается метод PUT users/update */}
-        {/* <Input
-          label="E-mail"
+        <Input
+          label="Новый e-mail (при изменения почты вы будете автоматически разлогинены из системы)"
           onChange={(e) =>
             setFormState((prev) => ({
               ...prev,
               email: e.target.value,
             }))
           }
+          value={formState.email}
           disabled={isLoading}
-          placeholder="Введите E-mail"
+          placeholder="Введите новый E-mail"
           type="email"
         />
-        <Select
-          label="Роль"
-          onChange={(value) =>
-            setFormState((prev) => ({
-              ...prev,
-              role: value,
-            }))
-          }
-          options={[
-            {
-              key: UserRole.photographer,
-              value: UserRole.photographer,
-              label: getRoleDescription(UserRole.photographer),
-            },
-            {
-              key: UserRole.seller,
-              value: UserRole.seller,
-              label: getRoleDescription(UserRole.seller),
-            },
-            {
-              key: UserRole.manager,
-              value: UserRole.manager,
-              label: getRoleDescription(UserRole.manager),
-            },
-          ]}
-        /> */}
-        {isPasswordError && (
-          <div className={css.error}>Пароли не совпадают</div>
-        )}
         <Button
           className={css.btn}
           disabled={

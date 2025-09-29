@@ -9,7 +9,7 @@
 export type PutApiUsersIdBodyRole = 'photographer' | 'seller' | 'admin' | 'manager';
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+// eslint-disable-next-line
 export const PutApiUsersIdBodyRole = {
   photographer: 'photographer' as PutApiUsersIdBodyRole,
   seller: 'seller' as PutApiUsersIdBodyRole,

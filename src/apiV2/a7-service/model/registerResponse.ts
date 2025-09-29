@@ -5,12 +5,15 @@
  * API документация для A7 Backend - платформа для фотографов
  * OpenAPI spec version: 1.0.0
  */
+import type { RegisterResponseRole } from './registerResponseRole';
 
 export interface RegisterResponse {
-  /** ID созданного пользователя */
+  /** Уникальный идентификатор пользователя */
   id?: string;
   /** Email пользователя */
   email?: string;
   /** Имя пользователя */
   name?: string;
+  /** Роль пользователя */
+  role?: RegisterResponseRole;
 }

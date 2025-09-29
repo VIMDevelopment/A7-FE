@@ -4,6 +4,7 @@ import { defaultApiAxiosParams } from "../api/helpers";
 import { getUsersInfo } from "../apiV2/a7-service";
 import { UserInfoResponse } from "../apiV2/a7-service/model";
 
+
 export const $currentProfile = createStore<{
   data?: UserInfoResponse;
   error?: Error;

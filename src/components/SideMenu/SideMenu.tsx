@@ -24,8 +24,7 @@ const SideMenu = () => {
         <div className={css.profileInfoCpntainer}>
           <div className={css.userInfoContainer}>
             <div className={css.userName}>{user?.name}</div>
-            {/* TODO: вернуть когда доработается метод GET users/info */}
-            {/* <div className={css.userRole}>{getRoleDescription(user?.role)}</div> */}
+            <div className={css.userRole}>{getRoleDescription(user?.role)}</div>
           </div>
           <Tooltip title="Выйти из аккаунта">
             <LogoutOutlined

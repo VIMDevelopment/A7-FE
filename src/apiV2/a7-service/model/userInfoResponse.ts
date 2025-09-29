@@ -5,10 +5,13 @@
  * API документация для A7 Backend - платформа для фотографов
  * OpenAPI spec version: 1.0.0
  */
+import type { UserInfoResponseRole } from './userInfoResponseRole';
 
 export interface UserInfoResponse {
   /** Email пользователя */
   email?: string;
   /** Имя пользователя */
   name?: string;
+  /** Роль пользователя */
+  role?: UserInfoResponseRole;
 }

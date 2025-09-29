@@ -12,7 +12,7 @@
 export type UserRole = 'photographer' | 'seller' | 'admin' | 'manager';
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+// eslint-disable-next-line
 export const UserRole = {
   photographer: 'photographer' as UserRole,
   seller: 'seller' as UserRole,

@@ -6,11 +6,9 @@ import { UserRole } from "../apiV2/a7-service/model";
 export function useShowPermissions() {
   const { data: userProfile } = useProfile();
 
-  // TODO: вернуть когда доработается метод GET users/info
-  // const userPrivileges = useMemo(() => {
-  //   return userProfile?.role;
-  // }, [userProfile]);
-  const userPrivileges = [UserRole.admin]
+  const userPrivileges = useMemo(() => {
+    return userProfile?.role;
+  }, [userProfile]);
 
   const getRoutePrivileges = useCallback(
     (route: Routes | RedirectRoutes): UserRole[] => {

@@ -7,15 +7,15 @@
  */
 
 /**
- * Роль пользователя 
+ * Роль пользователя
  */
-export type UserRole = 'photographer' | 'seller' | 'admin' | 'manager';
+export type UserRole = 'seller' | 'photographer' | 'manager' | 'admin';
 
 
 // eslint-disable-next-line
 export const UserRole = {
-  photographer: 'photographer' as UserRole,
   seller: 'seller' as UserRole,
-  admin: 'admin' as UserRole,
+  photographer: 'photographer' as UserRole,
   manager: 'manager' as UserRole,
+  admin: 'admin' as UserRole,
 };

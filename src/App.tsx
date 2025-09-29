@@ -67,18 +67,15 @@ const App = () => {
     return [...routes, ...redirects];
   }, [getRoutePrivileges, hasPrivileges]);
 
-  // TODO: вернуть когда доработается метод GET users/info
-  // const isHaveUserRoles = useMemo(() => {
-  //   const acceptedRoles = new Set(ROUTES.flatMap((elem) => elem.roles));
+  const isHaveUserRoles = useMemo(() => {
+    const acceptedRoles = new Set(ROUTES.flatMap((elem) => elem.roles));
 
-  //   const isHaveUserRoles = (data?.role ? [data?.role] : []).some((role) =>
-  //     acceptedRoles.has(role)
-  //   );
+    const isHaveUserRoles = (data?.role ? [data?.role] : []).some((role) =>
+      acceptedRoles.has(role)
+    );
 
-  //   return isHaveUserRoles;
-  // }, [data?.role]);
-
-  const isHaveUserRoles = true;
+    return isHaveUserRoles;
+  }, [data?.role]);
 
   if (error) {
     return (

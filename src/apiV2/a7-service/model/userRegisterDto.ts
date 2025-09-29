@@ -5,6 +5,7 @@
  * API документация для A7 Backend - платформа для фотографов
  * OpenAPI spec version: 1.0.0
  */
+import type { UserRegisterDtoRole } from './userRegisterDtoRole';
 
 export interface UserRegisterDto {
   /** Email пользователя */
@@ -13,4 +14,6 @@ export interface UserRegisterDto {
   name: string;
   /** Пароль пользователя */
   password: string;
+  /** Роль пользователя */
+  role?: UserRegisterDtoRole;
 }

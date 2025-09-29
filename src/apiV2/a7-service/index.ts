@@ -30,6 +30,7 @@ import type {
   UpdateResponse,
   UserUpdateDto,
   UserInfoResponse,
+  UserResponse,
   ProjectResponse,
   CreateProjectDto,
   GetAllProjectsResponse,
@@ -191,6 +192,44 @@ export const useGetUsersInfo = <TData = AsyncReturnType<typeof getUsersInfo>, TE
   const queryFn: QueryFunction<AsyncReturnType<typeof getUsersInfo>> = () => getUsersInfo(axiosOptions);
 
   const query = useQuery<AsyncReturnType<typeof getUsersInfo>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Возвращает список всех пользователей в системе (требует аутентификации)
+ * @summary Получение всех пользователей
+ */
+export const getUsersAll = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<UserResponse[]>> => {
+    return axios.get(
+      `/users/all`,options
+    );
+  }
+
+
+export const getGetUsersAllQueryKey = () => [`/users/all`];
+
+    
+export const useGetUsersAll = <TData = AsyncReturnType<typeof getUsersAll>, TError = AxiosError<AuthError>>(
+  options?: { query?:UseQueryOptions<AsyncReturnType<typeof getUsersAll>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetUsersAllQueryKey();
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getUsersAll>> = () => getUsersAll(axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getUsersAll>, TError, TData>(queryKey, queryFn, queryOptions)
 
   return {
     queryKey,

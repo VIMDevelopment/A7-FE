@@ -5,10 +5,17 @@
  * API документация для A7 Backend - платформа для фотографов
  * OpenAPI spec version: 1.0.0
  */
+import type { UserUpdateDtoRole } from './userUpdateDtoRole';
 
 export interface UserUpdateDto {
+  /** ID пользователя для обновления */
+  id?: string;
+  /** Новый email пользователя */
+  email?: string;
   /** Новое имя пользователя */
   name?: string;
   /** Новый пароль пользователя */
   password?: string;
+  /** Новая роль пользователя */
+  role?: UserUpdateDtoRole;
 }

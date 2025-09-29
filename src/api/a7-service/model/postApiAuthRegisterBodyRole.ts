@@ -9,7 +9,7 @@
 export type PostApiAuthRegisterBodyRole = 'photographer' | 'seller' | 'admin' | 'manager';
 
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+// eslint-disable-next-line
 export const PostApiAuthRegisterBodyRole = {
   photographer: 'photographer' as PostApiAuthRegisterBodyRole,
   seller: 'seller' as PostApiAuthRegisterBodyRole,
