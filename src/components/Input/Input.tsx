@@ -1,14 +1,16 @@
 import { Input as AntdInput, InputProps } from "antd";
 import React, { FC, useState } from "react";
 import css from "./index.module.css";
+import cn from "classnames";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 
 type Props = {
   label?: string;
+  className?: string;
   isPasswordInput?: boolean;
 } & InputProps;
 
-const Input: FC<Props> = ({ label, isPasswordInput, ...props }) => {
+const Input: FC<Props> = ({ label, className, isPasswordInput, ...props }) => {
   const [isVisiblePassword, setIsVisiblePassword] = useState(false);
 
   return (
@@ -17,7 +19,7 @@ const Input: FC<Props> = ({ label, isPasswordInput, ...props }) => {
       {isPasswordInput ? (
         <div className={css.passwordInputContainer}>
           <AntdInput
-            className={css.input}
+            className={cn(css.input, className)}
             type={isVisiblePassword ? props.type : "password"}
             {...props}
           />
@@ -34,7 +36,7 @@ const Input: FC<Props> = ({ label, isPasswordInput, ...props }) => {
           </div>
         </div>
       ) : (
-        <AntdInput className={css.input} {...props} />
+        <AntdInput className={cn(css.input, className)} {...props} />
       )}
     </div>
   );

@@ -1,5 +1,7 @@
 .container {
   display: flex;
+  flex-direction: column;
+  row-gap: 30px;
 }
 
 .pageTitle {
@@ -7,4 +9,10 @@
   font-weight: 500;
   color: rgba(69, 86, 92, 1);
   text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
 }

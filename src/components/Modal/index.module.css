@@ -1,0 +1,23 @@
+.modal :global(.ant-modal-title) {
+  font-size: 20px;
+  color: rgba(69, 86, 92, 1);
+}
+
+.modal :global(.ant-modal-close):hover {
+  background: none;
+}
+.modal :global(.ant-modal-title) {
+  font-size: 20px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  column-gap: 10px;
+  width: 100%;
+}
+
+.footerBtn {
+  width: 100px !important;
+  height: 40px !important;
+}

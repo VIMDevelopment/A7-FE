@@ -33,6 +33,10 @@
   outline: none;
 }
 
+.input:focus {
+  box-shadow: none;
+}
+
 .eyeContainer {
   position: relative;
   right: 30px;
