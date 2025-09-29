@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import css from "./index.module.css";
 import AddProject from "./components/AddProjectCard/AddProjectCard";
 import { useGetProjects } from "../../apiV2/a7-service";
@@ -15,7 +15,7 @@ const ProjectsPage = () => {
       <div className={css.pageTitle}>Проекты</div>
       <div className={css.grid}>
         {data?.data?.projects?.map((item) => (
-          <ProjectCard name={item.name} />
+          <ProjectCard key={item.id} id={item.id} name={item.name} />
         ))}
         <AddProject />
       </div>

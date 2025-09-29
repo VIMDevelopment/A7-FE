@@ -5,23 +5,27 @@
  * @param get - функция для выдачи URL
  */
 
-export const reassignParam = "reassign";
-
-export type ApplicationParams = {
-  applicationId?: string;
-  isReassign?: string;
-  requestId?: string;
-};
-
 export const PublicRoutes = {
   MAIN: {
-    static: "/"
+    static: "/",
   },
   ADMINISTRATION: {
     static: "/administration",
   },
   PROJECTS: {
     static: "/projects",
+  },
+  PROJECT: {
+    static: "/projects/:projectId",
+    get: ({ projectId }: { projectId: string }) => {
+      return `/projects/${projectId}`;
+    },
+  },
+  ALBUM: {
+    static: "/projects/:projectId/album/:albumId",
+    get: ({ projectId, albumId }: { projectId: string; albumId: string }) => {
+      return `/projects/${projectId}/album/${albumId}`;
+    },
   },
   REPORTS: {
     static: "/reports",

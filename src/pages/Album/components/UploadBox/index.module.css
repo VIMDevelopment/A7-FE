@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 150px);
+}
+
+.dragger {
+  height: 300px;
+  width: 80%;
+  border-radius: 40px;
+  color: rgba(69, 86, 92, 1);
+  font-size: 16px;
+  white-space: pre;
+  text-align: center;
+}
+
+.smallContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  height: 150px;
+  cursor: pointer;
+  background-color: rgba(237, 255, 255, 1);
+  border-radius: 10px;
+  color: rgba(69, 86, 92, 1);
+  font-size: 16px;
+  white-space: pre;
+  text-align: center;
+  opacity: 0.6;
+}
+
+.smallDragger {
+  height: 150px;
+  min-width: 150px;
+  border-radius: 40px;
+  color: rgba(69, 86, 92, 1);
+  font-size: 16px;
+  white-space: pre;
+  text-align: center;
+}

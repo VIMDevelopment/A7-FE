@@ -1,0 +1,87 @@
+import React, { FC, useEffect, useState } from "react";
+import css from "./index.module.css";
+import Modal from "../../../../components/Modal/Modal";
+import Input from "../../../../components/Input/Input";
+import { usePostAlbums, usePostProjectsCreate } from "../../../../apiV2/a7-service";
+import { defaultApiAxiosParams } from "../../../../api/helpers";
+import { showNotification } from "../../../../components/ShowNotification";
+import { useQueryClient } from "react-query";
+import { formatDate } from "../../../../lib/formatters/date";
+
+type Props = {
+  projectId: string;
+}
+
+const AddAlbumCard: FC<Props> = ({ projectId }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(`Альбом - ${formatDate(new Date())}`);
+
+  const queryClient = useQueryClient();
+
+  const {
+    isLoading,
+    isSuccess,
+    mutate: createAlbum,
+  } = usePostAlbums({
+    axios: defaultApiAxiosParams,
+  });
+
+  useEffect(() => {
+    if (isSuccess) {
+      showNotification({
+        message: "Альбом успешно создан",
+        type: "success",
+      });
+      setIsModalOpen(false);
+      void queryClient.invalidateQueries({ queryKey: `/albums/project/${projectId}` });
+    }
+  }, [isSuccess]);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    createAlbum({
+      data: {
+        title: inputValue,
+        projectId,
+        isPublic: true,
+        description: "",
+        tags: []
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <>
+      <div
+        className={css.container}
+        onClick={showModal}
+      >{`+\nДобавить\nальбом`}</div>
+
+      <Modal
+        title={"Добавление альбома"}
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        okButtonName="Добавить"
+        destroyOnHidden
+        isLoading={isLoading}
+      >
+        <Input
+          className={css.input}
+          label="Введите название"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+      </Modal>
+    </>
+  );
+};
+
+export default AddAlbumCard;

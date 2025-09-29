@@ -7,6 +7,8 @@ import ProjectsPage from "../pages/Projects/Projects";
 import ReportsPage from "../pages/Reports/Reports";
 import SettingsPage from "../pages/Settings/Settings";
 import StatisticsPage from "../pages/Statistics/Statistics";
+import ProjectPage from "../pages/Project/Project";
+import AlbumPage from "../pages/Album/Album";
 
 export type Routes = {
   /**
@@ -56,6 +58,18 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.PROJECTS.static,
     roles: [UserRole.admin, UserRole.photographer, UserRole.manager],
     component: <ProjectsPage />,
+  },
+  {
+    id: "project",
+    path: PublicRoutes.PROJECT.static,
+    roles: [UserRole.admin, UserRole.photographer, UserRole.manager],
+    component: <ProjectPage />,
+  },
+  {
+    id: "album",
+    path: PublicRoutes.ALBUM.static,
+    roles: [UserRole.admin, UserRole.photographer, UserRole.manager],
+    component: <AlbumPage />,
   },
   {
     id: "reports",

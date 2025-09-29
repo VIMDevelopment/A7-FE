@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 230px;
+  height: 255px;
+  cursor: pointer;
+  background-color: rgba(237, 255, 255, 1);
+  border-radius: 10px;
+  color: rgba(69, 86, 92, 1);
+  font-size: 16px;
+  white-space: pre;
+  text-align: center;
+  opacity: 0.6;
+}
+
+.input {
+  border: 1px solid rgba(69, 86, 92, 1) !important;
+}
