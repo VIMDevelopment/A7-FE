@@ -18,3 +18,31 @@
   gap: 20px;
   margin-top: 30px;
 }
+
+.navMenu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.input {
+  border: 1px solid rgba(69, 86, 92, 1) !important;
+}
+
+.actionsBlock {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+}
+
+.deleteButton {
+  background: rgb(245, 0, 0);
+}
+
+.deleteButton:hover {
+  background: rgb(210, 0, 0) !important;
+}

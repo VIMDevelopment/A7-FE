@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../../../../components/Modal/Modal";
 import Input from "../../../../components/Input/Input";
@@ -7,7 +7,11 @@ import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 
-const AddProjectCard = () => {
+type Props = {
+  allProjectsNames: string[];
+};
+
+const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -29,6 +33,7 @@ const AddProjectCard = () => {
       });
       setIsModalOpen(false);
       void queryClient.invalidateQueries({ queryKey: "/projects" });
+      setInputValue("");
     }
   }, [isSuccess]);
 
@@ -37,15 +42,28 @@ const AddProjectCard = () => {
   };
 
   const handleOk = () => {
-    createProject({
-      data: {
-        name: inputValue,
-      },
-    });
+    const isNameUniq = !allProjectsNames.some(
+      (item) => item.toLocaleLowerCase() === inputValue.toLocaleLowerCase()
+    );
+
+    if (isNameUniq) {
+      createProject({
+        data: {
+          name: inputValue,
+        },
+      });
+    } else {
+      showNotification({
+        type: "error",
+        message:
+          "Проект с таким названием уже существует. Пожалуйста, введите другое название.",
+      });
+    }
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setInputValue("");
   };
 
   return (

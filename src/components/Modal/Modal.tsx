@@ -2,11 +2,13 @@ import React, { FC, PropsWithChildren } from "react";
 import css from "./index.module.css";
 import { Modal as AntdModal, ModalProps } from "antd";
 import Button from "../Button/Button";
+import cn from "classnames";
 
 type Props = {
   okButtonName?: string;
   cancelButtonName?: string;
   isLoading?: boolean;
+  customOkButtonClassName?: string;
 } & ModalProps &
   PropsWithChildren;
 
@@ -15,6 +17,7 @@ const Modal: FC<Props> = ({
   cancelButtonName,
   isLoading,
   children,
+  customOkButtonClassName,
   ...props
 }) => {
   return (
@@ -28,6 +31,7 @@ const Modal: FC<Props> = ({
           isLoading={isLoading}
           onOk={props.onOk}
           onCancel={props.onCancel}
+          customOkButtonClassName={customOkButtonClassName}
         />
       }
     >
@@ -42,12 +46,14 @@ type FooterProps = {
   okButtonName?: string;
   cancelButtonName?: string;
   isLoading?: boolean;
+  customOkButtonClassName?: string;
 } & Pick<ModalProps, "onOk" | "onCancel">;
 
 const ModalFooter: FC<FooterProps> = ({
   okButtonName,
   cancelButtonName,
   isLoading,
+  customOkButtonClassName,
   onOk,
   onCancel,
 }) => (
@@ -55,7 +61,11 @@ const ModalFooter: FC<FooterProps> = ({
     <Button className={css.footerBtn} disabled={isLoading} onClick={onCancel}>
       {cancelButtonName || "Отмена"}
     </Button>
-    <Button className={css.footerBtn} showSpinner={isLoading} onClick={onOk}>
+    <Button
+      className={cn(css.footerBtn, customOkButtonClassName)}
+      showSpinner={isLoading}
+      onClick={onOk}
+    >
       {okButtonName || "Сохранить"}
     </Button>
   </div>

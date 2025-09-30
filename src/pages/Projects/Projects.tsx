@@ -10,6 +10,9 @@ const ProjectsPage = () => {
     axios: defaultApiAxiosParams,
   });
 
+  const allProjectsNames =
+    data?.data?.projects?.map((item) => item.name ?? "") ?? [];
+
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>Проекты</div>
@@ -17,7 +20,7 @@ const ProjectsPage = () => {
         {data?.data?.projects?.map((item) => (
           <ProjectCard key={item.id} id={item.id} name={item.name} />
         ))}
-        <AddProject />
+        <AddProject allProjectsNames={allProjectsNames} />
       </div>
     </div>
   );
