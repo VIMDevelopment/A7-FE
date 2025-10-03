@@ -19,6 +19,7 @@ import Modal from "../../components/Modal/Modal";
 import Input from "../../components/Input/Input";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
+import { Image } from "antd";
 
 const AlbumPage = () => {
   const { projectId, albumId } = useParams();
@@ -207,9 +208,15 @@ const AlbumPage = () => {
         <UploadBox size="big" albumId={albumId ?? ""} />
       ) : (
         <div className={css.grid}>
-          {albumPhotos?.map((item) => (
-            <PhotoCard key={item.id} url={item.fileUrl} name={item.fileName} />
-          ))}
+          <Image.PreviewGroup items={albumPhotos?.map((item) => item.fileUrl)}>
+            {albumPhotos?.map((item) => (
+              <PhotoCard
+                key={item.id}
+                url={item.fileUrl}
+                name={item.fileName}
+              />
+            ))}
+          </Image.PreviewGroup>
           <UploadBox size="small" albumId={albumId ?? ""} />
         </div>
       )}

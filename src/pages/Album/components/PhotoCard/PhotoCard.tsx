@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import css from "./index.module.css";
+import { Image } from "antd";
 
 type Props = {
   url: string;
@@ -10,7 +11,7 @@ const PhotoCard: FC<Props> = ({ url, name }) => {
   return (
     <div className={css.container}>
       <div className={css.imgContainer}>
-        <img className={css.img} src={url} />
+        <Image src={url} className={css.img} />
       </div>
       <div className={css.name}>{name}</div>
     </div>

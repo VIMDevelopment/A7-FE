@@ -11,6 +11,8 @@
   width: 150px;
   border-radius: 20px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
 .img {

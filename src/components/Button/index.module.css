@@ -5,12 +5,12 @@
   outline: none;
   border-radius: 20px;
   color: white;
-  background-color: rgb(112, 131, 138);
+  background-color: rgb(255, 199, 87);
   width: 100%;
   margin-top: 20px;
 }
 
 .button:hover {
   color: white !important;
-  background-color: rgb(85, 99, 104) !important;
+  background-color: rgb(255, 180, 50) !important;
 }

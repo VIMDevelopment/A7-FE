@@ -22,7 +22,7 @@
   min-width: 150px;
   height: 150px;
   cursor: pointer;
-  background-color: rgba(237, 255, 255, 1);
+  background-color: rgb(255, 228, 179);;
   border-radius: 10px;
   color: rgba(69, 86, 92, 1);
   font-size: 16px;
@@ -35,7 +35,7 @@
   height: 150px;
   min-width: 150px;
   border-radius: 40px;
-  color: rgba(69, 86, 92, 1);
+  color: rgb(185, 167, 132);;
   font-size: 16px;
   white-space: pre;
   text-align: center;

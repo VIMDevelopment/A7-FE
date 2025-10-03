@@ -4,7 +4,7 @@
   align-items: center;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(151, 199, 204, 1);
+  background-color: rgb(255, 238, 206);;
 }
 
 .modal {
@@ -14,7 +14,7 @@
   padding: 50px 30px;
   width: 500px;
   border-radius: 20px;
-  background-color: rgb(201, 243, 255);
+  background-color: rgb(255, 228, 179);;
 }
 
 .title {
