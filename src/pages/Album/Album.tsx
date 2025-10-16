@@ -5,6 +5,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { PublicRoutes } from "../../routes/routes";
 import {
   useDeleteAlbumsId,
+  useDeletePhotosId,
   useGetAlbumsId,
   useGetAlbumsProjectProjectId,
   useGetPhotosAlbumAlbumId,
@@ -20,14 +21,17 @@ import Input from "../../components/Input/Input";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { Image } from "antd";
+import Button from "../../components/Button/Button";
 
 const AlbumPage = () => {
   const { projectId, albumId } = useParams();
   const navigate = useNavigate();
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
+  const [isDeleteAlbumModalOpen, setIsDeleteAlbumModalOpen] = useState(false);
+  const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
+  const [inputAlbumValue, setInputAlbumValue] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -51,52 +55,57 @@ const AlbumPage = () => {
     albumsData?.data?.map((item) => item.title ?? "") ?? [];
 
   const {
-    isLoading: isEditLoading,
-    isSuccess: isEditSuccess,
+    isLoading: isEditAlbumLoading,
+    isSuccess: isEditAlbumSuccess,
     mutate: updateAlbum,
   } = usePutAlbumsId({
     axios: defaultApiAxiosParams,
   });
 
   const {
-    isLoading: isDeleteLoading,
-    isSuccess: isDeleteSuccess,
+    isLoading: isDeleteAlbumLoading,
+    isSuccess: isDeleteAlbumSuccess,
     mutate: deleteAlbum,
   } = useDeleteAlbumsId({
     axios: defaultApiAxiosParams,
   });
 
+  const { isLoading: isDeletePhotosLoading, mutateAsync: deletePhoto } =
+    useDeletePhotosId({
+      axios: defaultApiAxiosParams,
+    });
+
   useEffect(() => {
-    setInputValue(albumData?.data?.title ?? "");
+    setInputAlbumValue(albumData?.data?.title ?? "");
   }, [albumData]);
 
   useEffect(() => {
-    if (isEditSuccess) {
+    if (isEditAlbumSuccess) {
       showNotification({
         message: "Альбом успешно переименован",
         type: "success",
       });
-      setIsEditModalOpen(false);
+      setIsEditAlbumModalOpen(false);
       void queryClient.invalidateQueries({ queryKey: `/albums/${albumId}` });
       void queryClient.invalidateQueries({
         queryKey: `/albums/project/${projectId}`,
       });
     }
-  }, [isEditSuccess]);
+  }, [isEditAlbumSuccess]);
 
   useEffect(() => {
-    if (isDeleteSuccess) {
+    if (isDeleteAlbumSuccess) {
       showNotification({
         message: "Альбом успешно удален",
         type: "success",
       });
-      setIsDeleteModalOpen(false);
+      setIsDeleteAlbumModalOpen(false);
       void queryClient.invalidateQueries({
         queryKey: `/albums/project/${projectId}`,
       });
       navigate(PublicRoutes.PROJECT.get({ projectId: projectId ?? "" }));
     }
-  }, [isDeleteSuccess]);
+  }, [isDeleteAlbumSuccess]);
 
   const projectName = useMemo(
     () =>
@@ -119,24 +128,28 @@ const AlbumPage = () => {
     navigate(PublicRoutes.PROJECTS.static);
   };
 
-  const handleEditClick = () => {
-    setIsEditModalOpen(true);
+  const handleEditAlbumClick = () => {
+    setIsEditAlbumModalOpen(true);
   };
 
-  const handleDeleteClick = () => {
-    setIsDeleteModalOpen(true);
+  const handleDeleteAlbumClick = () => {
+    setIsDeleteAlbumModalOpen(true);
   };
 
-  const handleEditOk = () => {
+  const handleDeletePhotosClick = () => {
+    setIsDeletePhotosModalOpen(true);
+  };
+
+  const handleEditAlbumOk = () => {
     const isNameUniq = !allAlbumsNames.some(
-      (item) => item.toLocaleLowerCase() === inputValue.toLocaleLowerCase()
+      (item) => item.toLocaleLowerCase() === inputAlbumValue.toLocaleLowerCase()
     );
 
     if (isNameUniq) {
       updateAlbum({
         id: albumId ?? "",
         data: {
-          title: inputValue,
+          title: inputAlbumValue,
         },
       });
     } else {
@@ -148,19 +161,61 @@ const AlbumPage = () => {
     }
   };
 
-  const handleDeleteOk = () => {
+  const handleDeleteAlbumOk = () => {
     deleteAlbum({
       id: albumId ?? "",
     });
   };
 
-  const handleEditCancel = () => {
-    setIsEditModalOpen(false);
-    setInputValue(albumData?.data?.title ?? "");
+  const handleDeletePhotosOk = async () => {
+    try {
+      await Promise.all(selectedPhotos.map((id) => deletePhoto({ id })));
+
+      showNotification({
+        message: "Фото успешно удалены",
+        type: "success",
+      });
+
+      setSelectedPhotos([]);
+      setIsDeletePhotosModalOpen(false);
+
+      await queryClient.invalidateQueries({
+        queryKey: [`/photos/album/${albumId}`],
+      });
+    } catch {
+      showNotification({
+        message: "Ошибка при удалении некоторых фото",
+        type: "error",
+      });
+    }
   };
 
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
+  const handleEditAlbumCancel = () => {
+    setIsEditAlbumModalOpen(false);
+    setInputAlbumValue(albumData?.data?.title ?? "");
+  };
+
+  const handleDeleteAlbumCancel = () => {
+    setIsDeleteAlbumModalOpen(false);
+  };
+
+  const handleDeletePhotosCancel = () => {
+    setIsDeletePhotosModalOpen(false);
+  };
+
+  const toggleSelectPhoto = (id: string) => {
+    setSelectedPhotos((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllPhotos = () => {
+    const photosIds = (albumPhotos ?? []).map((item) => item.id);
+    setSelectedPhotos(photosIds);
+  };
+
+  const handleResetSelectedPhotos = () => {
+    setSelectedPhotos([]);
   };
 
   return (
@@ -197,14 +252,14 @@ const AlbumPage = () => {
           ]}
         />
         <div className={css.actionsBlock}>
-          <div className={css.icon} onClick={handleEditClick}>
+          <div className={css.icon} onClick={handleEditAlbumClick}>
             <EditOutlined
               style={{
                 color: "rgba(255, 255, 255, 0.5)",
               }}
             />
           </div>
-          <div className={css.icon} onClick={handleDeleteClick}>
+          <div className={css.icon} onClick={handleDeleteAlbumClick}>
             <DeleteOutlined
               style={{
                 color: "rgba(255, 255, 255, 0.5)",
@@ -213,6 +268,19 @@ const AlbumPage = () => {
           </div>
         </div>
       </div>
+      <div className={css.actionsContainer}>
+        <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
+        <Button onClick={handleResetSelectedPhotos}>Отменить выбор</Button>
+        <Button
+          disabled={selectedPhotos.length === 0}
+          onClick={handleDeletePhotosClick}
+        >
+          Удалить выбранные
+        </Button>
+      </div>
+      <div
+        className={css.counter}
+      >{`Выбрано фотографий: ${selectedPhotos.length}`}</div>
       {albumPhotos?.length === 0 ? (
         <UploadBox size="big" albumId={albumId ?? ""} />
       ) : (
@@ -221,8 +289,11 @@ const AlbumPage = () => {
             {albumPhotos?.map((item) => (
               <PhotoCard
                 key={item.id}
+                id={item.id}
                 url={item.fileUrl}
                 name={item.fileName}
+                isSelected={selectedPhotos.includes(item.id)}
+                onSelect={toggleSelectPhoto}
               />
             ))}
           </Image.PreviewGroup>
@@ -231,31 +302,49 @@ const AlbumPage = () => {
       )}
       <Modal
         title={"Редактирование альбома"}
-        open={isEditModalOpen}
-        onOk={handleEditOk}
-        onCancel={handleEditCancel}
+        open={isEditAlbumModalOpen}
+        onOk={handleEditAlbumOk}
+        onCancel={handleEditAlbumCancel}
         okButtonName="Сохранить"
         destroyOnHidden
-        isLoading={isEditLoading}
+        isLoading={isEditAlbumLoading}
       >
         <Input
           label="Введите название"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          value={inputAlbumValue}
+          onChange={(e) => setInputAlbumValue(e.target.value)}
         />
       </Modal>
 
       <Modal
         title={"Удаление альбома"}
-        open={isDeleteModalOpen}
-        onOk={handleDeleteOk}
-        onCancel={handleDeleteCancel}
+        open={isDeleteAlbumModalOpen}
+        onOk={handleDeleteAlbumOk}
+        onCancel={handleDeleteAlbumCancel}
         okButtonName="Удалить"
         destroyOnHidden
-        isLoading={isDeleteLoading}
+        isLoading={isDeleteAlbumLoading}
         customOkButtonClassName={css.deleteButton}
       >
         {`Вы уверены, что хотите удалить альбом "${albumData?.data?.title}"? Все данные будут безвозвратно
+        удалены.`}
+      </Modal>
+
+      <Modal
+        title={"Удаление фото"}
+        open={isDeletePhotosModalOpen}
+        onOk={handleDeletePhotosOk}
+        onCancel={handleDeletePhotosCancel}
+        okButtonName="Удалить"
+        destroyOnHidden
+        isLoading={isDeletePhotosLoading}
+        customOkButtonClassName={css.deleteButton}
+      >
+        {`Вы уверены, что хотите удалить ${
+          selectedPhotos.length === 1
+            ? "это"
+            : `выбранные (${selectedPhotos.length})`
+        } фото? Данные будут безвозвратно
         удалены.`}
       </Modal>
     </div>

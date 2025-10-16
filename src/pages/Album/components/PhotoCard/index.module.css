@@ -13,6 +13,7 @@
   overflow: hidden;
   display: flex;
   align-items: center;
+  background-color: var(--color-modal-background);
 }
 
 .img {
@@ -28,4 +29,16 @@
   color: var(--color-text);
   white-space: pre-line;
   word-break: break-all;
+}
+
+.checkboxContainer {
+  position: absolute;
+  height: 0;
+}
+
+.checkbox {
+  position: relative;
+  right: 60px;
+  top: 4px;
+  z-index: 1;
 }

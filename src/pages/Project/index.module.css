@@ -39,7 +39,7 @@
   background: rgb(245, 0, 0);
 }
 
-.deleteButton:hover {
+.deleteButton:not(:disabled):hover {
   background: rgb(210, 0, 0) !important;
 }
 
