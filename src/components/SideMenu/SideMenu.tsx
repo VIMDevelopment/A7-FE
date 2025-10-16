@@ -28,7 +28,7 @@ const SideMenu = () => {
           </div>
           <Tooltip title="Выйти из аккаунта">
             <LogoutOutlined
-              style={{ opacity: "0.5", paddingTop: "8px" }}
+              style={{ color: "white", opacity: "0.5", paddingTop: "8px" }}
               onClick={handleLogout}
             />
           </Tooltip>

@@ -5,5 +5,5 @@
 
 .pageContainer {
   width: 100%;
-  background-color: rgb(255, 247, 233);
+  background-color: var(--color-page-background);
 }

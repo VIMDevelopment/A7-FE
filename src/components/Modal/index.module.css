@@ -1,11 +1,27 @@
+.modal :global(.ant-modal-body) {
+  color: var(--color-text)
+}
+
+.modal :global(.ant-modal-content) {
+  background-color: var(--color-modal-background);
+}
+
 .modal :global(.ant-modal-title) {
   font-size: 20px;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text);
+  background-color: var(--color-modal-background);
+}
+
+.modal :global(.ant-modal-close) {
+  background: none;
+  color: var(--color-text);
 }
 
 .modal :global(.ant-modal-close):hover {
   background: none;
+  color: var(--color-text-secondary);
 }
+
 .modal :global(.ant-modal-title) {
   font-size: 20px;
 }

@@ -7,7 +7,7 @@
 
 .label {
   font-size: 18px;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text);
 }
 
 .select {
@@ -17,17 +17,31 @@
 }
 
 .select :global(.ant-select-selector) {
-  border-radius: 0px 20px 20px 20px;
+  border-radius: 10px;
   padding: 0px 0px 0px 20px !important;
   font-size: 20px;
   border: none !important;
 }
 
 .root:global(.ant-select-dropdown) {
-  border-radius: 20px !important;
+  border-radius: 10px !important;
 }
 
 .root :global(.ant-select-item) {
   font-size: 20px;
-  border-radius: 20px;
+  border-radius: 10px;
+}
+
+.root :global(.ant-select-item-option-selected) {
+  background-color: rgb(200, 200, 200) !important;
+}
+
+.root :global(.ant-select-selection-placeholder) {
+  font-size: 20px;
+  color: rgba(95, 95, 95, 0.3);
+}
+
+.disabled {
+  border-radius: 10px;
+  background: var(--color-input-disabled) !important;
 }

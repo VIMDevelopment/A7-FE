@@ -19,9 +19,9 @@ const Input: FC<Props> = ({ label, className, isPasswordInput, ...props }) => {
       {isPasswordInput ? (
         <div className={css.passwordInputContainer}>
           <AntdInput
+            {...props}
             className={cn(css.input, className)}
             type={isVisiblePassword ? props.type : "password"}
-            {...props}
           />
           <div className={css.eyeContainer}>
             {!isVisiblePassword ? (
@@ -36,7 +36,7 @@ const Input: FC<Props> = ({ label, className, isPasswordInput, ...props }) => {
           </div>
         </div>
       ) : (
-        <AntdInput className={cn(css.input, className)} {...props} />
+        <AntdInput {...props} className={cn(css.input, className)} />
       )}
     </div>
   );

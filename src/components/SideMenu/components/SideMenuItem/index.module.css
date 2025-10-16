@@ -11,5 +11,5 @@
 
 .itemTitle {
   font-size: 14px;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text)
 }

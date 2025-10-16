@@ -3,14 +3,19 @@
   cursor: pointer;
   border: none;
   outline: none;
-  border-radius: 20px;
+  border-radius: 10px;
   color: white;
-  background-color: rgb(255, 199, 87);
+  background-color: var(--color-button-background);
   width: 100%;
   margin-top: 20px;
 }
 
-.button:hover {
+.button:not(:disabled):hover {
   color: white !important;
-  background-color: rgb(255, 180, 50) !important;
+  background-color: var(--color-button-hover-background) !important;
+}
+
+.button:disabled {
+  color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(130, 130, 130, 0.2);
 }

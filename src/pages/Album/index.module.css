@@ -6,7 +6,7 @@
 .pageTitle {
   font-size: 22px;
   font-weight: 500;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text);
   text-transform: uppercase;
   margin-bottom: 10px;
   cursor: pointer;
@@ -29,10 +29,6 @@
   cursor: pointer;
 }
 
-.input {
-  border: 1px solid rgba(69, 86, 92, 1) !important;
-}
-
 .actionsBlock {
   display: flex;
   align-items: center;
@@ -45,4 +41,16 @@
 
 .deleteButton:hover {
   background: rgb(210, 0, 0) !important;
+}
+
+.breadCrumbs :global(a) {
+  color: var(--color-text-secondary) !important;
+}
+
+.breadCrumbs :global(span) {
+  color: var(--color-text-secondary) !important;
+}
+
+.breadCrumbs :global(li) {
+  color: var(--color-text-secondary) !important;
 }

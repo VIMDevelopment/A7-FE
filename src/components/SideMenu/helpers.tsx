@@ -51,7 +51,7 @@ export const menuItems: SideMenuItemProps[] = [
     icon: (
       <BankOutlined
         style={{
-          color: "rgba(98, 120, 128, 1)",
+          color: "rgba(255, 255, 255, 0.5)",
           fontSize: "28px",
           paddingBottom: "2px",
         }}

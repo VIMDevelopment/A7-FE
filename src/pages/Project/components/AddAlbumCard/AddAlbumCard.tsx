@@ -92,7 +92,6 @@ const AddAlbumCard: FC<Props> = ({ projectId, allAlbumsNames }) => {
         isLoading={isLoading}
       >
         <Input
-          className={css.input}
           label="Введите название"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

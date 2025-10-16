@@ -83,7 +83,6 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
         isLoading={isLoading}
       >
         <Input
-          className={css.input}
           label="Введите название"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

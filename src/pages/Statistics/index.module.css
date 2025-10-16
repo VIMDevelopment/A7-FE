@@ -5,6 +5,6 @@
 .pageTitle {
   font-size: 22px;
   font-weight: 500;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text);
   text-transform: uppercase;
 }

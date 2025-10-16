@@ -4,7 +4,7 @@
   align-items: center;
   width: 100vw;
   height: 100vh;
-  background-color: rgb(255, 238, 206);;
+  background-color: var(--color-common-background);
 }
 
 .modal {
@@ -13,13 +13,13 @@
   align-items: center;
   padding: 50px 30px;
   width: 500px;
-  border-radius: 20px;
-  background-color: rgb(255, 228, 179);;
+  border-radius: 10px;
+  background-color: var(--color-page-background);
 }
 
 .title {
   font-size: 22px;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text);
   margin-bottom: 40px;
 }
 

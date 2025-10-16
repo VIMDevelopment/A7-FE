@@ -149,6 +149,7 @@ const ProjectPage = () => {
       </div>
       <div className={css.navMenu}>
         <Breadcrumb
+          className={css.breadCrumbs}
           separator=""
           items={[
             {
@@ -164,10 +165,18 @@ const ProjectPage = () => {
         />
         <div className={css.actionsBlock}>
           <div className={css.icon} onClick={handleEditClick}>
-            <EditOutlined />
+            <EditOutlined
+              style={{
+                color: "rgba(255, 255, 255, 0.5)",
+              }}
+            />
           </div>
           <div className={css.icon} onClick={handleDeleteClick}>
-            <DeleteOutlined />
+            <DeleteOutlined
+              style={{
+                color: "rgba(255, 255, 255, 0.5)",
+              }}
+            />
           </div>
         </div>
       </div>
@@ -196,7 +205,6 @@ const ProjectPage = () => {
         isLoading={isEditLoading}
       >
         <Input
-          className={css.input}
           label="Введите название"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

@@ -5,9 +5,9 @@
   min-width: 150px;
   height: 100px;
   cursor: pointer;
-  background-color: rgb(255, 228, 179);
+  background-color: var(--color-modal-background);
   border-radius: 10px;
-  color: #45565c;
+  color: var(--color-text);
   font-size: 16px;
   white-space: pre-line;
   word-break: break-all;

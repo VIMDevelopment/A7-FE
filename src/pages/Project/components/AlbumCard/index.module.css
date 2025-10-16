@@ -6,9 +6,9 @@
   min-width: 230px;
   height: 255px;
   cursor: pointer;
-  background-color: rgb(255, 228, 179);;
+  background-color: var(--color-modal-background);
   border-radius: 10px;
-  color: #45565c;
+  color: var(--color-text);
   font-size: 16px;
   white-space: pre-line;
   word-break: break-all;
@@ -26,14 +26,14 @@
   height: 100px;
   width: 100px;
   border-radius: 10px;
-  background-color: rgb(129, 119, 101);;
+  background-color: rgb(200, 200, 200);
   opacity: 0.1;
 }
 
 .imgContainer {
   height: 210px;
   width: 210px;
-  border-radius: 20px;
+  border-radius: 10px;
   overflow: hidden;
 }
 

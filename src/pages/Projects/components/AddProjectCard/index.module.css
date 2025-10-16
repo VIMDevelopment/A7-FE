@@ -5,15 +5,11 @@
   min-width: 150px;
   height: 100px;
   cursor: pointer;
-  background-color: rgb(255, 228, 179);
+  background-color: var(--color-modal-background);
   border-radius: 10px;
-  color: rgba(69, 86, 92, 1);
+  color: var(--color-text);
   font-size: 16px;
   white-space: pre;
   text-align: center;
-  opacity: 0.6;
-}
-
-.input {
-  border: 1px solid rgb(121, 109, 88) !important;
+  opacity: 0.3;
 }
