@@ -32,16 +32,16 @@ export const menuItems: SideMenuItemProps[] = [
     title: "Проекты",
     route: PublicRoutes.PROJECTS.static,
   },
-  {
-    icon: <ReportsIcon />,
-    title: "Отчеты",
-    route: PublicRoutes.REPORTS.static,
-  },
-  {
-    icon: <StatisticsIcon />,
-    title: "Статистика",
-    route: PublicRoutes.STATISTICS.static,
-  },
+  // {
+  //   icon: <ReportsIcon />,
+  //   title: "Отчеты",
+  //   route: PublicRoutes.REPORTS.static,
+  // },
+  // {
+  //   icon: <StatisticsIcon />,
+  //   title: "Статистика",
+  //   route: PublicRoutes.STATISTICS.static,
+  // },
   {
     icon: <SettingsIcon />,
     title: "Настройки профиля",

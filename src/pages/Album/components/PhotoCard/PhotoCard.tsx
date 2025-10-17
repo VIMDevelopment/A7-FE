@@ -136,7 +136,7 @@ const PhotoCard: FC<Props> = ({
           <Dropdown
             overlayClassName={css.dropdown}
             placement="bottomRight"
-            menu={{ items, theme: "dark" }}
+            menu={{ items }}
             trigger={["click"]}
           >
             <MoreOutlined
