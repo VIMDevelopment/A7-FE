@@ -23,6 +23,7 @@ import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { Image } from "antd";
 import Button from "../../components/Button/Button";
+import { FileForZip, handleDownloadAll } from "./components/PhotoCard/helpers";
 
 const AlbumPage = () => {
   const { projectId, albumId } = useParams();
@@ -161,6 +162,17 @@ const AlbumPage = () => {
     setIsDeletePhotosModalOpen(true);
   };
 
+  const handleDownloadPhotosClick = () => {
+    const preparedFilesData: FileForZip[] = (albumPhotos ?? [])
+      .filter((item) => selectedPhotos.includes(item.id))
+      .map((item) => ({
+        url: item.fileUrl ?? "",
+        fileName: item.fileName ?? "",
+      }));
+
+    handleDownloadAll(preparedFilesData);
+  };
+
   const handleEditAlbumOk = () => {
     const isNameUniq = !allAlbumsNames.some(
       (item) => item.toLocaleLowerCase() === inputAlbumValue.toLocaleLowerCase()
@@ -290,6 +302,12 @@ const AlbumPage = () => {
       <div className={css.actionsContainer}>
         <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
         <Button onClick={handleResetSelectedPhotos}>Отменить выбор</Button>
+        <Button
+          disabled={selectedPhotos.length === 0}
+          onClick={handleDownloadPhotosClick}
+        >
+          Скачать выбранные
+        </Button>
         <Button
           disabled={selectedPhotos.length === 0}
           onClick={handleDeletePhotosClick}

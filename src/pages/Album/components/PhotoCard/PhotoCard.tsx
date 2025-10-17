@@ -13,6 +13,7 @@ import {
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import Input from "../../../../components/Input/Input";
+import { downloadImageByUrl } from "./helpers";
 
 type Props = {
   id: string;
@@ -77,11 +78,16 @@ const PhotoCard: FC<Props> = ({
   const items: ItemType[] = [
     {
       key: "0",
+      label: "Скачать",
+      onClick: () => downloadImageByUrl(url, name),
+    },
+    {
+      key: "1",
       label: "Переименовать",
       onClick: () => setIsEditPhotoNameModalOpen(true),
     },
     {
-      key: "1",
+      key: "2",
       label: "Удалить",
       danger: true,
       onClick: () => setIsDeletePhotoModalOpen(true),
