@@ -22,5 +22,8 @@ body {
   --color-input-disabled: rgb(180, 180, 180);
   --color-modal-background: rgb(90, 90, 90);
   --color-page-background: rgb(70, 70, 70);
+  --color-menu-item-hovered-background: rgb(50, 50, 50);
   --color-common-background: rgb(35, 35, 35);
+  --color-error: rgb(255, 77, 79);
+  --color-error-btn-hovered: rgb(217, 65, 67);
 }

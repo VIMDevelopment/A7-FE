@@ -42,3 +42,43 @@
   top: 4px;
   z-index: 1;
 }
+
+.actionMenuIconContainer {
+  position: absolute;
+  height: 0;
+}
+
+.menuIconButton {
+  position: relative;
+  left: 60px;
+  top: 4px;
+  display: flex;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(63, 63, 63, 0.799);
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.dropdown :global(.ant-dropdown-menu) {
+  background-color: var(--color-page-background);
+}
+
+.dropdown :global(.ant-dropdown-menu-title-content) {
+  color: var(--color-text);
+}
+
+.dropdown :global(.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-danger)) {
+  background-color: var(--color-menu-item-hovered-background) !important;
+}
+
+.deleteButton {
+  background: var(--color-error);
+}
+
+.deleteButton:not(:disabled):hover {
+  background: var(--color-error-btn-hovered) !important;
+}

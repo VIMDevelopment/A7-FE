@@ -89,10 +89,6 @@ const ProjectPage = () => {
     }
   }, [isDeleteSuccess]);
 
-  const handleProjectsClick = () => {
-    navigate(PublicRoutes.PROJECTS.static);
-  };
-
   const handleEditClick = () => {
     setIsEditModalOpen(true);
   };
@@ -144,9 +140,7 @@ const ProjectPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle} onClick={handleProjectsClick}>
-        Проекты
-      </div>
+      <div className={css.pageTitle}>Проекты</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
@@ -221,7 +215,7 @@ const ProjectPage = () => {
         customOkButtonClassName={css.deleteButton}
       >
         {`Вы уверены, что хотите удалить проект "${projectName}"? Все данные будут безвозвратно
-        удалены.`}
+        утеряны.`}
       </Modal>
     </div>
   );

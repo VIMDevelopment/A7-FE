@@ -10,6 +10,7 @@ import {
   useGetAlbumsProjectProjectId,
   useGetPhotosAlbumAlbumId,
   useGetProjects,
+  usePutAlbumsCover,
   usePutAlbumsId,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
@@ -43,11 +44,16 @@ const AlbumPage = () => {
     axios: defaultApiAxiosParams,
   });
 
-  const { data: albumPhotosData } = useGetPhotosAlbumAlbumId(albumId ?? "", {
+  const { data: albumPhotosData, isLoading: isAlbumPhotosLoading } =
+    useGetPhotosAlbumAlbumId(albumId ?? "", {
+      axios: defaultApiAxiosParams,
+    });
+
+  const { data: albumsData } = useGetAlbumsProjectProjectId(projectId ?? "", {
     axios: defaultApiAxiosParams,
   });
 
-  const { data: albumsData } = useGetAlbumsProjectProjectId(projectId ?? "", {
+  const { mutateAsync: setAlbumCover } = usePutAlbumsCover({
     axios: defaultApiAxiosParams,
   });
 
@@ -124,9 +130,24 @@ const AlbumPage = () => {
     [albumPhotosData]
   );
 
-  const handleProjectsClick = () => {
-    navigate(PublicRoutes.PROJECTS.static);
-  };
+  useEffect(() => {
+    if ((albumPhotos ?? []).length > 0) {
+      const firstPhotoId = albumPhotos?.[0]?.id;
+
+      if (firstPhotoId && albumData?.data?.coverPhotoId !== firstPhotoId) {
+        setAlbumCover({
+          data: {
+            photoId: firstPhotoId ?? "",
+            albumId: albumId ?? "",
+          },
+        }).then(() => {
+          void queryClient.invalidateQueries({
+            queryKey: `/albums/project/${projectId}`,
+          });
+        });
+      }
+    }
+  }, [albumPhotos, albumData]);
 
   const handleEditAlbumClick = () => {
     setIsEditAlbumModalOpen(true);
@@ -220,9 +241,7 @@ const AlbumPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle} onClick={handleProjectsClick}>
-        Проекты
-      </div>
+      <div className={css.pageTitle}>Проекты</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
@@ -282,7 +301,11 @@ const AlbumPage = () => {
         className={css.counter}
       >{`Выбрано фотографий: ${selectedPhotos.length}`}</div>
       {albumPhotos?.length === 0 ? (
-        <UploadBox size="big" albumId={albumId ?? ""} />
+        <UploadBox
+          isAlbumLoading={isAlbumPhotosLoading}
+          size="big"
+          albumId={albumId ?? ""}
+        />
       ) : (
         <div className={css.grid}>
           <Image.PreviewGroup items={albumPhotos?.map((item) => item.fileUrl)}>
@@ -293,11 +316,16 @@ const AlbumPage = () => {
                 url={item.fileUrl}
                 name={item.fileName}
                 isSelected={selectedPhotos.includes(item.id)}
+                albumId={albumId ?? ""}
                 onSelect={toggleSelectPhoto}
               />
             ))}
           </Image.PreviewGroup>
-          <UploadBox size="small" albumId={albumId ?? ""} />
+          <UploadBox
+            isAlbumLoading={isAlbumPhotosLoading}
+            size="small"
+            albumId={albumId ?? ""}
+          />
         </div>
       )}
       <Modal
@@ -327,7 +355,7 @@ const AlbumPage = () => {
         customOkButtonClassName={css.deleteButton}
       >
         {`Вы уверены, что хотите удалить альбом "${albumData?.data?.title}"? Все данные будут безвозвратно
-        удалены.`}
+        утеряны.`}
       </Modal>
 
       <Modal
@@ -342,10 +370,13 @@ const AlbumPage = () => {
       >
         {`Вы уверены, что хотите удалить ${
           selectedPhotos.length === 1
-            ? "это"
-            : `выбранные (${selectedPhotos.length})`
-        } фото? Данные будут безвозвратно
-        удалены.`}
+            ? `фото ${
+                albumPhotos?.find((item) => item.id === selectedPhotos[0])
+                  ?.fileName ?? ""
+              }`
+            : `выбранные (${selectedPhotos.length}) фото`
+        }? Данные будут безвозвратно
+        утеряны.`}
       </Modal>
     </div>
   );

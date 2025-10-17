@@ -15,8 +15,11 @@ type Props = {
 const AlbumCard: FC<Props> = ({ id, name, projectId, coverId }) => {
   const navigate = useNavigate();
 
-  const { data } = useGetPhotosId(coverId ?? "", {
+  const { data, isError, isLoading } = useGetPhotosId(coverId ?? "", {
     axios: defaultApiAxiosParams,
+    query: {
+      onError: () => {},
+    },
   });
 
   const handleProjectClick = () => {
@@ -27,7 +30,7 @@ const AlbumCard: FC<Props> = ({ id, name, projectId, coverId }) => {
 
   return (
     <div className={css.container} onClick={handleProjectClick}>
-      {coverId ? (
+      {coverId && !isError && !isLoading ? (
         <div className={css.imgContainer}>
           <img className={css.img} src={data?.data?.fileUrl} alt="" />
         </div>

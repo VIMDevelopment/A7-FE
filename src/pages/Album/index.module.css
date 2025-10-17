@@ -9,7 +9,6 @@
   color: var(--color-text);
   text-transform: uppercase;
   margin-bottom: 10px;
-  cursor: pointer;
 }
 
 .grid {
@@ -36,11 +35,11 @@
 }
 
 .deleteButton {
-  background: rgb(245, 0, 0);
+  background: var(--color-error);
 }
 
 .deleteButton:not(:disabled):hover {
-  background: rgb(210, 0, 0) !important;
+  background: var(--color-error-btn-hovered) !important;
 }
 
 .breadCrumbs :global(a) {
