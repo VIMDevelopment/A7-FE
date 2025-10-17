@@ -44,9 +44,11 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
         type: "success",
         message: "Файлы успешно загружены",
       });
-      void queryClient.invalidateQueries({
-        queryKey: `/photos/album/${albumId}`,
-      });
+      setTimeout(() => {
+        void queryClient.invalidateQueries({
+          queryKey: `/photos/album/${albumId}`,
+        });
+      }, 200);
     }
   }, [isSuccess]);
 

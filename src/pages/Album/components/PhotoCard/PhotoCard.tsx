@@ -6,9 +6,13 @@ import { MoreOutlined } from "@ant-design/icons";
 import { ItemType } from "antd/es/menu/interface";
 import Modal from "../../../../components/Modal/Modal";
 import { useQueryClient } from "react-query";
-import { useDeletePhotosId } from "../../../../apiV2/a7-service";
+import {
+  useDeletePhotosId,
+  usePutPhotosId,
+} from "../../../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
+import Input from "../../../../components/Input/Input";
 
 type Props = {
   id: string;
@@ -29,10 +33,18 @@ const PhotoCard: FC<Props> = ({
 }) => {
   const queryClient = useQueryClient();
 
+  const [inputPhotoNameValue, setInputPhotoNameValue] = useState(name);
+  const [isEditPhotoNameModalOpen, setIsEditPhotoNameModalOpen] =
+    useState(false);
   const [isDeletePhotoModalOpen, setIsDeletePhotoModalOpen] = useState(false);
 
   const { isLoading: isDeletePhotoLoading, mutateAsync: deletePhoto } =
     useDeletePhotosId({
+      axios: defaultApiAxiosParams,
+    });
+
+  const { isLoading: isEditPhotoNameLoading, mutateAsync: updatePhotoName } =
+    usePutPhotosId({
       axios: defaultApiAxiosParams,
     });
 
@@ -66,6 +78,7 @@ const PhotoCard: FC<Props> = ({
     {
       key: "0",
       label: "Переименовать",
+      onClick: () => setIsEditPhotoNameModalOpen(true),
     },
     {
       key: "1",
@@ -74,6 +87,29 @@ const PhotoCard: FC<Props> = ({
       onClick: () => setIsDeletePhotoModalOpen(true),
     },
   ];
+
+  const handleEditPhotoNameOk = () => {
+    updatePhotoName({
+      id,
+      data: {
+        fileName: inputPhotoNameValue,
+      },
+    }).then(() => {
+      showNotification({
+        message: "Файл успешно переименован",
+        type: "success",
+      });
+      setIsEditPhotoNameModalOpen(false);
+      void queryClient.invalidateQueries({
+        queryKey: [`/photos/album/${albumId}`],
+      });
+    });
+  };
+
+  const handleEditPhotoNameCancel = () => {
+    setIsEditPhotoNameModalOpen(false);
+    setInputPhotoNameValue(name);
+  };
 
   return (
     <div className={css.container}>
@@ -104,6 +140,22 @@ const PhotoCard: FC<Props> = ({
         <Image src={url} className={css.img} />
       </div>
       <div className={css.name}>{name}</div>
+
+      <Modal
+        title={"Редактирование названия фото"}
+        open={isEditPhotoNameModalOpen}
+        onOk={handleEditPhotoNameOk}
+        onCancel={handleEditPhotoNameCancel}
+        okButtonName="Сохранить"
+        destroyOnHidden
+        isLoading={isEditPhotoNameLoading}
+      >
+        <Input
+          label="Введите название"
+          value={inputPhotoNameValue}
+          onChange={(e) => setInputPhotoNameValue(e.target.value)}
+        />
+      </Modal>
 
       <Modal
         title={"Удаление фото"}

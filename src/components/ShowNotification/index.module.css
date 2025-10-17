@@ -1,0 +1,9 @@
+.notification {
+  padding: 14px !important;
+  font-size: 14px;
+}
+
+.notification a {
+  top: 14px !important;
+  inset-inline-end: 14px !important;
+}

@@ -1,4 +1,5 @@
 import { notification } from "antd";
+import css from "./index.module.css";
 
 type NotificationType = "error" | "success" | "info";
 
@@ -12,6 +13,7 @@ export const showNotification = (notificationObject: Notification) => {
   const { message, description = "", type = "success" } = notificationObject;
 
   return notification[type]({
+    className: css.notification,
     message,
     description,
   });
