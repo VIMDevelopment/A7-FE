@@ -38,6 +38,7 @@ import {
 const AlbumPage = () => {
   const { projectId, albumId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
@@ -45,7 +46,6 @@ const AlbumPage = () => {
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [inputAlbumValue, setInputAlbumValue] = useState("");
 
-  const queryClient = useQueryClient();
 
   const { data: allProjectsData } = useGetProjects({
     axios: defaultApiAxiosParams,
