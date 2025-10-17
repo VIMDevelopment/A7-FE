@@ -13,7 +13,7 @@ import {
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import Input from "../../../../components/Input/Input";
-import { downloadImageByUrl } from "./helpers";
+import { downloadImageByUrl, handlePrintPhoto } from "./helpers";
 
 type Props = {
   id: string;
@@ -53,7 +53,7 @@ const PhotoCard: FC<Props> = ({
     deletePhoto({ id })
       .then(() => {
         showNotification({
-          message: "Фото успешно удалено",
+          message: "Фото удалено",
           type: "success",
         });
 
@@ -78,16 +78,21 @@ const PhotoCard: FC<Props> = ({
   const items: ItemType[] = [
     {
       key: "0",
+      label: "Печать",
+      onClick: () => handlePrintPhoto(url, name),
+    },
+    {
+      key: "1",
       label: "Скачать",
       onClick: () => downloadImageByUrl(url, name),
     },
     {
-      key: "1",
+      key: "2",
       label: "Переименовать",
       onClick: () => setIsEditPhotoNameModalOpen(true),
     },
     {
-      key: "2",
+      key: "3",
       label: "Удалить",
       danger: true,
       onClick: () => setIsDeletePhotoModalOpen(true),
@@ -102,7 +107,7 @@ const PhotoCard: FC<Props> = ({
       },
     }).then(() => {
       showNotification({
-        message: "Файл успешно переименован",
+        message: "Файл переименован",
         type: "success",
       });
       setIsEditPhotoNameModalOpen(false);

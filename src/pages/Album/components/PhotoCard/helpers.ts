@@ -58,3 +58,68 @@ export const handleDownloadAll = async (files: FileForZip[]) => {
   const zipBlob = await zip.generateAsync({ type: "blob" });
   saveAs(zipBlob, "photos.zip");
 };
+
+export const handlePrintPhoto = (url: string, name: string) => {
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow?.document;
+  if (!doc) return;
+
+  doc.open();
+  doc.write(`
+    <html>
+      <head>
+        <title>${name}</title>
+        <style>
+          @media print {
+            body {
+              margin: 0;
+              padding: 0;
+              display: flex;
+              justify-content: center;
+              align-items: flex-start;
+              height: 100vh;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              object-fit: contain;
+            }
+          }
+          body {
+            margin: 0;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 0;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+        </style>
+      </head>
+      <body>
+        <img id="photo" src="${url}" alt="${name}" />
+      </body>
+    </html>
+  `);
+  doc.close();
+
+  const img = doc.getElementById("photo") as HTMLImageElement | null;
+  if (img) {
+    img.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => iframe.remove(), 1500);
+    };
+  }
+};

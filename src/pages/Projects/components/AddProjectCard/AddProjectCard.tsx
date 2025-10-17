@@ -28,7 +28,7 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
   useEffect(() => {
     if (isSuccess) {
       showNotification({
-        message: "Проект успешно создан",
+        message: "Проект создан",
         type: "success",
       });
       setIsModalOpen(false);

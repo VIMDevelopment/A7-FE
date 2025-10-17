@@ -69,7 +69,7 @@ const ProjectPage = () => {
   useEffect(() => {
     if (isEditSuccess) {
       showNotification({
-        message: "Проект успешно переименован",
+        message: "Проект переименован",
         type: "success",
       });
       setIsEditModalOpen(false);
@@ -80,7 +80,7 @@ const ProjectPage = () => {
   useEffect(() => {
     if (isDeleteSuccess) {
       showNotification({
-        message: "Проект успешно удален",
+        message: "Проект удален",
         type: "success",
       });
       setIsDeleteModalOpen(false);

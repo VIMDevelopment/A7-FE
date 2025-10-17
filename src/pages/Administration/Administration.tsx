@@ -65,7 +65,7 @@ const AdministrationPage = () => {
     if (isUserSuccessfulyCreated) {
       showNotification({
         type: "success",
-        message: "Пользователь успешно создан",
+        message: "Пользователь создан",
       });
       void queryClient.invalidateQueries({
         queryKey: `/users/all`,
@@ -78,7 +78,7 @@ const AdministrationPage = () => {
     if (isSuccess) {
       showNotification({
         type: "success",
-        message: "Данные о пользователе успешно обновлены",
+        message: "Данные о пользователе обновлены",
       });
       void queryClient.invalidateQueries({
         queryKey: `/users/all`,

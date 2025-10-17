@@ -25,6 +25,7 @@
 .name {
   display: flex;
   justify-content: center;
+  text-align: center;
   font-size: 16px;
   color: var(--color-text);
   white-space: pre-line;
@@ -64,14 +65,15 @@
 }
 
 .dropdown :global(.ant-dropdown-menu) {
-  background-color: var(--color-page-background);
+  background-color: var(--color-common-background);
 }
 
 .dropdown :global(.ant-dropdown-menu-title-content) {
   color: var(--color-text);
 }
 
-.dropdown :global(.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-danger)) {
+.dropdown
+  :global(.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-danger)) {
   background-color: var(--color-menu-item-hovered-background) !important;
 }
 

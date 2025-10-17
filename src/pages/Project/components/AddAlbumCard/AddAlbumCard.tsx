@@ -33,7 +33,7 @@ const AddAlbumCard: FC<Props> = ({ projectId, allAlbumsNames }) => {
   useEffect(() => {
     if (isSuccess) {
       showNotification({
-        message: "Альбом успешно создан",
+        message: "Альбом создан",
         type: "success",
       });
       setIsModalOpen(false);

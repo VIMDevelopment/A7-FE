@@ -16,14 +16,24 @@ import {
 import { defaultApiAxiosParams } from "../../api/helpers";
 import UploadBox from "./components/UploadBox/UploadBox";
 import PhotoCard from "./components/PhotoCard/PhotoCard";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons";
 import Modal from "../../components/Modal/Modal";
 import Input from "../../components/Input/Input";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { Image } from "antd";
 import Button from "../../components/Button/Button";
-import { FileForZip, handleDownloadAll } from "./components/PhotoCard/helpers";
+import {
+  downloadImageByUrl,
+  FileForZip,
+  handleDownloadAll,
+  handlePrintPhoto,
+} from "./components/PhotoCard/helpers";
 
 const AlbumPage = () => {
   const { projectId, albumId } = useParams();
@@ -89,7 +99,7 @@ const AlbumPage = () => {
   useEffect(() => {
     if (isEditAlbumSuccess) {
       showNotification({
-        message: "Альбом успешно переименован",
+        message: "Альбом переименован",
         type: "success",
       });
       setIsEditAlbumModalOpen(false);
@@ -103,7 +113,7 @@ const AlbumPage = () => {
   useEffect(() => {
     if (isDeleteAlbumSuccess) {
       showNotification({
-        message: "Альбом успешно удален",
+        message: "Альбом удален",
         type: "success",
       });
       setIsDeleteAlbumModalOpen(false);
@@ -158,8 +168,13 @@ const AlbumPage = () => {
     setIsDeleteAlbumModalOpen(true);
   };
 
-  const handleDeletePhotosClick = () => {
-    setIsDeletePhotosModalOpen(true);
+  const handleDeletePhotosClick = (id?: string) => {
+    if (id) {
+      setSelectedPhotos([id]);
+      setIsDeletePhotosModalOpen(true);
+    } else {
+      setIsDeletePhotosModalOpen(true);
+    }
   };
 
   const handleDownloadPhotosClick = () => {
@@ -205,7 +220,7 @@ const AlbumPage = () => {
       await Promise.all(selectedPhotos.map((id) => deletePhoto({ id })));
 
       showNotification({
-        message: "Фото успешно удалены",
+        message: "Фото удалены",
         type: "success",
       });
 
@@ -310,7 +325,7 @@ const AlbumPage = () => {
         </Button>
         <Button
           disabled={selectedPhotos.length === 0}
-          onClick={handleDeletePhotosClick}
+          onClick={() => handleDeletePhotosClick()}
         >
           Удалить выбранные
         </Button>
@@ -326,7 +341,51 @@ const AlbumPage = () => {
         />
       ) : (
         <div className={css.grid}>
-          <Image.PreviewGroup items={albumPhotos?.map((item) => item.fileUrl)}>
+          <Image.PreviewGroup
+            preview={{
+              toolbarRender: (_, info) => {
+                const currentPhoto = albumPhotos?.[info.current];
+
+                return (
+                  <div className={css.toolbar}>
+                    {info.icons.flipXIcon}
+                    {info.icons.flipYIcon}
+                    {info.icons.rotateLeftIcon}
+                    {info.icons.rotateRightIcon}
+                    {info.icons.zoomOutIcon}
+                    {info.icons.zoomInIcon}
+                    <div className={css.customToolbarButtonsContainer}>
+                      <PrinterOutlined
+                        onClick={() =>
+                          handlePrintPhoto(
+                            currentPhoto?.fileUrl ?? "",
+                            currentPhoto?.fileName ?? ""
+                          )
+                        }
+                        className={css.toolbarBtn}
+                      />
+                      <DownloadOutlined
+                        className={css.toolbarBtn}
+                        onClick={() =>
+                          downloadImageByUrl(
+                            currentPhoto?.fileUrl ?? "",
+                            currentPhoto?.fileName ?? ""
+                          )
+                        }
+                      />
+                      <DeleteOutlined
+                        className={css.toolbarBtn}
+                        onClick={() => {
+                          handleDeletePhotosClick(currentPhoto?.id);
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              },
+            }}
+            items={albumPhotos?.map((item) => item.fileUrl)}
+          >
             {albumPhotos?.map((item) => (
               <PhotoCard
                 key={item.id}

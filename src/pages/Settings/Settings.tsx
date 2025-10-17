@@ -46,7 +46,7 @@ const SettingsPage = () => {
     if (isSuccess) {
       showNotification({
         type: "success",
-        message: "Данные о пользователе успешно обновлены",
+        message: "Данные о пользователе обновлены",
       });
     }
   }, [isSuccess]);

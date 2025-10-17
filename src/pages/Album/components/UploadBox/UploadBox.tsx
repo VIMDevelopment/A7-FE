@@ -42,7 +42,7 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
     if (isSuccess) {
       showNotification({
         type: "success",
-        message: "Файлы успешно загружены",
+        message: "Файлы загружены",
       });
       setTimeout(() => {
         void queryClient.invalidateQueries({
@@ -70,7 +70,7 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
             if (status === "done") {
               showNotification({
                 type: "success",
-                message: `Файл ${info.file.name} успешно загружен`,
+                message: `Файл ${info.file.name} загружен`,
               });
             } else if (status === "error") {
               showNotification({
