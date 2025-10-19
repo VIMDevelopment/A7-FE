@@ -142,7 +142,7 @@ const ProjectPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>Проекты</div>
+      <div className={css.pageTitle}>{projectName}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}

@@ -69,6 +69,11 @@ const AlbumPage = () => {
     axios: defaultApiAxiosParams,
   });
 
+  const albumName = useMemo(
+    () => albumsData?.data?.find((item) => item.id === albumId)?.title,
+    [albumsData]
+  );
+
   const allAlbumsNames =
     albumsData?.data?.map((item) => item.title ?? "") ?? [];
 
@@ -94,7 +99,7 @@ const AlbumPage = () => {
     });
 
   useEffect(() => {
-    setInputAlbumValue(albumData?.data?.title ?? "");
+    setInputAlbumValue(albumName ?? "");
   }, [albumData]);
 
   useEffect(() => {
@@ -241,7 +246,7 @@ const AlbumPage = () => {
 
   const handleEditAlbumCancel = () => {
     setIsEditAlbumModalOpen(false);
-    setInputAlbumValue(albumData?.data?.title ?? "");
+    setInputAlbumValue(albumName ?? "");
   };
 
   const handleDeleteAlbumCancel = () => {
@@ -269,7 +274,7 @@ const AlbumPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>Проекты</div>
+      <div className={css.pageTitle}>{albumName}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
@@ -294,7 +299,7 @@ const AlbumPage = () => {
               type: "separator",
             },
             {
-              title: `Альбом: "${albumData?.data?.title ?? ""}"`,
+              title: `Альбом: "${albumName ?? ""}"`,
             },
           ]}
         />
@@ -434,7 +439,7 @@ const AlbumPage = () => {
         isLoading={isDeleteAlbumLoading}
         customOkButtonClassName={css.deleteButton}
       >
-        {`Вы уверены, что хотите удалить альбом "${albumData?.data?.title}"? Все данные будут безвозвратно
+        {`Вы уверены, что хотите удалить альбом "${albumName}"? Все данные будут безвозвратно
         утеряны.`}
       </Modal>
 
