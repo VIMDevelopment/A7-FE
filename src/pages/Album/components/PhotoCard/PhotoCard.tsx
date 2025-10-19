@@ -1,6 +1,6 @@
-import React, { FC, useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import css from "./index.module.css";
-import { Dropdown, Image } from "antd";
+import { Dropdown, Image, InputRef } from "antd";
 import Checkbox from "antd/es/checkbox/Checkbox";
 import { MoreOutlined } from "@ant-design/icons";
 import { ItemType } from "antd/es/menu/interface";
@@ -33,6 +33,7 @@ const PhotoCard: FC<Props> = ({
   onSelect,
 }) => {
   const queryClient = useQueryClient();
+  const inputRef = useRef<InputRef>(null);
 
   const [inputPhotoNameValue, setInputPhotoNameValue] = useState(name);
   const [isEditPhotoNameModalOpen, setIsEditPhotoNameModalOpen] =
@@ -48,6 +49,16 @@ const PhotoCard: FC<Props> = ({
     usePutPhotosId({
       axios: defaultApiAxiosParams,
     });
+
+  const handleAfterOpen = () => {
+    const inputEl = inputRef.current?.input;
+
+    if (inputEl) {
+      inputEl.focus();
+      const lastDotIndex = inputEl.value.lastIndexOf(".");
+      inputEl.setSelectionRange(lastDotIndex, lastDotIndex);
+    }
+  };
 
   const handleDeletePhotoOk = () => {
     deletePhoto({ id })
@@ -160,8 +171,10 @@ const PhotoCard: FC<Props> = ({
         okButtonName="Сохранить"
         destroyOnHidden
         isLoading={isEditPhotoNameLoading}
+        afterOpenChange={handleAfterOpen}
       >
         <Input
+          ref={inputRef}
           label="Введите название"
           value={inputPhotoNameValue}
           onChange={(e) => setInputPhotoNameValue(e.target.value)}

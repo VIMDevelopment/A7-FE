@@ -7,6 +7,7 @@ import Button from "../../components/Button/Button";
 import { usePutUsersUpdate } from "../../apiV2/a7-service";
 import { showNotification } from "../../components/ShowNotification";
 import { UserUpdateDto } from "../../apiV2/a7-service/model";
+import { useEnterPressListener } from "../../lib/utils/useEnterPressListener";
 
 type UserUpdateForm = UserUpdateDto & {
   repeatPassword?: string;
@@ -73,6 +74,8 @@ const SettingsPage = () => {
       });
     }
   };
+
+  useEnterPressListener(handleUpdateClick);
 
   return (
     <div className={css.container}>

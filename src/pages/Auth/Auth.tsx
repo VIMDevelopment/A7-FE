@@ -7,6 +7,7 @@ import { PublicRoutes } from "../../routes/routes";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import { usePostUsersLogin } from "../../apiV2/a7-service";
+import { useEnterPressListener } from "../../lib/utils/useEnterPressListener";
 
 const AuthPage = () => {
   const [formState, setFormState] = useState<LoginRequest>({
@@ -28,6 +29,8 @@ const AuthPage = () => {
     });
   };
 
+  useEnterPressListener(handleLoginClick);
+
   useEffect(() => {
     if (data) {
       Cookies.set("accessToken", data?.data?.jwt ?? "", {});
@@ -48,9 +51,6 @@ const AuthPage = () => {
                 email: e.target.value,
               }))
             }
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleLoginClick();
-            }}
             disabled={isLoading}
             placeholder="Введите E-mail"
             type="email"
@@ -64,9 +64,6 @@ const AuthPage = () => {
                 password: e.target.value,
               }))
             }
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleLoginClick();
-            }}
             disabled={isLoading}
             placeholder="Введите пароль"
           />

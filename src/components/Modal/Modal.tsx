@@ -3,6 +3,7 @@ import css from "./index.module.css";
 import { Modal as AntdModal, ModalProps } from "antd";
 import Button from "../Button/Button";
 import cn from "classnames";
+import { useEnterPressListener } from "../../lib/utils/useEnterPressListener";
 
 type Props = {
   okButtonName?: string;
@@ -20,6 +21,13 @@ const Modal: FC<Props> = ({
   customOkButtonClassName,
   ...props
 }) => {
+  useEnterPressListener(() => {
+    if (!props.open) return;
+    const activeTag = (document.activeElement as HTMLElement)?.tagName;
+    if (activeTag === "TEXTAREA" || activeTag === "BUTTON") return;
+    props.onOk?.({} as any);
+  });
+
   return (
     <AntdModal
       {...props}
