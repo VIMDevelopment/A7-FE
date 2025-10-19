@@ -54,3 +54,11 @@
   justify-content: space-between;
   width: 100%;
 }
+
+@media (max-width: 768px) {
+  .container {
+    max-width: unset;
+    width: 100%;
+    padding: 20px;
+  }
+}

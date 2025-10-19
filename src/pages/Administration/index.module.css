@@ -34,3 +34,9 @@
 .btn {
   width: 200px !important;
 }
+
+@media (max-width: 768px) {
+  .subTitle {
+    margin-top: 40px;
+  }
+}

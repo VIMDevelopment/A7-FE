@@ -34,7 +34,7 @@ const AuthPage = () => {
   useEffect(() => {
     if (data) {
       Cookies.set("accessToken", data?.data?.jwt ?? "", {});
-      window.location.replace(PublicRoutes.MAIN.static);
+      window.location.replace(PublicRoutes.PROJECTS.static);
     }
   }, [data]);
 

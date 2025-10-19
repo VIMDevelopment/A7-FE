@@ -1,9 +1,7 @@
-import { BankOutlined } from "@ant-design/icons";
+import { BankOutlined, LogoutOutlined } from "@ant-design/icons";
 import { UserRole } from "../../api/a7-service/model";
 import ProjectsIcon from "../../assets/ProjectsIcon";
-import ReportsIcon from "../../assets/ReportsIcon";
 import SettingsIcon from "../../assets/SettingsIcon";
-import StatisticsIcon from "../../assets/StatisticsIcon";
 import { PublicRoutes } from "../../routes/routes";
 import { SideMenuItemProps } from "./components/SideMenuItem/SideMenuItem";
 
@@ -26,7 +24,13 @@ export const getRoleDescription = (role?: UserRole) => {
   }
 };
 
-export const menuItems: SideMenuItemProps[] = [
+export const getMenuItems: ({
+  isMobileMenu,
+  onLogout,
+}: {
+  isMobileMenu: boolean;
+  onLogout: () => void;
+}) => SideMenuItemProps[] = ({ isMobileMenu, onLogout }) => [
   {
     icon: <ProjectsIcon />,
     title: "Проекты",
@@ -60,4 +64,22 @@ export const menuItems: SideMenuItemProps[] = [
     title: "Администрирование",
     route: PublicRoutes.ADMINISTRATION.static,
   },
+  ...(isMobileMenu
+    ? [
+        {
+          icon: (
+            <LogoutOutlined
+              style={{
+                color: "rgba(255, 255, 255, 0.5)",
+                fontSize: "28px",
+                paddingBottom: "2px",
+              }}
+            />
+          ),
+          title: "Выйти",
+          route: PublicRoutes.PROJECTS.static,
+          customOnClick: onLogout,
+        },
+      ]
+    : []),
 ];

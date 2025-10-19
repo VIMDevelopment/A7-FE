@@ -79,7 +79,7 @@ const AdministrationPage = () => {
       showNotification({
         type: "success",
         message: "Данные о пользователе обновлены",
-      });
+      }); 
       void queryClient.invalidateQueries({
         queryKey: `/users/all`,
       });

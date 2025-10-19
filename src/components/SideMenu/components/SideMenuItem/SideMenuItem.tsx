@@ -9,32 +9,42 @@ export type SideMenuItemProps = {
   icon: ReactNode;
   title: string;
   route: string;
+  toggleOpen?: () => void;
+  customOnClick?: () => void;
 };
 
-const SideMenuItem: FC<SideMenuItemProps> = ({ icon, title, route }) => {
-  let showItem = false;
-
+const SideMenuItem: FC<SideMenuItemProps> = ({
+  icon,
+  title,
+  route,
+  toggleOpen,
+  customOnClick,
+}) => {
   const { getRoutePrivileges, hasPrivileges } = useShowPermissions();
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(route);
+    toggleOpen?.();
+    if (customOnClick) {
+      customOnClick();
+    } else {
+      navigate(route);
+    }
   };
 
   const routeObject = ROUTES.find((item) => item.path === route);
 
-  if (routeObject) {
-    showItem = hasPrivileges(getRoutePrivileges(routeObject))
-  }
+  const showItem =
+    routeObject && hasPrivileges(getRoutePrivileges(routeObject));
 
   return (
     <>
-      {showItem ? (
+      {showItem && (
         <div className={css.container} onClick={handleClick}>
           <div className={css.iconContainer}>{icon}</div>
           <div className={css.itemTitle}>{title}</div>
         </div>
-      ) : null}
+      )}
     </>
   );
 };

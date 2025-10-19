@@ -1,7 +1,6 @@
 import React, { ReactElement } from "react";
 import { UserRole } from "../api/a7-service/model";
 import { PublicRoutes } from "./routes";
-import MainPage from "../pages/Main/Main";
 import AdministrationPage from "../pages/Administration/Administration";
 import ProjectsPage from "../pages/Projects/Projects";
 import ReportsPage from "../pages/Reports/Reports";
@@ -36,17 +35,6 @@ export type RedirectRoutes = {
 };
 
 export const ROUTES: Routes[] = [
-  {
-    id: "main",
-    path: PublicRoutes.MAIN.static,
-    roles: [
-      UserRole.admin,
-      UserRole.manager,
-      UserRole.photographer,
-      UserRole.seller,
-    ],
-    component: <MainPage />,
-  },
   {
     id: "administration",
     path: PublicRoutes.ADMINISTRATION.static,
@@ -99,7 +87,7 @@ export const ROUTES: Routes[] = [
 export const REDIRECTS: RedirectRoutes[] = [
   {
     id: "redirect",
-    path: PublicRoutes.MAIN.static,
+    path: PublicRoutes.PROJECTS.static,
     roles: [
       UserRole.admin,
       UserRole.manager,
