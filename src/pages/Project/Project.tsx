@@ -17,10 +17,12 @@ import Modal from "../../components/Modal/Modal";
 import Input from "../../components/Input/Input";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
+import { useMediaQuery } from "react-responsive";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -144,6 +146,7 @@ const ProjectPage = () => {
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
+          
           separator=""
           items={[
             {
@@ -162,6 +165,7 @@ const ProjectPage = () => {
             <EditOutlined
               style={{
                 color: "rgba(255, 255, 255, 0.5)",
+                fontSize: isMobile ? "26px" : "unset",
               }}
             />
           </div>
@@ -169,6 +173,7 @@ const ProjectPage = () => {
             <DeleteOutlined
               style={{
                 color: "rgba(255, 255, 255, 0.5)",
+                fontSize: isMobile ? "26px" : "unset",
               }}
             />
           </div>

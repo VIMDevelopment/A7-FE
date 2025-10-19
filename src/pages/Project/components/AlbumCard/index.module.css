@@ -50,8 +50,8 @@
 
 .menuIconButton {
   position: relative;
-  left: 204px;
-  top: 6px;
+  left: 206px;
+  top: 4px;
   display: flex;
   border-radius: 50%;
   align-items: center;
@@ -82,4 +82,25 @@
 
 .deleteButton:not(:disabled):hover {
   background: var(--color-error-btn-hovered) !important;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: calc(100vw - 40px);
+  }
+
+  .imgContainer {
+    width: 100%;
+  }
+
+  .menuIconButton {
+    left: calc(100vw - 88px);
+    top: 8px;
+    height: 40px;
+    width: 40px;
+  }
+
+  .dropdown :global(.ant-dropdown-menu-title-content) {
+    font-size: 22px;
+  }
 }

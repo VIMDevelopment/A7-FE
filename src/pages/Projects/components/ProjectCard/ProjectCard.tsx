@@ -15,6 +15,7 @@ import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import Input from "../../../../components/Input/Input";
+import { useMediaQuery } from "react-responsive";
 
 type Props = {
   id?: string;
@@ -24,6 +25,7 @@ type Props = {
 const ProjectCard: FC<Props> = ({ id, name }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -129,13 +131,13 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
     {
       key: "2",
       label: "Переименовать",
-      onClick: () => setIsEditModalOpen(true),
+      onClick: handleEditClick,
     },
     {
       key: "3",
       label: "Удалить",
       danger: true,
-      onClick: () => setIsDeleteModalOpen(true),
+      onClick: handleDeleteClick,
     },
   ];
 
@@ -152,6 +154,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
             <MoreOutlined
               style={{
                 color: "white",
+                fontSize: isMobile ? "30px" : "unset",
               }}
             />
           </Dropdown>

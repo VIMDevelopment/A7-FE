@@ -7,6 +7,7 @@ import SideMenuItem from "./components/SideMenuItem/SideMenuItem";
 import Cookies from "js-cookie";
 import { Tooltip } from "antd";
 import { useMediaQuery } from "react-responsive";
+import cn from "classnames";
 
 const SideMenu = () => {
   const { data: user } = useProfile();
@@ -27,6 +28,23 @@ const SideMenu = () => {
     isMobileMenu: isMobile,
     onLogout: handleLogout,
   });
+
+  useEffect(() => {
+    if (open) {
+      const scrollBarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [open]);
 
   return (
     <div className={css.container}>
@@ -55,20 +73,26 @@ const SideMenu = () => {
           )}
         </div>
       </div>
-      {(!isMobile || open) && (
-        <div className={css.menuItemsContainer}>
-          {menuItems.map((item, index) => (
-            <SideMenuItem
-              key={`${item.title}${index}`}
-              icon={item.icon}
-              title={item.title}
-              route={item.route}
-              toggleOpen={toggleOpen}
-              customOnClick={item.customOnClick}
-            />
-          ))}
-        </div>
+
+      {isMobile && (
+        <div
+          className={cn(css.overlay, open && css.open)}
+          onClick={toggleOpen}
+        />
       )}
+
+      <div className={cn(css.menuItemsContainer, open && css.open)}>
+        {menuItems.map((item, index) => (
+          <SideMenuItem
+            key={`${item.title}${index}`}
+            icon={item.icon}
+            title={item.title}
+            route={item.route}
+            toggleOpen={toggleOpen}
+            customOnClick={item.customOnClick}
+          />
+        ))}
+      </div>
     </div>
   );
 };

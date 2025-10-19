@@ -14,6 +14,7 @@ import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import Input from "../../../../components/Input/Input";
 import { downloadImageByUrl, handlePrintPhoto } from "./helpers";
+import { useMediaQuery } from "react-responsive";
 
 type Props = {
   id: string;
@@ -34,6 +35,7 @@ const PhotoCard: FC<Props> = ({
 }) => {
   const queryClient = useQueryClient();
   const inputRef = useRef<InputRef>(null);
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [inputPhotoNameValue, setInputPhotoNameValue] = useState(name);
   const [isEditPhotoNameModalOpen, setIsEditPhotoNameModalOpen] =
@@ -134,15 +136,15 @@ const PhotoCard: FC<Props> = ({
   };
 
   return (
-    <div className={css.container}>
-      <div className={css.checkboxContainer}>
-        <Checkbox
-          className={css.checkbox}
-          checked={isSelected}
-          onClick={() => onSelect(id)}
-        />
-      </div>
+    <div>
       <div className={css.actionMenuIconContainer}>
+        <div className={css.checkboxContainer}>
+          <Checkbox
+            className={css.checkbox}
+            checked={isSelected}
+            onClick={() => onSelect(id)}
+          />
+        </div>
         <div className={css.menuIconButton}>
           <Dropdown
             overlayClassName={css.dropdown}
@@ -153,47 +155,50 @@ const PhotoCard: FC<Props> = ({
             <MoreOutlined
               style={{
                 color: "white",
+                fontSize: isMobile ? "30px" : "unset",
               }}
             />
           </Dropdown>
         </div>
       </div>
-      <div className={css.imgContainer}>
-        <Image src={url} className={css.img} />
-      </div>
-      <div className={css.name}>{name}</div>
+      <div className={css.container}>
+        <div className={css.imgContainer}>
+          <Image src={url} className={css.img} />
+        </div>
+        <div className={css.name}>{name}</div>
 
-      <Modal
-        title={"Редактирование названия фото"}
-        open={isEditPhotoNameModalOpen}
-        onOk={handleEditPhotoNameOk}
-        onCancel={handleEditPhotoNameCancel}
-        okButtonName="Сохранить"
-        destroyOnHidden
-        isLoading={isEditPhotoNameLoading}
-        afterOpenChange={handleAfterOpen}
-      >
-        <Input
-          ref={inputRef}
-          label="Введите название"
-          value={inputPhotoNameValue}
-          onChange={(e) => setInputPhotoNameValue(e.target.value)}
-        />
-      </Modal>
+        <Modal
+          title={"Редактирование названия фото"}
+          open={isEditPhotoNameModalOpen}
+          onOk={handleEditPhotoNameOk}
+          onCancel={handleEditPhotoNameCancel}
+          okButtonName="Сохранить"
+          destroyOnHidden
+          isLoading={isEditPhotoNameLoading}
+          afterOpenChange={handleAfterOpen}
+        >
+          <Input
+            ref={inputRef}
+            label="Введите название"
+            value={inputPhotoNameValue}
+            onChange={(e) => setInputPhotoNameValue(e.target.value)}
+          />
+        </Modal>
 
-      <Modal
-        title={"Удаление фото"}
-        open={isDeletePhotoModalOpen}
-        onOk={handleDeletePhotoOk}
-        onCancel={handleDeletePhotoCancel}
-        okButtonName="Удалить"
-        destroyOnHidden
-        isLoading={isDeletePhotoLoading}
-        customOkButtonClassName={css.deleteButton}
-      >
-        {`Вы уверены, что хотите удалить фото ${name}? Данные будут безвозвратно
+        <Modal
+          title={"Удаление фото"}
+          open={isDeletePhotoModalOpen}
+          onOk={handleDeletePhotoOk}
+          onCancel={handleDeletePhotoCancel}
+          okButtonName="Удалить"
+          destroyOnHidden
+          isLoading={isDeletePhotoLoading}
+          customOkButtonClassName={css.deleteButton}
+        >
+          {`Вы уверены, что хотите удалить фото ${name}? Данные будут безвозвратно
         утеряны.`}
-      </Modal>
+        </Modal>
+      </div>
     </div>
   );
 };

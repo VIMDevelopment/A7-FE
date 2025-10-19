@@ -16,6 +16,7 @@ import Modal from "../../../../components/Modal/Modal";
 import Input from "../../../../components/Input/Input";
 import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
+import { useMediaQuery } from "react-responsive";
 
 type Props = {
   id?: string;
@@ -27,6 +28,7 @@ type Props = {
 const AlbumCard: FC<Props> = ({ id, name, projectId, coverId }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
   const [isDeleteAlbumModalOpen, setIsDeleteAlbumModalOpen] = useState(false);
@@ -159,6 +161,7 @@ const AlbumCard: FC<Props> = ({ id, name, projectId, coverId }) => {
             <MoreOutlined
               style={{
                 color: "white",
+                fontSize: isMobile ? "30px" : "unset",
               }}
             />
           </Dropdown>

@@ -34,18 +34,19 @@ import {
   handleDownloadAll,
   handlePrintPhoto,
 } from "./components/PhotoCard/helpers";
+import { useMediaQuery } from "react-responsive";
 
 const AlbumPage = () => {
   const { projectId, albumId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
   const [isDeleteAlbumModalOpen, setIsDeleteAlbumModalOpen] = useState(false);
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [inputAlbumValue, setInputAlbumValue] = useState("");
-
 
   const { data: allProjectsData } = useGetProjects({
     axios: defaultApiAxiosParams,
@@ -302,6 +303,7 @@ const AlbumPage = () => {
             <EditOutlined
               style={{
                 color: "rgba(255, 255, 255, 0.5)",
+                fontSize: isMobile ? "26px" : "unset",
               }}
             />
           </div>
@@ -309,6 +311,7 @@ const AlbumPage = () => {
             <DeleteOutlined
               style={{
                 color: "rgba(255, 255, 255, 0.5)",
+                fontSize: isMobile ? "26px" : "unset",
               }}
             />
           </div>
@@ -332,7 +335,7 @@ const AlbumPage = () => {
       </div>
       <div
         className={css.counter}
-      >{`Выбрано фотографий: ${selectedPhotos.length}`}</div>
+      >{`Выбрано фотографий: ${selectedPhotos.length} из ${albumPhotos?.length}`}</div>
       {albumPhotos?.length === 0 ? (
         <UploadBox
           isAlbumLoading={isAlbumPhotosLoading}

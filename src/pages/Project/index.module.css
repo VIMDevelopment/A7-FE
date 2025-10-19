@@ -53,3 +53,21 @@
 .breadCrumbs :global(li) {
   color: var(--color-text-secondary) !important;
 }
+
+@media (max-width: 768px) {
+  .breadCrumbs :global(a) {
+    font-size: 20px;
+  }
+
+  .breadCrumbs :global(span) {
+    font-size: 20px;
+  }
+
+  .breadCrumbs :global(li) {
+    font-size: 20px;
+  }
+
+  .navMenu {
+    align-items: flex-start;
+  }
+}

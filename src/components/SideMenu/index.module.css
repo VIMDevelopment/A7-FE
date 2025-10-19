@@ -59,6 +59,42 @@
   .container {
     max-width: unset;
     width: 100%;
+    padding: 0;
+  }
+
+  .profileContainer {
     padding: 20px;
+    width: 100%;
+    background-color: var(--color-common-background);
+    z-index: 3;
+  }
+
+  .menuItemsContainer {
+    position: fixed;
+    padding: 20px;
+    width: 100%;
+    top: -100vh;
+    transition: top 0.4s ease;
+    background-color: var(--color-common-background);
+    z-index: 2;
+  }
+
+  .menuItemsContainer.open {
+    top: 95px;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+  }
+
+  .overlay.open {
+    opacity: 1;
+    visibility: visible;
   }
 }

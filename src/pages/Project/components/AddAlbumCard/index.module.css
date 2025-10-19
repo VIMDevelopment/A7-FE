@@ -13,3 +13,9 @@
   text-align: center;
   opacity: 0.3;
 }
+
+@media (max-width: 768px) {
+  .container {
+    width: calc(100vw - 40px);
+  }
+}

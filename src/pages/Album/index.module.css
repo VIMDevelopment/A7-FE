@@ -56,6 +56,7 @@
 
 .actionsContainer {
   display: flex;
+  flex-wrap: wrap;
   column-gap: 20px;
 }
 
@@ -99,5 +100,36 @@
     path {
       color: rgba(255, 255, 255, 0.85);
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .breadCrumbs :global(a) {
+    font-size: 20px;
+  }
+
+  .breadCrumbs :global(span) {
+    font-size: 20px;
+  }
+
+  .breadCrumbs :global(li) {
+    font-size: 20px;
+  }
+
+  .navMenu {
+    align-items: flex-start;
+  }
+
+  .actionsContainer button {
+    height: 40px;
+    padding: 20px;
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .counter {
+    margin-top: 20px;
+    color: var(--color-text);
+    font-size: 16px;
   }
 }
