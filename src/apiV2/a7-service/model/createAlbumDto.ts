@@ -10,7 +10,7 @@ export interface CreateAlbumDto {
   /** Название альбома */
   title: string;
   /** ID проекта */
-  projectId: string;
+  subprojectId: string;
   /** Описание альбома */
   description?: string;
   /** Публичный ли альбом */

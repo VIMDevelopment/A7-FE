@@ -9,13 +9,15 @@
 /**
  * Роль пользователя
  */
-export type UserRegisterDtoRole = 'seller' | 'photographer' | 'manager' | 'admin';
+export type UserRegisterDtoRole = 'admin' | 'owner' | 'agency' | 'cluster' | 'supervisor' | 'maker';
 
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UserRegisterDtoRole = {
-  seller: 'seller' as UserRegisterDtoRole,
-  photographer: 'photographer' as UserRegisterDtoRole,
-  manager: 'manager' as UserRegisterDtoRole,
   admin: 'admin' as UserRegisterDtoRole,
+  owner: 'owner' as UserRegisterDtoRole,
+  agency: 'agency' as UserRegisterDtoRole,
+  cluster: 'cluster' as UserRegisterDtoRole,
+  supervisor: 'supervisor' as UserRegisterDtoRole,
+  maker: 'maker' as UserRegisterDtoRole,
 };

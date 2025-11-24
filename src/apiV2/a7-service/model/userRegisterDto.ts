@@ -16,4 +16,6 @@ export interface UserRegisterDto {
   password: string;
   /** Роль пользователя */
   role?: UserRegisterDtoRole;
+  /** Массив идентификаторов проектов, в которых участвует пользователь */
+  workplace?: string[];
 }

@@ -9,13 +9,15 @@
 /**
  * Роль пользователя
  */
-export type UserRole = 'seller' | 'photographer' | 'manager' | 'admin';
+export type UserRole = 'admin' | 'owner' | 'agency' | 'cluster' | 'supervisor' | 'maker';
 
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UserRole = {
-  seller: 'seller' as UserRole,
-  photographer: 'photographer' as UserRole,
-  manager: 'manager' as UserRole,
   admin: 'admin' as UserRole,
+  owner: 'owner' as UserRole,
+  agency: 'agency' as UserRole,
+  cluster: 'cluster' as UserRole,
+  supervisor: 'supervisor' as UserRole,
+  maker: 'maker' as UserRole,
 };

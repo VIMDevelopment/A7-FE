@@ -21,10 +21,30 @@ export const PublicRoutes = {
       return `/projects/${projectId}`;
     },
   },
+  SUBPROJECT: {
+    static: "/projects/:projectId/subproject/:subprojectId",
+    get: ({
+      projectId,
+      subprojectId,
+    }: {
+      projectId: string;
+      subprojectId: string;
+    }) => {
+      return `/projects/${projectId}/subproject/${subprojectId}`;
+    },
+  },
   ALBUM: {
-    static: "/projects/:projectId/album/:albumId",
-    get: ({ projectId, albumId }: { projectId: string; albumId: string }) => {
-      return `/projects/${projectId}/album/${albumId}`;
+    static: "/projects/:projectId/subproject/:subprojectId/album/:albumId",
+    get: ({
+      projectId,
+      subprojectId,
+      albumId,
+    }: {
+      projectId: string;
+      subprojectId: string;
+      albumId: string;
+    }) => {
+      return `/projects/${projectId}/subproject/${subprojectId}/album/${albumId}`;
     },
   },
   REPORTS: {

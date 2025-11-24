@@ -1,8 +1,7 @@
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode } from "react";
 import css from "./index.module.css";
 import { useNavigate } from "react-router-dom";
 import { useShowPermissions } from "../../../../auth/userData";
-import { UserRole } from "../../../../api/a7-service/model";
 import { ROUTES } from "../../../../routes/constants";
 
 export type SideMenuItemProps = {

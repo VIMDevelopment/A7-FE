@@ -1,0 +1,72 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 30px;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.navMenu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.actionsBlock {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+}
+
+.deleteButton {
+  background: var(--color-error);
+}
+
+.deleteButton:not(:disabled):hover {
+  background: var(--color-error-btn-hovered) !important;
+}
+
+.breadCrumbs :global(a) {
+  color: var(--color-text-secondary) !important;
+}
+
+.breadCrumbs :global(span) {
+  color: var(--color-text-secondary) !important;
+}
+
+.breadCrumbs :global(li) {
+  color: var(--color-text-secondary) !important;
+}
+
+@media (max-width: 768px) {
+  .breadCrumbs :global(a) {
+    font-size: 20px;
+  }
+
+  .breadCrumbs :global(span) {
+    font-size: 20px;
+  }
+
+  .breadCrumbs :global(li) {
+    font-size: 20px;
+  }
+
+  .navMenu {
+    align-items: flex-start;
+  }
+}

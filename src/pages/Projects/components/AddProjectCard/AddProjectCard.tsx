@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../../../../components/Modal/Modal";
 import Input from "../../../../components/Input/Input";
@@ -17,25 +17,9 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
 
   const queryClient = useQueryClient();
 
-  const {
-    isLoading,
-    isSuccess,
-    mutate: createProject,
-  } = usePostProjectsCreate({
+  const { isLoading, mutateAsync: createProject } = usePostProjectsCreate({
     axios: defaultApiAxiosParams,
   });
-
-  useEffect(() => {
-    if (isSuccess) {
-      showNotification({
-        message: "Проект создан",
-        type: "success",
-      });
-      setIsModalOpen(false);
-      void queryClient.invalidateQueries({ queryKey: "/projects" });
-      setInputValue("");
-    }
-  }, [isSuccess]);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -43,7 +27,7 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
 
   const handleOk = () => {
     const isNameUniq = !allProjectsNames.some(
-      (item) => item.toLocaleLowerCase() === inputValue.toLocaleLowerCase()
+      (item) => item.toLocaleLowerCase().trim() === inputValue.toLocaleLowerCase().trim()
     );
 
     if (isNameUniq) {
@@ -51,6 +35,14 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
         data: {
           name: inputValue,
         },
+      }).then(() => {
+        showNotification({
+          message: "Проект создан",
+          type: "success",
+        });
+        setIsModalOpen(false);
+        void queryClient.invalidateQueries({ queryKey: "/projects" });
+        setInputValue("");
       });
     } else {
       showNotification({

@@ -26,18 +26,29 @@ import type {
   ErrorResponse,
   UserLoginDto,
   RegisterResponse,
+  UserCreationRolesError,
   UserRegisterDto,
   UpdateResponse,
+  UserUpdateRolesError,
   UserUpdateDto,
   UserInfoResponse,
   UserResponse,
   ProjectResponse,
+  ProjectCreationRolesError,
   CreateProjectDto,
   GetAllProjectsResponse,
   ProjectDto,
   UpdateProjectDto,
   DeleteProjectsDelete200,
   DeleteProjectDto,
+  SubprojectResponse,
+  CreateSubprojectDto,
+  GetAllSubprojectsResponse,
+  GetSubprojectsParams,
+  UpdateSubprojectDto,
+  DeleteSubprojects200,
+  DeleteSubprojectDto,
+  SubprojectDto,
   AlbumResponse,
   AlbumErrorResponse,
   SearchAlbumsByTagsDto,
@@ -47,6 +58,7 @@ import type {
   CreateAlbumDto,
   UpdateAlbumDto,
   AlbumDeleteResponse,
+  SetProcessedDto,
   UploadPhotoResponse,
   PhotoErrorResponse,
   PostPhotosUploadBody,
@@ -54,10 +66,18 @@ import type {
   UpdatePhotoRequest,
   DeletePhotoResponse,
   PhotoListResponse,
-  SetCoverRequest
+  SetCoverRequest,
+  ImprovePhotosResponse,
+  ImprovePhotosRequest,
+  DescriptorMatchResponse,
+  DescriptorMatchRequest,
+  PromptResponse,
+  PromptErrorResponse,
+  CreatePromptRequest,
+  UpdatePromptRequest
 } from './model'
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AsyncReturnType<
 T extends (...args: any) => Promise<any>
 > = T extends (...args: any) => Promise<infer R> ? R : any;
@@ -111,7 +131,7 @@ export const postUsersRegister = (
 
 
 
-    export const usePostUsersRegister = <TError = AxiosError<ErrorResponse>,
+    export const usePostUsersRegister = <TError = AxiosError<UserCreationRolesError | ErrorResponse>,
     
     TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postUsersRegister>, TError,{data: UserRegisterDto}, TContext>, axios?: AxiosRequestConfig}
 ) => {
@@ -144,7 +164,7 @@ export const putUsersUpdate = (
 
 
 
-    export const usePutUsersUpdate = <TError = AxiosError<AuthError | ErrorResponse>,
+    export const usePutUsersUpdate = <TError = AxiosError<AuthError | UserUpdateRolesError | ErrorResponse>,
     
     TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof putUsersUpdate>, TError,{data: UserUpdateDto}, TContext>, axios?: AxiosRequestConfig}
 ) => {
@@ -253,7 +273,7 @@ export const postProjectsCreate = (
 
 
 
-    export const usePostProjectsCreate = <TError = AxiosError<ErrorResponse>,
+    export const usePostProjectsCreate = <TError = AxiosError<ProjectCreationRolesError | ErrorResponse>,
     
     TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postProjectsCreate>, TError,{data: CreateProjectDto}, TContext>, axios?: AxiosRequestConfig}
 ) => {
@@ -313,32 +333,32 @@ export const useGetProjects = <TData = AsyncReturnType<typeof getProjects>, TErr
  * Возвращает информацию о проекте по его идентификатору
  * @summary Получение проекта по ID
  */
-export const getProjectsId = (
+export const getProjectsProjectId = (
     id: string, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<ProjectDto>> => {
     return axios.get(
-      `/projects/${id}`,options
+      `/projects/project/${id}`,options
     );
   }
 
 
-export const getGetProjectsIdQueryKey = (id: string,) => [`/projects/${id}`];
+export const getGetProjectsProjectIdQueryKey = (id: string,) => [`/projects/project/${id}`];
 
     
-export const useGetProjectsId = <TData = AsyncReturnType<typeof getProjectsId>, TError = AxiosError<ErrorResponse>>(
- id: string, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getProjectsId>, TError, TData>, axios?: AxiosRequestConfig}
+export const useGetProjectsProjectId = <TData = AsyncReturnType<typeof getProjectsProjectId>, TError = AxiosError<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getProjectsProjectId>, TError, TData>, axios?: AxiosRequestConfig}
 
   ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 
   const {query: queryOptions, axios: axiosOptions} = options || {}
 
-  const queryKey = queryOptions?.queryKey ?? getGetProjectsIdQueryKey(id);
+  const queryKey = queryOptions?.queryKey ?? getGetProjectsProjectIdQueryKey(id);
 
   
 
-  const queryFn: QueryFunction<AsyncReturnType<typeof getProjectsId>> = () => getProjectsId(id, axiosOptions);
+  const queryFn: QueryFunction<AsyncReturnType<typeof getProjectsProjectId>> = () => getProjectsProjectId(id, axiosOptions);
 
-  const query = useQuery<AsyncReturnType<typeof getProjectsId>, TError, TData>(queryKey, queryFn, {enabled: !!(id), ...queryOptions})
+  const query = useQuery<AsyncReturnType<typeof getProjectsProjectId>, TError, TData>(queryKey, queryFn, {enabled: !!(id), ...queryOptions})
 
   return {
     queryKey,
@@ -414,6 +434,183 @@ export const deleteProjectsDelete = (
     }
     
 /**
+ * Создание нового подпроекта с указанным названием и ID родительского проекта
+ * @summary Создание нового подпроекта
+ */
+export const postSubprojects = (
+    createSubprojectDto: CreateSubprojectDto, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SubprojectResponse>> => {
+    return axios.post(
+      `/subprojects`,
+      createSubprojectDto,options
+    );
+  }
+
+
+
+    export const usePostSubprojects = <TError = AxiosError<ErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postSubprojects>, TError,{data: CreateSubprojectDto}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postSubprojects>, {data: CreateSubprojectDto}> = (props) => {
+          const {data} = props || {};
+
+          return  postSubprojects(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postSubprojects>, TError, {data: CreateSubprojectDto}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Возвращает список подпроектов для указанного проекта
+ * @summary Получение подпроектов по projectId
+ */
+export const getSubprojects = (
+    params?: GetSubprojectsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<GetAllSubprojectsResponse>> => {
+    return axios.get(
+      `/subprojects`,{
+        params,
+    ...options}
+    );
+  }
+
+
+export const getGetSubprojectsQueryKey = (params?: GetSubprojectsParams,) => [`/subprojects`, ...(params ? [params]: [])];
+
+    
+export const useGetSubprojects = <TData = AsyncReturnType<typeof getSubprojects>, TError = AxiosError<ErrorResponse>>(
+ params?: GetSubprojectsParams, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getSubprojects>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetSubprojectsQueryKey(params);
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getSubprojects>> = () => getSubprojects(params, axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getSubprojects>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Обновление названия и ID родительского проекта существующего подпроекта
+ * @summary Обновление подпроекта
+ */
+export const putSubprojects = (
+    updateSubprojectDto: UpdateSubprojectDto, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SubprojectResponse>> => {
+    return axios.put(
+      `/subprojects`,
+      updateSubprojectDto,options
+    );
+  }
+
+
+
+    export const usePutSubprojects = <TError = AxiosError<ErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof putSubprojects>, TError,{data: UpdateSubprojectDto}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof putSubprojects>, {data: UpdateSubprojectDto}> = (props) => {
+          const {data} = props || {};
+
+          return  putSubprojects(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof putSubprojects>, TError, {data: UpdateSubprojectDto}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Удаление подпроекта по его идентификатору
+ * @summary Удаление подпроекта
+ */
+export const deleteSubprojects = (
+    deleteSubprojectDto: DeleteSubprojectDto, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DeleteSubprojects200>> => {
+    return axios.delete(
+      `/subprojects`,{data:
+      deleteSubprojectDto, ...options}
+    );
+  }
+
+
+
+    export const useDeleteSubprojects = <TError = AxiosError<ErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof deleteSubprojects>, TError,{data: DeleteSubprojectDto}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof deleteSubprojects>, {data: DeleteSubprojectDto}> = (props) => {
+          const {data} = props || {};
+
+          return  deleteSubprojects(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof deleteSubprojects>, TError, {data: DeleteSubprojectDto}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Возвращает информацию о подпроекте по его идентификатору
+ * @summary Получение подпроекта по ID
+ */
+export const getSubprojectsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SubprojectDto>> => {
+    return axios.get(
+      `/subprojects/${id}`,options
+    );
+  }
+
+
+export const getGetSubprojectsIdQueryKey = (id: string,) => [`/subprojects/${id}`];
+
+    
+export const useGetSubprojectsId = <TData = AsyncReturnType<typeof getSubprojectsId>, TError = AxiosError<ErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getSubprojectsId>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetSubprojectsIdQueryKey(id);
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getSubprojectsId>> = () => getSubprojectsId(id, axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getSubprojectsId>, TError, TData>(queryKey, queryFn, {enabled: !!(id), ...queryOptions})
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
  * Получение списка всех публичных альбомов (не требует аутентификации)
  * @summary Получение публичных альбомов
  */
@@ -452,35 +649,35 @@ export const useGetAlbumsPublic = <TData = AsyncReturnType<typeof getAlbumsPubli
 
 
 /**
- * Получение всех альбомов, принадлежащих конкретному проекту (требует аутентификации)
- * @summary Получение альбомов проекта
+ * Получение всех альбомов, принадлежащих конкретному подпроекту (требует аутентификации)
+ * @summary Получение альбомов подпроекта
  */
-export const getAlbumsProjectProjectId = (
-    projectId: string, options?: AxiosRequestConfig
+export const getAlbumsSubprojectSubprojectId = (
+    subprojectId: string, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<AlbumResponse[]>> => {
     return axios.get(
-      `/albums/project/${projectId}`,options
+      `/albums/subproject/${subprojectId}`,options
     );
   }
 
 
-export const getGetAlbumsProjectProjectIdQueryKey = (projectId: string,) => [`/albums/project/${projectId}`];
+export const getGetAlbumsSubprojectSubprojectIdQueryKey = (subprojectId: string,) => [`/albums/subproject/${subprojectId}`];
 
     
-export const useGetAlbumsProjectProjectId = <TData = AsyncReturnType<typeof getAlbumsProjectProjectId>, TError = AxiosError<AlbumErrorResponse>>(
- projectId: string, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getAlbumsProjectProjectId>, TError, TData>, axios?: AxiosRequestConfig}
+export const useGetAlbumsSubprojectSubprojectId = <TData = AsyncReturnType<typeof getAlbumsSubprojectSubprojectId>, TError = AxiosError<AlbumErrorResponse>>(
+ subprojectId: string, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getAlbumsSubprojectSubprojectId>, TError, TData>, axios?: AxiosRequestConfig}
 
   ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 
   const {query: queryOptions, axios: axiosOptions} = options || {}
 
-  const queryKey = queryOptions?.queryKey ?? getGetAlbumsProjectProjectIdQueryKey(projectId);
+  const queryKey = queryOptions?.queryKey ?? getGetAlbumsSubprojectSubprojectIdQueryKey(subprojectId);
 
   
 
-  const queryFn: QueryFunction<AsyncReturnType<typeof getAlbumsProjectProjectId>> = () => getAlbumsProjectProjectId(projectId, axiosOptions);
+  const queryFn: QueryFunction<AsyncReturnType<typeof getAlbumsSubprojectSubprojectId>> = () => getAlbumsSubprojectSubprojectId(subprojectId, axiosOptions);
 
-  const query = useQuery<AsyncReturnType<typeof getAlbumsProjectProjectId>, TError, TData>(queryKey, queryFn, {enabled: !!(projectId), ...queryOptions})
+  const query = useQuery<AsyncReturnType<typeof getAlbumsSubprojectSubprojectId>, TError, TData>(queryKey, queryFn, {enabled: !!(subprojectId), ...queryOptions})
 
   return {
     queryKey,
@@ -835,6 +1032,39 @@ export const deleteAlbumsId = (
     }
     
 /**
+ * Установка статуса processed для альбома (требует аутентификации)
+ * @summary Установка статуса обработки альбома
+ */
+export const putAlbumsProcessed = (
+    setProcessedDto: SetProcessedDto, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AlbumResponse>> => {
+    return axios.put(
+      `/albums/processed`,
+      setProcessedDto,options
+    );
+  }
+
+
+
+    export const usePutAlbumsProcessed = <TError = AxiosError<AlbumErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof putAlbumsProcessed>, TError,{data: SetProcessedDto}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof putAlbumsProcessed>, {data: SetProcessedDto}> = (props) => {
+          const {data} = props || {};
+
+          return  putAlbumsProcessed(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof putAlbumsProcessed>, TError, {data: SetProcessedDto}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
  * Загружает изображение в S3 хранилище и создает запись в базе данных
  * @summary Загрузка фото в альбом
  */
@@ -874,7 +1104,12 @@ if(postPhotosUploadBody.tags !== undefined) {
     }
     
 /**
- * Возвращает информацию о фото по его уникальному идентификатору
+ * Возвращает информацию о фото по его уникальному идентификатору.
+
+**Версии фотографий:**
+- `current` - текущие версии (могут изменяться при улучшении)
+- `default` - версии по умолчанию (неизменны, для отката изменений)
+
  * @summary Получение фото по ID
  */
 export const getPhotosId = (
@@ -1047,5 +1282,286 @@ export const putPhotosIdSetcover = (
         }
 
       return useMutation<AsyncReturnType<typeof putPhotosIdSetcover>, TError, {id: string;data: SetCoverRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Добавляет фотографии в очередь для улучшения с использованием указанного промпта.
+
+После улучшения поле `current` обновляется новыми версиями, а `default` остается неизменным.
+Это позволяет откатить изменения, скопировав `default` в `current`.
+
+ * @summary Улучшение фотографий
+ */
+export const postPhotosImprovement = (
+    improvePhotosRequest: ImprovePhotosRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ImprovePhotosResponse>> => {
+    return axios.post(
+      `/photos/improvement`,
+      improvePhotosRequest,options
+    );
+  }
+
+
+
+    export const usePostPhotosImprovement = <TError = AxiosError<PhotoErrorResponse | void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovement>, TError,{data: ImprovePhotosRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovement>, {data: ImprovePhotosRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postPhotosImprovement(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPhotosImprovement>, TError, {data: ImprovePhotosRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Восстанавливает значения из `default` в `current` и удаляет файлы из бакета,
+которые были в `current`, но отсутствуют в `default`.
+
+Это позволяет откатить изменения, сделанные улучшайзером.
+
+ * @summary Откат изменений фото к версиям по умолчанию
+ */
+export const postPhotosIdRevert = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Photo>> => {
+    return axios.post(
+      `/photos/${id}/revert`,undefined,options
+    );
+  }
+
+
+
+    export const usePostPhotosIdRevert = <TError = AxiosError<void | PhotoErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosIdRevert>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosIdRevert>, {id: string}> = (props) => {
+          const {id} = props || {};
+
+          return  postPhotosIdRevert(id,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPhotosIdRevert>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Принимает набор дескрипторов и возвращает список фотографий, у которых найдено совпадение
+ * @summary Сравнение дескрипторов лица с сохраненными образцами
+ */
+export const postDescriptors = (
+    descriptorMatchRequest: DescriptorMatchRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DescriptorMatchResponse>> => {
+    return axios.post(
+      `/descriptors`,
+      descriptorMatchRequest,options
+    );
+  }
+
+
+
+    export const usePostDescriptors = <TError = AxiosError<void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postDescriptors>, TError,{data: DescriptorMatchRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postDescriptors>, {data: DescriptorMatchRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postDescriptors(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postDescriptors>, TError, {data: DescriptorMatchRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Создает новый промпт для улучшения фотографий. Поле default автоматически устанавливается равным body.
+ * @summary Создание нового промпта
+ */
+export const postPrompts = (
+    createPromptRequest: CreatePromptRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PromptResponse>> => {
+    return axios.post(
+      `/prompts`,
+      createPromptRequest,options
+    );
+  }
+
+
+
+    export const usePostPrompts = <TError = AxiosError<PromptErrorResponse | void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPrompts>, TError,{data: CreatePromptRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPrompts>, {data: CreatePromptRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postPrompts(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPrompts>, TError, {data: CreatePromptRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Возвращает список всех промптов, отсортированных по дате создания (новые первыми)
+ * @summary Получение списка всех промптов
+ */
+export const getPrompts = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PromptResponse[]>> => {
+    return axios.get(
+      `/prompts`,options
+    );
+  }
+
+
+export const getGetPromptsQueryKey = () => [`/prompts`];
+
+    
+export const useGetPrompts = <TData = AsyncReturnType<typeof getPrompts>, TError = AxiosError<void>>(
+  options?: { query?:UseQueryOptions<AsyncReturnType<typeof getPrompts>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetPromptsQueryKey();
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getPrompts>> = () => getPrompts(axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getPrompts>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Возвращает информацию о промпте по его уникальному идентификатору
+ * @summary Получение промпта по ID
+ */
+export const getPromptsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PromptResponse>> => {
+    return axios.get(
+      `/prompts/${id}`,options
+    );
+  }
+
+
+export const getGetPromptsIdQueryKey = (id: string,) => [`/prompts/${id}`];
+
+    
+export const useGetPromptsId = <TData = AsyncReturnType<typeof getPromptsId>, TError = AxiosError<void | PromptErrorResponse>>(
+ id: string, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getPromptsId>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetPromptsIdQueryKey(id);
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getPromptsId>> = () => getPromptsId(id, axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getPromptsId>, TError, TData>(queryKey, queryFn, {enabled: !!(id), ...queryOptions})
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Обновляет название и/или текст промпта. Поле default не может быть изменено.
+ * @summary Обновление промпта
+ */
+export const putPromptsId = (
+    id: string,
+    updatePromptRequest: UpdatePromptRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PromptResponse>> => {
+    return axios.put(
+      `/prompts/${id}`,
+      updatePromptRequest,options
+    );
+  }
+
+
+
+    export const usePutPromptsId = <TError = AxiosError<void | PromptErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof putPromptsId>, TError,{id: string;data: UpdatePromptRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof putPromptsId>, {id: string;data: UpdatePromptRequest}> = (props) => {
+          const {id,data} = props || {};
+
+          return  putPromptsId(id,data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof putPromptsId>, TError, {id: string;data: UpdatePromptRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Удаляет промпт по его уникальному идентификатору
+ * @summary Удаление промпта
+ */
+export const deletePromptsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.delete(
+      `/prompts/${id}`,options
+    );
+  }
+
+
+
+    export const useDeletePromptsId = <TError = AxiosError<PromptErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof deletePromptsId>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof deletePromptsId>, {id: string}> = (props) => {
+          const {id} = props || {};
+
+          return  deletePromptsId(id,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof deletePromptsId>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
     }
     

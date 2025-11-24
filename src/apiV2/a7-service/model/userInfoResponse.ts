@@ -8,7 +8,7 @@
 import type { UserInfoResponseRole } from './userInfoResponseRole';
 
 export interface UserInfoResponse {
-  /** ID пользователя */
+  /** Уникальный идентификатор пользователя */
   id?: string;
   /** Email пользователя */
   email?: string;
@@ -16,4 +16,6 @@ export interface UserInfoResponse {
   name?: string;
   /** Роль пользователя */
   role?: UserInfoResponseRole;
+  /** Массив идентификаторов проектов, в которых участвует пользователь */
+  workplace?: string[];
 }

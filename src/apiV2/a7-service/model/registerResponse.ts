@@ -16,4 +16,6 @@ export interface RegisterResponse {
   name?: string;
   /** Роль пользователя */
   role?: RegisterResponseRole;
+  /** Массив идентификаторов проектов, в которых участвует пользователь */
+  workplace?: string[];
 }

@@ -29,7 +29,7 @@ const initialCreateUserValues = {
   email: "",
   name: "",
   password: "",
-  role: UserRegisterDtoRole.photographer,
+  role: UserRegisterDtoRole.maker,
 };
 
 const AdministrationPage = () => {
@@ -199,21 +199,17 @@ const AdministrationPage = () => {
           value={createFormState?.role}
           placeholder="Выберите из списка"
           disabled={isLoadingCreateUser}
+          // TODO: доделать ролевые доступы для назначений
           options={[
             {
-              key: UserRole.photographer,
-              value: UserRole.photographer,
-              label: getRoleDescription(UserRole.photographer),
+              key: UserRole.maker,
+              value: UserRole.maker,
+              label: getRoleDescription(UserRole.maker),
             },
             {
-              key: UserRole.seller,
-              value: UserRole.seller,
-              label: getRoleDescription(UserRole.seller),
-            },
-            {
-              key: UserRole.manager,
-              value: UserRole.manager,
-              label: getRoleDescription(UserRole.manager),
+              key: UserRole.supervisor,
+              value: UserRole.supervisor,
+              label: getRoleDescription(UserRole.supervisor),
             },
           ]}
         />
@@ -288,21 +284,17 @@ const AdministrationPage = () => {
           value={updateFormState?.role}
           placeholder="Выберите из списка"
           disabled={isLoading || !updateFormState?.id}
+          // TODO: доделать ролевые доступы для назначений
           options={[
             {
-              key: UserRole.photographer,
-              value: UserRole.photographer,
-              label: getRoleDescription(UserRole.photographer),
+              key: UserRole.maker,
+              value: UserRole.maker,
+              label: getRoleDescription(UserRole.maker),
             },
             {
-              key: UserRole.seller,
-              value: UserRole.seller,
-              label: getRoleDescription(UserRole.seller),
-            },
-            {
-              key: UserRole.manager,
-              value: UserRole.manager,
-              label: getRoleDescription(UserRole.manager),
+              key: UserRole.supervisor,
+              value: UserRole.supervisor,
+              label: getRoleDescription(UserRole.supervisor),
             },
           ]}
         />

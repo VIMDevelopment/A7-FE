@@ -5,14 +5,17 @@
  * API документация для A7 Backend - платформа для фотографов
  * OpenAPI spec version: 1.0.0
  */
+import type { PhotoVersions } from './photoVersions';
 
 export interface Photo {
   /** Уникальный идентификатор фото */
   id: string;
   /** ID альбома, к которому принадлежит фото */
   albumId: string;
-  /** URL файла в S3 хранилище */
-  fileUrl: string;
+  /** Текущие версии фото (могут изменяться при улучшении) */
+  current: PhotoVersions;
+  /** Версии по умолчанию (неизменны, для отката) */
+  default: PhotoVersions;
   /** Оригинальное имя файла */
   fileName: string;
   /** Размер файла в байтах */

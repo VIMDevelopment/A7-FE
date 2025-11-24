@@ -1,0 +1,74 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 100px;
+  cursor: pointer;
+  background-color: var(--color-modal-background);
+  border-radius: 10px;
+  color: var(--color-text);
+  font-size: 16px;
+  white-space: pre-line;
+  word-break: break-all;
+  padding: 5px;
+  text-align: center;
+}
+
+.actionMenuIconContainer {
+  position: absolute;
+  height: 0;
+}
+
+.menuIconButton {
+  position: relative;
+  left: 126px;
+  top: 4px;
+  display: flex;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(63, 63, 63, 0.799);
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.dropdown :global(.ant-dropdown-menu) {
+  background-color: var(--color-common-background);
+}
+
+.dropdown :global(.ant-dropdown-menu-title-content) {
+  color: var(--color-text);
+}
+
+.dropdown
+  :global(.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-danger)) {
+  background-color: var(--color-menu-item-hovered-background) !important;
+}
+
+.deleteButton {
+  background: var(--color-error);
+}
+
+.deleteButton:not(:disabled):hover {
+  background: var(--color-error-btn-hovered) !important;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: calc(100vw - 40px);
+  }
+
+  .menuIconButton {
+    left: calc(100vw - 88px);
+    top: 8px;
+    height: 40px;
+    width: 40px;
+  }
+
+  .dropdown :global(.ant-dropdown-menu-title-content) {
+    font-size: 22px;
+  }
+}

@@ -18,4 +18,8 @@ export interface UserUpdateDto {
   password?: string;
   /** Новая роль пользователя */
   role?: UserUpdateDtoRole;
+  /** Массив идентификаторов проектов, в которых участвует пользователь */
+  workplace?: string[];
+  /** Статус активности пользователя */
+  isActive?: boolean;
 }

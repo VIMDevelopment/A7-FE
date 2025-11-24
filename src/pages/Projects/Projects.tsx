@@ -11,13 +11,13 @@ const ProjectsPage = () => {
   });
 
   const allProjectsNames =
-    data?.data?.projects?.map((item) => item.name ?? "") ?? [];
+    data?.data.projects?.map((item) => item.name ?? "") ?? [];
 
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>Все проекты</div>
       <div className={css.grid}>
-        {data?.data?.projects?.map((item) => (
+        {data?.data.projects?.map((item) => (
           <ProjectCard key={item.id} id={item.id} name={item.name} />
         ))}
         <AddProject allProjectsNames={allProjectsNames} />

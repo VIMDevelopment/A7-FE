@@ -1,17 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import css from "./index.module.css";
 import { Breadcrumb } from "antd";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { PublicRoutes } from "../../routes/routes";
 import {
-  useDeleteAlbumsId,
   useDeletePhotosId,
   useGetAlbumsId,
-  useGetAlbumsProjectProjectId,
   useGetPhotosAlbumAlbumId,
-  useGetProjects,
+  useGetProjectsProjectId,
+  useGetSubprojectsId,
   usePutAlbumsCover,
-  usePutAlbumsId,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import UploadBox from "./components/UploadBox/UploadBox";
@@ -19,11 +17,9 @@ import PhotoCard from "./components/PhotoCard/PhotoCard";
 import {
   DeleteOutlined,
   DownloadOutlined,
-  EditOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
 import Modal from "../../components/Modal/Modal";
-import Input from "../../components/Input/Input";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { Image } from "antd";
@@ -34,21 +30,20 @@ import {
   handleDownloadAll,
   handlePrintPhoto,
 } from "./components/PhotoCard/helpers";
-import { useMediaQuery } from "react-responsive";
+import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
 
 const AlbumPage = () => {
-  const { projectId, albumId } = useParams();
-  const navigate = useNavigate();
+  const { projectId, subprojectId, albumId } = useParams();
   const queryClient = useQueryClient();
-  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
-  const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
-  const [isDeleteAlbumModalOpen, setIsDeleteAlbumModalOpen] = useState(false);
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
-  const [inputAlbumValue, setInputAlbumValue] = useState("");
 
-  const { data: allProjectsData } = useGetProjects({
+  const { data: projectData } = useGetProjectsProjectId(projectId ?? "", {
+    axios: defaultApiAxiosParams,
+  });
+
+  const { data: subprojectData } = useGetSubprojectsId(subprojectId ?? "", {
     axios: defaultApiAxiosParams,
   });
 
@@ -61,35 +56,7 @@ const AlbumPage = () => {
       axios: defaultApiAxiosParams,
     });
 
-  const { data: albumsData } = useGetAlbumsProjectProjectId(projectId ?? "", {
-    axios: defaultApiAxiosParams,
-  });
-
   const { mutateAsync: setAlbumCover } = usePutAlbumsCover({
-    axios: defaultApiAxiosParams,
-  });
-
-  const albumName = useMemo(
-    () => albumsData?.data?.find((item) => item.id === albumId)?.title,
-    [albumsData]
-  );
-
-  const allAlbumsNames =
-    albumsData?.data?.map((item) => item.title ?? "") ?? [];
-
-  const {
-    isLoading: isEditAlbumLoading,
-    isSuccess: isEditAlbumSuccess,
-    mutate: updateAlbum,
-  } = usePutAlbumsId({
-    axios: defaultApiAxiosParams,
-  });
-
-  const {
-    isLoading: isDeleteAlbumLoading,
-    isSuccess: isDeleteAlbumSuccess,
-    mutate: deleteAlbum,
-  } = useDeleteAlbumsId({
     axios: defaultApiAxiosParams,
   });
 
@@ -98,48 +65,13 @@ const AlbumPage = () => {
       axios: defaultApiAxiosParams,
     });
 
-  useEffect(() => {
-    setInputAlbumValue(albumName ?? "");
-  }, [albumData]);
-
-  useEffect(() => {
-    if (isEditAlbumSuccess) {
-      showNotification({
-        message: "Альбом переименован",
-        type: "success",
-      });
-      setIsEditAlbumModalOpen(false);
-      void queryClient.invalidateQueries({ queryKey: `/albums/${albumId}` });
-      void queryClient.invalidateQueries({
-        queryKey: `/albums/project/${projectId}`,
-      });
-    }
-  }, [isEditAlbumSuccess]);
-
-  useEffect(() => {
-    if (isDeleteAlbumSuccess) {
-      showNotification({
-        message: "Альбом удален",
-        type: "success",
-      });
-      setIsDeleteAlbumModalOpen(false);
-      void queryClient.invalidateQueries({
-        queryKey: `/albums/project/${projectId}`,
-      });
-      navigate(PublicRoutes.PROJECT.get({ projectId: projectId ?? "" }));
-    }
-  }, [isDeleteAlbumSuccess]);
-
-  const projectName = useMemo(
-    () =>
-      allProjectsData?.data?.projects?.find((item) => item.id === projectId)
-        ?.name,
-    [allProjectsData]
-  );
+  const projectName = projectData?.data.name ?? "";
+  const subprojectName = subprojectData?.data.name ?? "";
+  const albumName = albumData?.data.title;
 
   const albumPhotos = useMemo(
     () =>
-      albumPhotosData?.data?.sort((a, b) => {
+      albumPhotosData?.data.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
         return dateA - dateB;
@@ -151,28 +83,20 @@ const AlbumPage = () => {
     if ((albumPhotos ?? []).length > 0) {
       const firstPhotoId = albumPhotos?.[0]?.id;
 
-      if (firstPhotoId && albumData?.data?.coverPhotoId !== firstPhotoId) {
+      if (firstPhotoId && albumData?.data.coverPhotoId !== firstPhotoId) {
         setAlbumCover({
           data: {
-            photoId: firstPhotoId ?? "",
+            photoId: firstPhotoId,
             albumId: albumId ?? "",
           },
         }).then(() => {
           void queryClient.invalidateQueries({
-            queryKey: `/albums/project/${projectId}`,
+            queryKey: `/albums/subproject/${subprojectId}`,
           });
         });
       }
     }
   }, [albumPhotos, albumData]);
-
-  const handleEditAlbumClick = () => {
-    setIsEditAlbumModalOpen(true);
-  };
-
-  const handleDeleteAlbumClick = () => {
-    setIsDeleteAlbumModalOpen(true);
-  };
 
   const handleDeletePhotosClick = (id?: string) => {
     if (id) {
@@ -187,38 +111,11 @@ const AlbumPage = () => {
     const preparedFilesData: FileForZip[] = (albumPhotos ?? [])
       .filter((item) => selectedPhotos.includes(item.id))
       .map((item) => ({
-        url: item.fileUrl ?? "",
-        fileName: item.fileName ?? "",
+        url: item.default.original,
+        fileName: item.fileName,
       }));
 
     handleDownloadAll(preparedFilesData);
-  };
-
-  const handleEditAlbumOk = () => {
-    const isNameUniq = !allAlbumsNames.some(
-      (item) => item.toLocaleLowerCase() === inputAlbumValue.toLocaleLowerCase()
-    );
-
-    if (isNameUniq) {
-      updateAlbum({
-        id: albumId ?? "",
-        data: {
-          title: inputAlbumValue,
-        },
-      });
-    } else {
-      showNotification({
-        type: "error",
-        message:
-          "Альбом с таким названием уже существует. Пожалуйста, введите другое название.",
-      });
-    }
-  };
-
-  const handleDeleteAlbumOk = () => {
-    deleteAlbum({
-      id: albumId ?? "",
-    });
   };
 
   const handleDeletePhotosOk = async () => {
@@ -242,15 +139,6 @@ const AlbumPage = () => {
         type: "error",
       });
     }
-  };
-
-  const handleEditAlbumCancel = () => {
-    setIsEditAlbumModalOpen(false);
-    setInputAlbumValue(albumName ?? "");
-  };
-
-  const handleDeleteAlbumCancel = () => {
-    setIsDeleteAlbumModalOpen(false);
   };
 
   const handleDeletePhotosCancel = () => {
@@ -280,6 +168,7 @@ const AlbumPage = () => {
           className={css.breadCrumbs}
           separator=""
           items={[
+            ...useBreadcrumbsBackButton(),
             {
               title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
             },
@@ -291,7 +180,22 @@ const AlbumPage = () => {
                 <Link
                   to={PublicRoutes.PROJECT.get({ projectId: projectId ?? "" })}
                 >
-                  Проект: "{projectName ?? ""}"
+                  Проект: "{projectName}"
+                </Link>
+              ),
+            },
+            {
+              type: "separator",
+            },
+            {
+              title: (
+                <Link
+                  to={PublicRoutes.SUBPROJECT.get({
+                    projectId: projectId ?? "",
+                    subprojectId: subprojectId ?? "",
+                  })}
+                >
+                  Папка: "{subprojectName}"
                 </Link>
               ),
             },
@@ -303,24 +207,6 @@ const AlbumPage = () => {
             },
           ]}
         />
-        <div className={css.actionsBlock}>
-          <div className={css.icon} onClick={handleEditAlbumClick}>
-            <EditOutlined
-              style={{
-                color: "rgba(255, 255, 255, 0.5)",
-                fontSize: isMobile ? "26px" : "unset",
-              }}
-            />
-          </div>
-          <div className={css.icon} onClick={handleDeleteAlbumClick}>
-            <DeleteOutlined
-              style={{
-                color: "rgba(255, 255, 255, 0.5)",
-                fontSize: isMobile ? "26px" : "unset",
-              }}
-            />
-          </div>
-        </div>
       </div>
       <div className={css.actionsContainer}>
         <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
@@ -366,7 +252,7 @@ const AlbumPage = () => {
                       <PrinterOutlined
                         onClick={() =>
                           handlePrintPhoto(
-                            currentPhoto?.fileUrl ?? "",
+                            currentPhoto?.default.original ?? "",
                             currentPhoto?.fileName ?? ""
                           )
                         }
@@ -376,7 +262,7 @@ const AlbumPage = () => {
                         className={css.toolbarBtn}
                         onClick={() =>
                           downloadImageByUrl(
-                            currentPhoto?.fileUrl ?? "",
+                            currentPhoto?.default.original ?? "",
                             currentPhoto?.fileName ?? ""
                           )
                         }
@@ -392,13 +278,13 @@ const AlbumPage = () => {
                 );
               },
             }}
-            items={albumPhotos?.map((item) => item.fileUrl)}
+            items={albumPhotos?.map((item) => item.default.original)}
           >
             {albumPhotos?.map((item) => (
               <PhotoCard
                 key={item.id}
                 id={item.id}
-                url={item.fileUrl}
+                url={item.default.original}
                 name={item.fileName}
                 isSelected={selectedPhotos.includes(item.id)}
                 albumId={albumId ?? ""}
@@ -413,35 +299,6 @@ const AlbumPage = () => {
           />
         </div>
       )}
-      <Modal
-        title={"Редактирование альбома"}
-        open={isEditAlbumModalOpen}
-        onOk={handleEditAlbumOk}
-        onCancel={handleEditAlbumCancel}
-        okButtonName="Сохранить"
-        destroyOnHidden
-        isLoading={isEditAlbumLoading}
-      >
-        <Input
-          label="Введите название"
-          value={inputAlbumValue}
-          onChange={(e) => setInputAlbumValue(e.target.value)}
-        />
-      </Modal>
-
-      <Modal
-        title={"Удаление альбома"}
-        open={isDeleteAlbumModalOpen}
-        onOk={handleDeleteAlbumOk}
-        onCancel={handleDeleteAlbumCancel}
-        okButtonName="Удалить"
-        destroyOnHidden
-        isLoading={isDeleteAlbumLoading}
-        customOkButtonClassName={css.deleteButton}
-      >
-        {`Вы уверены, что хотите удалить альбом "${albumName}"? Все данные будут безвозвратно
-        утеряны.`}
-      </Modal>
 
       <Modal
         title={"Удаление фото"}

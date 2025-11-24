@@ -1,154 +1,47 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import css from "./index.module.css";
 import {
-  useDeleteProjectsDelete,
-  useGetAlbumsProjectProjectId,
-  useGetProjects,
-  usePutProjectsUpdate,
+  useGetProjectsProjectId,
+  useGetSubprojects,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import AlbumCard from "./components/AlbumCard/AlbumCard";
-import AddAlbumCard from "./components/AddAlbumCard/AddAlbumCard";
+import SubprojectCard from "./components/SubprojectCard/SubprojectCard";
+import AddSubprojectCard from "./components/AddSubprojectCard/AddSubprojectCard";
+import { Link, useParams } from "react-router-dom";
 import { Breadcrumb } from "antd";
 import { PublicRoutes } from "../../routes/routes";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import Modal from "../../components/Modal/Modal";
-import Input from "../../components/Input/Input";
-import { showNotification } from "../../components/ShowNotification";
-import { useQueryClient } from "react-query";
-import { useMediaQuery } from "react-responsive";
+import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
-  const navigate = useNavigate();
-  const isMobile = useMediaQuery({ maxWidth: 768 });
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-
-  const queryClient = useQueryClient();
-
-  const { data: allProjectsData } = useGetProjects({
+  const { data: projectData } = useGetProjectsProjectId(projectId ?? "", {
     axios: defaultApiAxiosParams,
   });
 
-  const { data: albumsData } = useGetAlbumsProjectProjectId(projectId ?? "", {
-    axios: defaultApiAxiosParams,
-  });
-
-  const {
-    isLoading: isEditLoading,
-    isSuccess: isEditSuccess,
-    mutate: updateProject,
-  } = usePutProjectsUpdate({
-    axios: defaultApiAxiosParams,
-  });
-
-  const {
-    isLoading: isDeleteLoading,
-    isSuccess: isDeleteSuccess,
-    mutate: deleteProject,
-  } = useDeleteProjectsDelete({
-    axios: defaultApiAxiosParams,
-  });
-
-  const projectName = useMemo(
-    () =>
-      allProjectsData?.data?.projects?.find((item) => item.id === projectId)
-        ?.name,
-    [allProjectsData]
+  const { data } = useGetSubprojects(
+    {
+      projectId: projectId ?? "",
+    },
+    {
+      axios: defaultApiAxiosParams,
+    }
   );
 
-  const allProjectsNames =
-    allProjectsData?.data?.projects?.map((item) => item.name ?? "") ?? [];
+  const allSubprojectsNames =
+    data?.data.subprojects?.map((item) => item.name ?? "") ?? [];
 
-  useEffect(() => {
-    setInputValue(projectName ?? "");
-  }, [projectName]);
-
-  useEffect(() => {
-    if (isEditSuccess) {
-      showNotification({
-        message: "Проект переименован",
-        type: "success",
-      });
-      setIsEditModalOpen(false);
-      void queryClient.invalidateQueries({ queryKey: "/projects" });
-    }
-  }, [isEditSuccess]);
-
-  useEffect(() => {
-    if (isDeleteSuccess) {
-      showNotification({
-        message: "Проект удален",
-        type: "success",
-      });
-      setIsDeleteModalOpen(false);
-      void queryClient.invalidateQueries({ queryKey: "/projects" });
-      navigate(PublicRoutes.PROJECTS.static);
-    }
-  }, [isDeleteSuccess]);
-
-  const handleEditClick = () => {
-    setIsEditModalOpen(true);
-  };
-
-  const handleDeleteClick = () => {
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleEditOk = () => {
-    const isNameUniq = !allProjectsNames.some(
-      (item) => item.toLocaleLowerCase() === inputValue.toLocaleLowerCase()
-    );
-
-    if (isNameUniq) {
-      updateProject({
-        data: {
-          id: projectId ?? "",
-          name: inputValue,
-        },
-      });
-    } else {
-      showNotification({
-        type: "error",
-        message:
-          "Проект с таким названием уже существует. Пожалуйста, введите другое название.",
-      });
-    }
-  };
-
-  const handleDeleteOk = () => {
-    deleteProject({
-      data: {
-        id: projectId ?? "",
-      },
-    });
-  };
-
-  const handleEditCancel = () => {
-    setIsEditModalOpen(false);
-    setInputValue(projectName ?? "");
-  };
-
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
-  };
-
-  const allAlbumsNames =
-    albumsData?.data?.map((item) => item.title ?? "") ?? [];
+  const projectName = projectData?.data.name;
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{projectName}</div>
+      <div className={css.pageTitle}>{`Все папки проекта ${projectName}`}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
-          
           separator=""
           items={[
+            ...useBreadcrumbsBackButton(),
             {
               title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
             },
@@ -160,68 +53,18 @@ const ProjectPage = () => {
             },
           ]}
         />
-        <div className={css.actionsBlock}>
-          <div className={css.icon} onClick={handleEditClick}>
-            <EditOutlined
-              style={{
-                color: "rgba(255, 255, 255, 0.5)",
-                fontSize: isMobile ? "26px" : "unset",
-              }}
-            />
-          </div>
-          <div className={css.icon} onClick={handleDeleteClick}>
-            <DeleteOutlined
-              style={{
-                color: "rgba(255, 255, 255, 0.5)",
-                fontSize: isMobile ? "26px" : "unset",
-              }}
-            />
-          </div>
-        </div>
       </div>
       <div className={css.grid}>
-        {albumsData?.data?.map((item) => (
-          <AlbumCard
-            projectId={projectId}
+        {data?.data.subprojects?.map((item) => (
+          <SubprojectCard
             key={item.id}
             id={item.id}
-            name={item.title}
-            coverId={item.coverPhotoId}
+            name={item.name}
+            allSubprojectsNames={allSubprojectsNames}
           />
         ))}
-        <AddAlbumCard
-          allAlbumsNames={allAlbumsNames}
-          projectId={projectId ?? ""}
-        />
+        <AddSubprojectCard allSubprojectsNames={allSubprojectsNames} />
       </div>
-      <Modal
-        title={"Редактирование проекта"}
-        open={isEditModalOpen}
-        onOk={handleEditOk}
-        onCancel={handleEditCancel}
-        okButtonName="Сохранить"
-        destroyOnHidden
-        isLoading={isEditLoading}
-      >
-        <Input
-          label="Введите название"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-      </Modal>
-      <Modal
-        title={"Удаление проекта"}
-        open={isDeleteModalOpen}
-        onOk={handleDeleteOk}
-        onCancel={handleDeleteCancel}
-        okButtonName="Удалить"
-        destroyOnHidden
-        isLoading={isDeleteLoading}
-        customOkButtonClassName={css.deleteButton}
-      >
-        {`Вы уверены, что хотите удалить проект "${projectName}"? Все данные будут безвозвратно
-        утеряны.`}
-      </Modal>
     </div>
   );
 };

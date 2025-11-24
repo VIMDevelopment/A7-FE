@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import css from "./index.module.css";
-import { LoginRequest } from "../../api/a7-service/model";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import Cookies from "js-cookie";
 import { PublicRoutes } from "../../routes/routes";
@@ -8,9 +7,10 @@ import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import { usePostUsersLogin } from "../../apiV2/a7-service";
 import { useEnterPressListener } from "../../lib/utils/useEnterPressListener";
+import { UserLoginDto } from "../../apiV2/a7-service/model";
 
 const AuthPage = () => {
-  const [formState, setFormState] = useState<LoginRequest>({
+  const [formState, setFormState] = useState<UserLoginDto>({
     email: "",
     password: "",
   });
@@ -33,7 +33,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (data) {
-      Cookies.set("accessToken", data?.data?.jwt ?? "", {});
+      Cookies.set("accessToken", data.data.jwt ?? "", {});
       window.location.replace(PublicRoutes.PROJECTS.static);
     }
   }, [data]);

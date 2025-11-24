@@ -1,23 +1,29 @@
 import { BankOutlined, LogoutOutlined } from "@ant-design/icons";
-import { UserRole } from "../../api/a7-service/model";
 import ProjectsIcon from "../../assets/ProjectsIcon";
 import SettingsIcon from "../../assets/SettingsIcon";
 import { PublicRoutes } from "../../routes/routes";
 import { SideMenuItemProps } from "./components/SideMenuItem/SideMenuItem";
+import { UserRole } from "../../apiV2/a7-service/model";
 
 export const getRoleDescription = (role?: UserRole) => {
   switch (role) {
     case UserRole.admin:
       return "Администратор";
 
-    case UserRole.manager:
-      return "Менеджер";
+    case UserRole.owner:
+      return "Владелец";
 
-    case UserRole.photographer:
-      return "Фотограф";
+    case UserRole.cluster:
+      return "Cluster";
 
-    case UserRole.seller:
-      return "Продавец";
+    case UserRole.agency:
+      return "Agency";
+
+    case UserRole.supervisor:
+      return "Супервизор";
+
+    case UserRole.maker:
+      return "Мэйкер";
 
     default:
       return "";

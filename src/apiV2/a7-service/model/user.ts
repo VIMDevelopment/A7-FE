@@ -18,4 +18,6 @@ export interface User {
   role?: UserRole;
   /** Активен ли пользователь */
   isActive?: boolean;
+  /** Массив идентификаторов проектов, в которых участвует пользователь */
+  workplace?: string[];
 }

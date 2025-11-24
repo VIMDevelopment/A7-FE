@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 100px;
+  cursor: pointer;
+  background-color: var(--color-modal-background);
+  border-radius: 10px;
+  color: var(--color-text);
+  font-size: 16px;
+  white-space: pre;
+  text-align: center;
+  opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: calc(100vw - 40px);
+  }
+}

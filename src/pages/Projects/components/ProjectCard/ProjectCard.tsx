@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import css from "./index.module.css";
 import { useNavigate } from "react-router-dom";
 import { PublicRoutes } from "../../../../routes/routes";
@@ -31,51 +31,22 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState(name ?? "");
 
-  const {
-    isLoading: isEditLoading,
-    isSuccess: isEditSuccess,
-    mutate: updateProject,
-  } = usePutProjectsUpdate({
-    axios: defaultApiAxiosParams,
-  });
+  const { isLoading: isEditLoading, mutateAsync: updateProject } =
+    usePutProjectsUpdate({
+      axios: defaultApiAxiosParams,
+    });
 
-  const {
-    isLoading: isDeleteLoading,
-    isSuccess: isDeleteSuccess,
-    mutate: deleteProject,
-  } = useDeleteProjectsDelete({
-    axios: defaultApiAxiosParams,
-  });
+  const { isLoading: isDeleteLoading, mutateAsync: deleteProject } =
+    useDeleteProjectsDelete({
+      axios: defaultApiAxiosParams,
+    });
 
   const { data: allProjectsData } = useGetProjects({
     axios: defaultApiAxiosParams,
   });
 
   const allProjectsNames =
-    allProjectsData?.data?.projects?.map((item) => item.name ?? "") ?? [];
-
-  useEffect(() => {
-    if (isEditSuccess) {
-      showNotification({
-        message: "Проект переименован",
-        type: "success",
-      });
-      setIsEditModalOpen(false);
-      void queryClient.invalidateQueries({ queryKey: "/projects" });
-    }
-  }, [isEditSuccess]);
-
-  useEffect(() => {
-    if (isDeleteSuccess) {
-      showNotification({
-        message: "Проект удален",
-        type: "success",
-      });
-      setIsDeleteModalOpen(false);
-      void queryClient.invalidateQueries({ queryKey: "/projects" });
-      navigate(PublicRoutes.PROJECTS.static);
-    }
-  }, [isDeleteSuccess]);
+    allProjectsData?.data.projects?.map((item) => item.name ?? "") ?? [];
 
   const handleEditClick = () => {
     setIsEditModalOpen(true);
@@ -87,7 +58,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
 
   const handleEditOk = () => {
     const isNameUniq = !allProjectsNames.some(
-      (item) => item.toLocaleLowerCase() === inputValue.toLocaleLowerCase()
+      (item) => item.toLocaleLowerCase().trim() === inputValue.toLocaleLowerCase().trim()
     );
 
     if (isNameUniq) {
@@ -96,6 +67,13 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
           id: id ?? "",
           name: inputValue,
         },
+      }).then(() => {
+        showNotification({
+          message: "Проект переименован",
+          type: "success",
+        });
+        setIsEditModalOpen(false);
+        void queryClient.invalidateQueries({ queryKey: "/projects" });
       });
     } else {
       showNotification({
@@ -111,6 +89,14 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
       data: {
         id: id ?? "",
       },
+    }).then(() => {
+      showNotification({
+        message: "Проект удален",
+        type: "success",
+      });
+      setIsDeleteModalOpen(false);
+      void queryClient.invalidateQueries({ queryKey: "/projects" });
+      navigate(PublicRoutes.PROJECTS.static);
     });
   };
 
@@ -129,12 +115,12 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
 
   const items: ItemType[] = [
     {
-      key: "2",
+      key: "1",
       label: "Переименовать",
       onClick: handleEditClick,
     },
     {
-      key: "3",
+      key: "2",
       label: "Удалить",
       danger: true,
       onClick: handleDeleteClick,
