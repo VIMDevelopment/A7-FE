@@ -16,6 +16,10 @@
   text-align: center;
 }
 
+.orange {
+  background-color: rgba(255, 166, 0, 0.5);
+}
+
 .albumPreviewContainer {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -76,6 +76,7 @@ const SubprojectPage = () => {
             id={item.id}
             name={item.title}
             coverId={item.coverPhotoId}
+            isProcessed={item.processed}
           />
         ))}
         <AddAlbumCard allAlbumsNames={allAlbumsNames} />
