@@ -10,6 +10,9 @@ type Props = {
   cancelButtonName?: string;
   isLoading?: boolean;
   customOkButtonClassName?: string;
+  withFooter?: boolean;
+  blur?: boolean;
+  customRootClassName?: string;
 } & ModalProps &
   PropsWithChildren;
 
@@ -19,11 +22,14 @@ const Modal: FC<Props> = ({
   isLoading,
   children,
   customOkButtonClassName,
+  withFooter = true,
+  blur,
+  customRootClassName,
   ...props
 }) => {
   useEnterPressListener(() => {
     if (!props.open) return;
-    const activeTag = (document.activeElement as HTMLElement)?.tagName;
+    const activeTag = (document.activeElement as HTMLElement).tagName;
     if (activeTag === "TEXTAREA" || activeTag === "BUTTON") return;
     props.onOk?.({} as any);
   });
@@ -31,16 +37,18 @@ const Modal: FC<Props> = ({
   return (
     <AntdModal
       {...props}
-      rootClassName={css.modal}
+      rootClassName={cn(css.modal, blur && css.modalBlur, customRootClassName)}
       footer={
-        <ModalFooter
-          okButtonName={okButtonName}
-          cancelButtonName={cancelButtonName}
-          isLoading={isLoading}
-          onOk={props.onOk}
-          onCancel={props.onCancel}
-          customOkButtonClassName={customOkButtonClassName}
-        />
+        withFooter && (
+          <ModalFooter
+            okButtonName={okButtonName}
+            cancelButtonName={cancelButtonName}
+            isLoading={isLoading}
+            onOk={props.onOk}
+            onCancel={props.onCancel}
+            customOkButtonClassName={customOkButtonClassName}
+          />
+        )
       }
     >
       {children}

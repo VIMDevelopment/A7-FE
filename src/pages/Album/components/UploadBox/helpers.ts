@@ -1,4 +1,3 @@
-import { RcFile } from "antd/lib/upload";
 import { showNotification } from "../../../../components/ShowNotification";
 
 export const beforeUpload = (file: File): boolean => {

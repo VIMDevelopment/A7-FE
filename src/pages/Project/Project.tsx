@@ -33,6 +33,8 @@ const ProjectPage = () => {
 
   const projectName = projectData?.data.name;
 
+  const { backButton } = useBreadcrumbsBackButton();
+
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>{`Все папки проекта ${projectName}`}</div>
@@ -41,7 +43,7 @@ const ProjectPage = () => {
           className={css.breadCrumbs}
           separator=""
           items={[
-            ...useBreadcrumbsBackButton(),
+            ...backButton,
             {
               title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
             },

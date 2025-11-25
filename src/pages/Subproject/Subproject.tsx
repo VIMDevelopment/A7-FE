@@ -36,6 +36,8 @@ const SubprojectPage = () => {
 
   const allAlbumsNames = albumsData?.data.map((item) => item.title ?? "") ?? [];
 
+  const { backButton } = useBreadcrumbsBackButton();
+
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>{subprojectName}</div>
@@ -44,7 +46,7 @@ const SubprojectPage = () => {
           className={css.breadCrumbs}
           separator=""
           items={[
-            ...useBreadcrumbsBackButton(),
+            ...backButton,
             {
               title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
             },

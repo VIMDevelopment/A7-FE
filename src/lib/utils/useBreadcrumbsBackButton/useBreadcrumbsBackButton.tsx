@@ -4,26 +4,30 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { BreadcrumbItemType } from "antd/es/breadcrumb/Breadcrumb";
 
-const useBreadcrumbsBackButton: () => BreadcrumbItemType[] = () => {
-  const navigate = useNavigate()
+const useBreadcrumbsBackButton: () => {
+  backButton: BreadcrumbItemType[];
+} = () => {
+  const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate(-1)
-  }
+    navigate(-1);
+  };
 
-  return [
-    {
-      title: (
-        <div className={css.backArrowContainer} onClick={handleGoBack}>
-          <ArrowLeftOutlined />
-        </div>
-      ),
-    },
-    {
-      type: "separator",
-      separator: <div className={css.separator}>|</div>,
-    },
-  ];
+  return {
+    backButton: [
+      {
+        title: (
+          <div className={css.backArrowContainer} onClick={handleGoBack}>
+            <ArrowLeftOutlined />
+          </div>
+        ),
+      },
+      {
+        type: "separator",
+        separator: <div className={css.separator}>|</div>,
+      },
+    ],
+  };
 };
 
 export default useBreadcrumbsBackButton;

@@ -23,6 +23,10 @@
   border: none !important;
 }
 
+.select :global(.ant-select-selection-wrap) {
+  height: 100%;
+}
+
 .root:global(.ant-select-dropdown) {
   border-radius: 10px !important;
 }

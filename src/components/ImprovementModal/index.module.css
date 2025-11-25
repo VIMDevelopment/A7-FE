@@ -1,0 +1,56 @@
+.improveModal :global(.ant-modal) {
+  width: calc(100vw - 100px) !important;
+}
+
+.improveModal :global(.ant-modal-wrap) {
+  z-index: 1100;
+}
+
+.improveModal :global(.ant-modal-mask) {
+  z-index: 1099;
+}
+
+.improveModal :global(.ant-modal-content) {
+  height: calc(100vh - 40px) !important;
+}
+
+.improvePhotoImgContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  height: calc(100vh - 400px);
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.imgInModal {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.filter {
+  filter: brightness(0.4);
+  transition: filter 0.3s ease;
+}
+
+.spinnerOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: inherit;
+}
+
+.bottomContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bottomContainerInner {
+  width: 100%;
+  max-width: 700px;
+}

@@ -46,7 +46,7 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
       });
       setTimeout(() => {
         void queryClient.invalidateQueries({
-          queryKey: `/photos/album/${albumId}`,
+          queryKey: [`/photos/album/${albumId}`],
         });
       }, 200);
     }

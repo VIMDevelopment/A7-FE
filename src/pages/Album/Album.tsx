@@ -18,6 +18,7 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   PrinterOutlined,
+  RocketOutlined,
 } from "@ant-design/icons";
 import Modal from "../../components/Modal/Modal";
 import { showNotification } from "../../components/ShowNotification";
@@ -31,6 +32,7 @@ import {
   handlePrintPhoto,
 } from "./components/PhotoCard/helpers";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
+import ImprovementModal from "../../components/ImprovementModal/ImprovementModal";
 
 const AlbumPage = () => {
   const { projectId, subprojectId, albumId } = useParams();
@@ -38,6 +40,8 @@ const AlbumPage = () => {
 
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
+  const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
+  const [improvementPhotoId, setImprovementPhotoId] = useState("");
 
   const { data: projectData } = useGetProjectsProjectId(projectId ?? "", {
     axios: defaultApiAxiosParams,
@@ -145,6 +149,10 @@ const AlbumPage = () => {
     setIsDeletePhotosModalOpen(false);
   };
 
+  const handleImprovePhotoCancel = () => {
+    setIsImprovePhotoModalOpen(false);
+  };
+
   const toggleSelectPhoto = (id: string) => {
     setSelectedPhotos((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -160,6 +168,8 @@ const AlbumPage = () => {
     setSelectedPhotos([]);
   };
 
+  const { backButton } = useBreadcrumbsBackButton();
+
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>{albumName}</div>
@@ -168,7 +178,7 @@ const AlbumPage = () => {
           className={css.breadCrumbs}
           separator=""
           items={[
-            ...useBreadcrumbsBackButton(),
+            ...backButton,
             {
               title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
             },
@@ -273,6 +283,13 @@ const AlbumPage = () => {
                           handleDeletePhotosClick(currentPhoto?.id);
                         }}
                       />
+                      <RocketOutlined
+                        className={css.toolbarBtn}
+                        onClick={() => {
+                          setImprovementPhotoId(currentPhoto?.id ?? "");
+                          setIsImprovePhotoModalOpen(true);
+                        }}
+                      />
                     </div>
                   </div>
                 );
@@ -285,6 +302,7 @@ const AlbumPage = () => {
                 key={item.id}
                 id={item.id}
                 url={item.default.original}
+                smallUrl={item.default.small}
                 name={item.fileName}
                 isSelected={selectedPhotos.includes(item.id)}
                 albumId={albumId ?? ""}
@@ -299,6 +317,13 @@ const AlbumPage = () => {
           />
         </div>
       )}
+
+      <ImprovementModal
+        photoId={improvementPhotoId}
+        isOpen={isImprovePhotoModalOpen}
+        onCancel={handleImprovePhotoCancel}
+        onOk={handleImprovePhotoCancel}
+      />
 
       <Modal
         title={"Удаление фото"}

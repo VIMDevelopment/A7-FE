@@ -20,16 +20,14 @@ const config = new QueryClient({
       onError: (err) =>
         showNotification({
           type: "error",
-          // @ts-ignore
-          message: err?.response?.data?.message ?? "",
+          message: (err as any)?.response?.data?.message ?? "",
         }),
     },
     queries: {
       onError: (err) =>
         showNotification({
           type: "error",
-          // @ts-ignore
-          message: err?.response?.data?.message ?? "",
+          message: (err as any)?.response?.data?.message ?? "",
         }),
       retry: false,
       staleTime: 20_000,
@@ -70,7 +68,7 @@ const App = () => {
   const isHaveUserRoles = useMemo(() => {
     const acceptedRoles = new Set(ROUTES.flatMap((elem) => elem.roles));
 
-    const isHaveUserRoles = (data?.role ? [data?.role] : []).some((role) =>
+    const isHaveUserRoles = (data?.role ? [data.role] : []).some((role) =>
       acceptedRoles.has(role)
     );
 

@@ -15,10 +15,12 @@ import { showNotification } from "../../../../components/ShowNotification";
 import Input from "../../../../components/Input/Input";
 import { downloadImageByUrl, handlePrintPhoto } from "./helpers";
 import { useMediaQuery } from "react-responsive";
+import ImprovementModal from "../../../../components/ImprovementModal/ImprovementModal";
 
 type Props = {
   id: string;
   url: string;
+  smallUrl: string;
   name: string;
   isSelected: boolean;
   albumId: string;
@@ -28,6 +30,7 @@ type Props = {
 const PhotoCard: FC<Props> = ({
   id,
   url,
+  smallUrl,
   name,
   isSelected,
   albumId,
@@ -38,6 +41,7 @@ const PhotoCard: FC<Props> = ({
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [inputPhotoNameValue, setInputPhotoNameValue] = useState(name);
+  const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
   const [isEditPhotoNameModalOpen, setIsEditPhotoNameModalOpen] =
     useState(false);
   const [isDeletePhotoModalOpen, setIsDeletePhotoModalOpen] = useState(false);
@@ -88,24 +92,33 @@ const PhotoCard: FC<Props> = ({
     setIsDeletePhotoModalOpen(false);
   };
 
+  const handleImprovePhotoCancel = () => {
+    setIsImprovePhotoModalOpen(false);
+  };
+
   const items: ItemType[] = [
     {
       key: "0",
+      label: "Улучшить",
+      onClick: () => setIsImprovePhotoModalOpen(true),
+    },
+    {
+      key: "1",
       label: "Печать",
       onClick: () => handlePrintPhoto(url, name),
     },
     {
-      key: "1",
+      key: "2",
       label: "Скачать",
       onClick: () => downloadImageByUrl(url, name),
     },
     {
-      key: "2",
+      key: "3",
       label: "Переименовать",
       onClick: () => setIsEditPhotoNameModalOpen(true),
     },
     {
-      key: "3",
+      key: "4",
       label: "Удалить",
       danger: true,
       onClick: () => setIsDeletePhotoModalOpen(true),
@@ -163,9 +176,22 @@ const PhotoCard: FC<Props> = ({
       </div>
       <div className={css.container}>
         <div className={css.imgContainer}>
-          <Image src={url} className={css.img} />
+          <Image
+            src={smallUrl}
+            className={css.img}
+            preview={{
+              src: url,
+            }}
+          />
         </div>
         <div className={css.name}>{name}</div>
+
+        <ImprovementModal
+          photoId={id}
+          isOpen={isImprovePhotoModalOpen}
+          onCancel={handleImprovePhotoCancel}
+          onOk={handleImprovePhotoCancel}
+        />
 
         <Modal
           title={"Редактирование названия фото"}

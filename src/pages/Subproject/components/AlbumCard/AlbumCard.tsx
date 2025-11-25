@@ -208,7 +208,7 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
       >
         {coverId && !isError && !isLoading ? (
           <div className={css.imgContainer}>
-            <img className={css.img} src={data?.data.default.original} alt="" />
+            <img className={css.img} src={data?.data.default.small} alt="" />
           </div>
         ) : (
           <div className={css.albumPreviewContainer}>
