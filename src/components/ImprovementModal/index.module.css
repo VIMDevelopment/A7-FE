@@ -30,6 +30,14 @@
   object-fit: contain;
 }
 
+.sliderInModal {
+  height: 100%;
+}
+
+.sliderInModal :global(img) {
+  object-fit: contain !important;
+}
+
 .filter {
   filter: brightness(0.4);
   transition: filter 0.3s ease;
@@ -53,4 +61,13 @@
 .bottomContainerInner {
   width: 100%;
   max-width: 700px;
+}
+
+.beforeAfterText {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  height: 25px;
 }

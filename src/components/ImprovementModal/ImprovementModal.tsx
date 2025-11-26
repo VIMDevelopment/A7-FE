@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
@@ -12,6 +12,10 @@ import Select from "../Select/Select";
 import Button from "../Button/Button";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
+import {
+  ReactCompareSlider,
+  ReactCompareSliderImage,
+} from "react-compare-slider";
 import cn from "classnames";
 
 type Props = {
@@ -23,7 +27,7 @@ type Props = {
 
 const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
   const [promptIds, setPromptIds] = useState<string[]>([]);
-  const [runPooling, setRunPooling] = useState(false);
+  const [improvementInProgress, setImprovementInProgress] = useState(false);
 
   const {
     data: photoData,
@@ -58,28 +62,6 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
       axios: defaultApiAxiosParams,
     });
 
-  useEffect(() => {
-    if (!runPooling) return;
-
-    const interval = setInterval(() => {
-      const improvedPhotoUrl = photoData?.data.current.original;
-
-      if (!improvedPhotoUrl) {
-        refetchPhoto();
-      } else {
-        refetchPhoto();
-        clearInterval(interval);
-        setRunPooling(false);
-        showNotification({
-          message: "Фото улучшено",
-          type: "success",
-        });
-      }
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [photoData, runPooling]);
-
   const handleImprovePhoto = () => {
     improvePhoto({
       data: {
@@ -88,7 +70,15 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
       },
     })
       .then(() => {
-        setRunPooling(true);
+        setImprovementInProgress(true);
+        setTimeout(() => {
+          refetchPhoto();
+          showNotification({
+            message: "Фото улучшено",
+            type: "success",
+          });
+          setImprovementInProgress(false);
+        }, 10000);
       })
       .catch(() => {
         showNotification({
@@ -127,13 +117,22 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
           blur
           style={{ top: 20 }}
         >
+          <div className={css.beforeAfterText}>
+            <span>До</span>
+            <span>После</span>
+          </div>
           <div className={css.improvePhotoImgContainer}>
-            <img
-              src={improvedPhoto ?? originalPhoto}
-              className={cn(css.imgInModal, runPooling && css.filter)}
+            <ReactCompareSlider
+              className={cn(
+                css.sliderInModal,
+                improvementInProgress && css.filter
+              )}
+              itemOne={<ReactCompareSliderImage src={originalPhoto} />}
+              itemTwo={<ReactCompareSliderImage src={improvedPhoto} />}
+              position={50}
             />
 
-            {runPooling && (
+            {improvementInProgress && (
               <div className={css.spinnerOverlay}>
                 <Spin
                   indicator={
@@ -157,7 +156,7 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
                 disabled={
                   isPromptsLoading ||
                   isImprovementLoading ||
-                  runPooling ||
+                  improvementInProgress ||
                   isPhotoLoading
                 }
                 loading={isPromptsLoading}
@@ -171,12 +170,18 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
                 disabled={
                   !promptIds.length ||
                   isPromptsLoading ||
-                  runPooling ||
+                  improvementInProgress ||
                   isPhotoLoading
                 }
-                loading={runPooling || isImprovementLoading || isPhotoLoading}
+                loading={
+                  improvementInProgress ||
+                  isImprovementLoading ||
+                  isPhotoLoading
+                }
               >
-                {runPooling ? "Идёт улучшение фото" : "Улучшить фото"}
+                {improvementInProgress
+                  ? "Идёт улучшение фото"
+                  : "Улучшить фото"}
               </Button>
             </div>
           </div>
