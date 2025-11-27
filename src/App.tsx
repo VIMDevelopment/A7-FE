@@ -20,14 +20,14 @@ const config = new QueryClient({
       onError: (err) =>
         showNotification({
           type: "error",
-          message: (err as any)?.response?.data?.message ?? "",
+          message: (err as any)?.response?.data?.message ?? "Произошла ошибка на сервере",
         }),
     },
     queries: {
       onError: (err) =>
         showNotification({
           type: "error",
-          message: (err as any)?.response?.data?.message ?? "",
+          message: (err as any)?.response?.data?.message ?? "Произошла ошибка на сервере",
         }),
       retry: false,
       staleTime: 20_000,

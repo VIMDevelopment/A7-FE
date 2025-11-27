@@ -1,9 +1,9 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useRef } from "react";
 import { Spin, Upload } from "antd";
 import { showNotification } from "../../../../components/ShowNotification";
 import css from "./index.module.css";
 import { usePostPhotosUpload } from "../../../../apiV2/a7-service";
-import { beforeUpload, normalizeFile } from "./helpers";
+import { beforeUpload as oldBeforeUpload, normalizeFile } from "./helpers";
 import { ENV } from "../../../../env";
 import { apiGetToken } from "../../../../auth/apiGetToken";
 import { stringify } from "qs";
@@ -38,6 +38,40 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
     },
   });
 
+  const queue = useRef<File[]>([]);
+  const uploadingRef = useRef(false);
+
+  const processQueue = async () => {
+    if (uploadingRef.current) return;
+    if (queue.current.length === 0) return;
+
+    uploadingRef.current = true;
+
+    while (queue.current.length > 0) {
+      const file = queue.current.shift()!;
+
+      try {
+        await upload({
+          data: {
+            photo: normalizeFile(file),
+            albumId,
+          },
+        });
+      } catch {
+        showNotification({
+          type: "error",
+          message: `Ошибка загрузки файла ${file.name}`,
+        });
+      }
+    }
+
+    uploadingRef.current = false;
+
+    void queryClient.invalidateQueries({
+      queryKey: [`/photos/album/${albumId}`],
+    });
+  };
+
   useEffect(() => {
     if (isSuccess) {
       showNotification({
@@ -64,33 +98,13 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
           className={cn(size === "big" ? css.dragger : css.smallDragger)}
           multiple={true}
           showUploadList={false}
-          onChange={(info) => {
-            const { status } = info.file;
-
-            if (status === "done") {
-              showNotification({
-                type: "success",
-                message: `Файл ${info.file.name} загружен`,
-              });
-            } else if (status === "error") {
-              showNotification({
-                type: "error",
-                message: `Ошибка загрузки файла ${info.file.name}`,
-              });
-            }
+          beforeUpload={(file) => {
+            oldBeforeUpload(file);
+            queue.current.push(file);
+            processQueue();
+            return false;
           }}
-          beforeUpload={beforeUpload}
           accept="image/*"
-          customRequest={async (options) => {
-            const safeFile = normalizeFile(options.file as File);
-
-            await upload({
-              data: {
-                photo: safeFile,
-                albumId,
-              },
-            });
-          }}
         >
           {size === "big"
             ? `+\nАльбом пуст\nперетащите фотографии`
