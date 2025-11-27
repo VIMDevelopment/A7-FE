@@ -41,6 +41,14 @@
   text-align: center;
 }
 
+.progress :global(.ant-progress-text) {
+  color: #b4b4b4 !important;
+}
+
+.progress :global(.ant-progress-circle-path) {
+  transition: stroke-dashoffset 0.5s ease !important;
+}
+
 @media (max-width: 768px) {
   .container {
     margin-top: 20px;

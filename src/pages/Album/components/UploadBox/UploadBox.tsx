@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useRef } from "react";
-import { Spin, Upload } from "antd";
+import React, { FC, useEffect, useRef, useState } from "react";
+import { Progress, Spin, Upload, UploadFile, UploadProps } from "antd";
 import { showNotification } from "../../../../components/ShowNotification";
 import css from "./index.module.css";
 import { usePostPhotosUpload } from "../../../../apiV2/a7-service";
@@ -20,11 +20,22 @@ type Props = {
 };
 
 const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploadDone, setUploadDone] = useState(0);
+  const [isUploadingGap, setIsUploadingGap] = useState(false);
+
+  const progress =
+    fileList.length > 0 ? Math.round((100 / fileList.length) * uploadDone) : 0;
+
+  const handleChange: UploadProps["onChange"] = (info) => {
+    setFileList(info.fileList);
+  };
+
   const queryClient = useQueryClient();
 
   const {
     isSuccess,
-    isLoading,
+    isLoading: isUploading,
     mutateAsync: upload,
   } = usePostPhotosUpload({
     axios: {
@@ -37,6 +48,17 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
         stringify(params, { arrayFormat: "repeat" }),
     },
   });
+
+  useEffect(() => {
+    if (isUploading) {
+      setIsUploadingGap(true);
+    } else {
+      setTimeout(() => {
+        setIsUploadingGap(false);
+        setUploadDone(0);
+      }, 2000);
+    }
+  }, [isUploading]);
 
   const queue = useRef<File[]>([]);
   const uploadingRef = useRef(false);
@@ -57,11 +79,16 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
             albumId,
           },
         });
+
+        setUploadDone((prev) => prev + 1);
       } catch {
         showNotification({
           type: "error",
           message: `Ошибка загрузки файла ${file.name}`,
+          duration: 30,
         });
+
+        setUploadDone((prev) => prev + 1);
       }
     }
 
@@ -88,29 +115,40 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
 
   return (
     <div className={cn(size === "big" ? css.container : css.smallContainer)}>
-      {isLoading || isAlbumLoading ? (
-        <Spin
-          size="large"
-          indicator={<LoadingOutlined spin style={{ color: "white" }} />}
-        />
-      ) : (
-        <Dragger
-          className={cn(size === "big" ? css.dragger : css.smallDragger)}
-          multiple={true}
-          showUploadList={false}
-          beforeUpload={(file) => {
-            oldBeforeUpload(file);
-            queue.current.push(file);
-            processQueue();
-            return false;
-          }}
-          accept="image/*"
-        >
-          {size === "big"
-            ? `+\nАльбом пуст\nперетащите фотографии`
-            : `+\nДобавить\nфото`}
-        </Dragger>
-      )}
+      <Dragger
+        className={cn(size === "big" ? css.dragger : css.smallDragger)}
+        multiple={true}
+        showUploadList={false}
+        disabled={isUploading || isAlbumLoading}
+        onChange={handleChange}
+        beforeUpload={(file) => {
+          oldBeforeUpload(file);
+          queue.current.push(file);
+          processQueue();
+          return false;
+        }}
+        accept="image/*"
+      >
+        {isAlbumLoading ? (
+          <Spin
+            size="large"
+            indicator={<LoadingOutlined spin style={{ color: "white" }} />}
+          />
+        ) : isUploadingGap ? (
+          <Progress
+            className={css.progress}
+            strokeColor={"#b4b4b4"}
+            type="circle"
+            percent={progress}
+          />
+        ) : (
+          <>
+            {size === "big"
+              ? `+\nАльбом пуст\nперетащите фотографии`
+              : `+\nДобавить\nфото`}
+          </>
+        )}
+      </Dragger>
     </div>
   );
 };
