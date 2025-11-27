@@ -127,7 +127,7 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
           processQueue();
           return false;
         }}
-        accept="image/*"
+        accept=".png, .jpg, .jpeg"
       >
         {isAlbumLoading ? (
           <Spin
