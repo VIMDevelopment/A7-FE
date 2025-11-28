@@ -4,6 +4,7 @@ import Input from "../../components/Input/Input";
 import {
   UserRegisterDto,
   UserRegisterDtoRole,
+  UserRole,
   UserUpdateDto,
   UserUpdateDtoRole,
 } from "../../apiV2/a7-service/model";
@@ -18,7 +19,7 @@ import { showNotification } from "../../components/ShowNotification";
 import Select from "../../components/Select/Select";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
-import { getRolesOptions } from "./helpers";
+import { getRolePriority, getRolesOptions } from "./helpers";
 
 type UserCreateForm = UserRegisterDto & {
   repeatPassword?: string;
@@ -140,8 +141,15 @@ const AdministrationPage = () => {
     }
   };
 
+  const currentUserLevel = getRolePriority(user?.role);
+
   const allUsersDataOptions = data?.data
-    .filter((item) => item.id !== user?.id)
+    .filter(
+      (item) =>
+        item.id !== user?.id &&
+        item.role &&
+        getRolePriority(item.role as UserRole) < currentUserLevel
+    )
     .map((item) => ({
       key: item.id,
       value: item.id,
