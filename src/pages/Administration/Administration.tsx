@@ -4,7 +4,6 @@ import Input from "../../components/Input/Input";
 import {
   UserRegisterDto,
   UserRegisterDtoRole,
-  UserRole,
   UserUpdateDto,
   UserUpdateDtoRole,
 } from "../../apiV2/a7-service/model";
@@ -17,9 +16,9 @@ import {
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../../components/ShowNotification";
 import Select from "../../components/Select/Select";
-import { getRoleDescription } from "../../components/SideMenu/helpers";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
+import { getRolesOptions } from "./helpers";
 
 type UserCreateForm = UserRegisterDto & {
   repeatPassword?: string;
@@ -79,7 +78,7 @@ const AdministrationPage = () => {
       showNotification({
         type: "success",
         message: "Данные о пользователе обновлены",
-      }); 
+      });
       void queryClient.invalidateQueries({
         queryKey: `/users/all`,
       });
@@ -93,10 +92,10 @@ const AdministrationPage = () => {
     if (validPasswords) {
       createUser({
         data: {
-          name: createFormState?.name,
-          password: createFormState?.password,
-          email: createFormState?.email,
-          role: createFormState?.role,
+          name: createFormState.name,
+          password: createFormState.password,
+          email: createFormState.email,
+          role: createFormState.role,
         },
       });
       setIsPasswordError(false);
@@ -123,7 +122,7 @@ const AdministrationPage = () => {
   };
 
   const allUsersDataOptions = data?.data
-    ?.filter((item) => item.id !== user?.id)
+    .filter((item) => item.id !== user?.id)
     .map((item) => ({
       key: item.id,
       value: item.id,
@@ -143,9 +142,22 @@ const AdministrationPage = () => {
               name: e.target.value,
             }))
           }
-          value={createFormState?.name}
+          value={createFormState.name}
           disabled={isLoadingCreateUser}
           placeholder="Введите имя"
+        />
+        <Input
+          label="E-mail"
+          onChange={(e) =>
+            setCreateFormState((prev) => ({
+              ...prev,
+              email: e.target.value,
+            }))
+          }
+          value={createFormState.email}
+          disabled={isLoadingCreateUser}
+          placeholder="Введите новый E-mail"
+          type="email"
         />
         <Input
           label="Пароль"
@@ -175,19 +187,6 @@ const AdministrationPage = () => {
           disabled={isLoading}
           placeholder="Повторно введите пароль"
         />
-        <Input
-          label="E-mail"
-          onChange={(e) =>
-            setCreateFormState((prev) => ({
-              ...prev,
-              email: e.target.value,
-            }))
-          }
-          value={createFormState?.email}
-          disabled={isLoadingCreateUser}
-          placeholder="Введите новый E-mail"
-          type="email"
-        />
         <Select
           label="Роль"
           onChange={(value) =>
@@ -196,22 +195,10 @@ const AdministrationPage = () => {
               role: value,
             }))
           }
-          value={createFormState?.role}
+          value={createFormState.role}
           placeholder="Выберите из списка"
           disabled={isLoadingCreateUser}
-          // TODO: доделать ролевые доступы для назначений
-          options={[
-            {
-              key: UserRole.maker,
-              value: UserRole.maker,
-              label: getRoleDescription(UserRole.maker),
-            },
-            {
-              key: UserRole.supervisor,
-              value: UserRole.supervisor,
-              label: getRoleDescription(UserRole.supervisor),
-            },
-          ]}
+          options={getRolesOptions(user?.role)}
         />
         <Button
           className={css.btn}
@@ -237,7 +224,7 @@ const AdministrationPage = () => {
           label="Выберите пользователя, которого хотите отредактировать"
           placeholder="Выберите из списка"
           onChange={(value) => {
-            const selectedUser = data?.data?.find((item) => item.id === value);
+            const selectedUser = data?.data.find((item) => item.id === value);
             setUpdateFormState({
               id: selectedUser?.id,
               name: selectedUser?.name,
@@ -284,19 +271,7 @@ const AdministrationPage = () => {
           value={updateFormState?.role}
           placeholder="Выберите из списка"
           disabled={isLoading || !updateFormState?.id}
-          // TODO: доделать ролевые доступы для назначений
-          options={[
-            {
-              key: UserRole.maker,
-              value: UserRole.maker,
-              label: getRoleDescription(UserRole.maker),
-            },
-            {
-              key: UserRole.supervisor,
-              value: UserRole.supervisor,
-              label: getRoleDescription(UserRole.supervisor),
-            },
-          ]}
+          options={getRolesOptions(user?.role)}
         />
         <Button
           className={css.btn}

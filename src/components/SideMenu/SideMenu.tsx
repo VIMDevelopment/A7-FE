@@ -30,7 +30,7 @@ const SideMenu = () => {
   });
 
   useEffect(() => {
-    if (open) {
+    if (open && isMobile) {
       const scrollBarWidth =
         window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
@@ -44,7 +44,7 @@ const SideMenu = () => {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
     };
-  }, [open]);
+  }, [open, isMobile]);
 
   return (
     <div className={css.container}>

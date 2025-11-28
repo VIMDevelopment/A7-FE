@@ -1,14 +1,11 @@
-.separator {
-  line-height: 18px;
-  font-size: 24px;
-}
-
 .backArrowContainer {
   cursor: pointer;
-  padding: 0px 6px;
-  border-radius: 4px;
+  padding: 0px 8px;
+  border-radius: 8px;
+  margin-right: 10px;
+  background-color: var(--color-button-background);
 }
 
 .backArrowContainer:hover {
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--color-button-hover-background);
 }

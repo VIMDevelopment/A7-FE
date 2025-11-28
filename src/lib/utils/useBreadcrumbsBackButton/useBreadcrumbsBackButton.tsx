@@ -18,13 +18,9 @@ const useBreadcrumbsBackButton: () => {
       {
         title: (
           <div className={css.backArrowContainer} onClick={handleGoBack}>
-            <ArrowLeftOutlined />
+            <ArrowLeftOutlined style={{ color: "white" }} />
           </div>
         ),
-      },
-      {
-        type: "separator",
-        separator: <div className={css.separator}>|</div>,
       },
     ],
   };

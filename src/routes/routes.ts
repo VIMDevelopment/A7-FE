@@ -6,9 +6,6 @@
  */
 
 export const PublicRoutes = {
-  MAIN: {
-    static: "/",
-  },
   ADMINISTRATION: {
     static: "/administration",
   },

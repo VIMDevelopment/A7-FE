@@ -2,13 +2,22 @@ import React, { ReactElement } from "react";
 import { PublicRoutes } from "./routes";
 import AdministrationPage from "../pages/Administration/Administration";
 import ProjectsPage from "../pages/Projects/Projects";
-import ReportsPage from "../pages/Reports/Reports";
+// import ReportsPage from "../pages/Reports/Reports";
 import SettingsPage from "../pages/Settings/Settings";
-import StatisticsPage from "../pages/Statistics/Statistics";
+// import StatisticsPage from "../pages/Statistics/Statistics";
 import AlbumPage from "../pages/Album/Album";
 import { UserRole } from "../apiV2/a7-service/model";
 import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
+
+const ALL_ROLES = [
+  UserRole.admin,
+  UserRole.owner,
+  UserRole.agency,
+  UserRole.cluster,
+  UserRole.supervisor,
+  UserRole.maker,
+];
 
 export type Routes = {
   /**
@@ -40,56 +49,62 @@ export const ROUTES: Routes[] = [
   {
     id: "administration",
     path: PublicRoutes.ADMINISTRATION.static,
-    roles: [UserRole.admin],
+    roles: [
+      UserRole.admin,
+      UserRole.owner,
+      UserRole.agency,
+      UserRole.cluster,
+      UserRole.supervisor,
+    ],
     component: <AdministrationPage />,
   },
   {
     id: "projects",
     path: PublicRoutes.PROJECTS.static,
-    roles: [UserRole.admin],
+    roles: ALL_ROLES,
     component: <ProjectsPage />,
   },
   {
     id: "project",
     path: PublicRoutes.PROJECT.static,
-    roles: [UserRole.admin],
+    roles: ALL_ROLES,
     component: <ProjectPage />,
   },
   {
     id: "subproject",
     path: PublicRoutes.SUBPROJECT.static,
-    roles: [UserRole.admin],
+    roles: ALL_ROLES,
     component: <SubprojectPage />,
   },
   {
     id: "album",
     path: PublicRoutes.ALBUM.static,
-    roles: [UserRole.admin],
+    roles: ALL_ROLES,
     component: <AlbumPage />,
   },
-  {
-    id: "reports",
-    path: PublicRoutes.REPORTS.static,
-    roles: [UserRole.admin],
-    component: <ReportsPage />,
-  },
+  // {
+  //   id: "reports",
+  //   path: PublicRoutes.REPORTS.static,
+  //   roles: [],
+  //   component: <ReportsPage />,
+  // },
   {
     id: "settings",
     path: PublicRoutes.SETTINGS.static,
-    roles: [UserRole.admin],
+    roles: ALL_ROLES,
     component: <SettingsPage />,
   },
-  {
-    id: "statistics",
-    path: PublicRoutes.STATISTICS.static,
-    roles: [UserRole.admin],
-    component: <StatisticsPage />,
-  },
+  // {
+  //   id: "statistics",
+  //   path: PublicRoutes.STATISTICS.static,
+  //   roles: [],
+  //   component: <StatisticsPage />,
+  // },
 ];
 
 export const REDIRECTS: RedirectRoutes[] = [
   {
-    id: "redirect",
+    id: "projects",
     path: PublicRoutes.PROJECTS.static,
     roles: [UserRole.admin],
   },

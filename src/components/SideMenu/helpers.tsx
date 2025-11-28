@@ -8,19 +8,19 @@ import { UserRole } from "../../apiV2/a7-service/model";
 export const getRoleDescription = (role?: UserRole) => {
   switch (role) {
     case UserRole.admin:
-      return "Администратор";
+      return "Суперадмин";
 
     case UserRole.owner:
       return "Владелец";
 
-    case UserRole.cluster:
-      return "Cluster";
-
     case UserRole.agency:
-      return "Agency";
+      return "Директор";
+
+    case UserRole.cluster:
+      return "Региональный руководитель";
 
     case UserRole.supervisor:
-      return "Супервизор";
+      return "Руководитель филиала";
 
     case UserRole.maker:
       return "Мэйкер";
