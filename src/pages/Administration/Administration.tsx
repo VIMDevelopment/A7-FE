@@ -24,6 +24,10 @@ type UserCreateForm = UserRegisterDto & {
   repeatPassword?: string;
 };
 
+type UserUpdateForm = UserUpdateDto & {
+  repeatPassword?: string;
+};
+
 const initialCreateUserValues = {
   email: "",
   name: "",
@@ -33,11 +37,12 @@ const initialCreateUserValues = {
 
 const AdministrationPage = () => {
   const { data: user } = useProfile();
-  const [isPasswordError, setIsPasswordError] = useState(false);
+  const [isCreatePasswordError, setIsCreatePasswordError] = useState(false);
+  const [isUpdatePasswordError, setIsUpdatePasswordError] = useState(false);
   const [createFormState, setCreateFormState] = useState<UserCreateForm>(
     initialCreateUserValues
   );
-  const [updateFormState, setUpdateFormState] = useState<UserUpdateDto>();
+  const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
   const queryClient = useQueryClient();
 
   const {
@@ -98,9 +103,9 @@ const AdministrationPage = () => {
           role: createFormState.role,
         },
       });
-      setIsPasswordError(false);
+      setIsCreatePasswordError(false);
     } else {
-      setIsPasswordError(true);
+      setIsCreatePasswordError(true);
       showNotification({
         type: "error",
         message: "Пароли не совпадают",
@@ -111,14 +116,28 @@ const AdministrationPage = () => {
   };
 
   const handleUpdateClick = () => {
-    updateUser({
-      data: {
-        id: updateFormState?.id,
-        name: updateFormState?.name,
-        email: updateFormState?.email,
-        role: updateFormState?.role,
-      },
-    });
+    const validPasswords =
+      updateFormState?.password === updateFormState?.repeatPassword;
+    if (validPasswords) {
+      updateUser({
+        data: {
+          id: updateFormState?.id,
+          name: updateFormState?.name,
+          email: updateFormState?.email,
+          password: updateFormState?.password,
+          role: updateFormState?.role,
+        },
+      });
+      setIsUpdatePasswordError(false);
+    } else {
+      setIsUpdatePasswordError(true);
+      showNotification({
+        type: "error",
+        message: "Пароли не совпадают",
+        description:
+          "Для обновления пароля пользователя нужно ввести одинаковые пароли в оба поля",
+      });
+    }
   };
 
   const allUsersDataOptions = data?.data
@@ -167,11 +186,12 @@ const AdministrationPage = () => {
               ...prev,
               password: e.target.value,
             }));
-            setIsPasswordError(false);
+            setIsCreatePasswordError(false);
           }}
           value={createFormState.password}
           disabled={isLoading}
           placeholder="Введите пароль"
+          status={isCreatePasswordError ? "error" : ""}
         />
         <Input
           label="Подтвердите пароль"
@@ -181,11 +201,12 @@ const AdministrationPage = () => {
               ...prev,
               repeatPassword: e.target.value,
             }));
-            setIsPasswordError(false);
+            setIsCreatePasswordError(false);
           }}
           value={createFormState.repeatPassword}
           disabled={isLoading}
           placeholder="Повторно введите пароль"
+          status={isCreatePasswordError ? "error" : ""}
         />
         <Select
           label="Роль"
@@ -204,7 +225,7 @@ const AdministrationPage = () => {
           className={css.btn}
           disabled={
             isLoadingCreateUser ||
-            isPasswordError ||
+            isCreatePasswordError ||
             !createFormState.name ||
             !createFormState.email ||
             !createFormState.password
@@ -260,6 +281,36 @@ const AdministrationPage = () => {
           placeholder="Введите новый E-mail"
           type="email"
         />
+        <Input
+          label="Новый пароль"
+          isPasswordInput
+          onChange={(e) => {
+            setUpdateFormState((prev) => ({
+              ...prev,
+              password: e.target.value,
+            }));
+            setIsUpdatePasswordError(false);
+          }}
+          value={updateFormState?.password}
+          disabled={isLoading || !updateFormState?.id}
+          placeholder="Введите пароль"
+          status={isUpdatePasswordError ? "error" : ""}
+        />
+        <Input
+          label="Подтвердите новый пароль"
+          isPasswordInput
+          onChange={(e) => {
+            setUpdateFormState((prev) => ({
+              ...prev,
+              repeatPassword: e.target.value,
+            }));
+            setIsUpdatePasswordError(false);
+          }}
+          value={updateFormState?.repeatPassword}
+          disabled={isLoading || !updateFormState?.id}
+          placeholder="Повторно введите пароль"
+          status={isUpdatePasswordError ? "error" : ""}
+        />
         <Select
           label="Новая роль"
           onChange={(value) =>
@@ -275,7 +326,7 @@ const AdministrationPage = () => {
         />
         <Button
           className={css.btn}
-          disabled={isLoading}
+          disabled={isLoading || isUpdatePasswordError}
           onClick={handleUpdateClick}
           showSpinner={isLoading}
         >

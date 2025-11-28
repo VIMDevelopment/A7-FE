@@ -105,6 +105,7 @@ const SettingsPage = () => {
           }}
           disabled={isLoading}
           placeholder="Введите новый пароль"
+          status={isPasswordError ? "error" : ""}
         />
         <Input
           label="Подтвердите новый пароль"
@@ -118,6 +119,7 @@ const SettingsPage = () => {
           }}
           disabled={isLoading}
           placeholder="Повторно введите новый пароль"
+          status={isPasswordError ? "error" : ""}
         />
         <Input
           label="Новый e-mail (при изменения почты вы будете автоматически разлогинены из системы)"

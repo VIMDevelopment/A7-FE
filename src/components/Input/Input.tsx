@@ -16,7 +16,9 @@ const Input = forwardRef<InputRef, Props>(
 
     return (
       <div className={css.inputContainer}>
-        <div className={css.label}>{label}</div>
+        <div className={cn(css.label, props.status === "error" && css.error)}>
+          {label}
+        </div>
         {isPasswordInput ? (
           <div className={css.passwordInputContainer}>
             <AntdInput

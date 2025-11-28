@@ -48,3 +48,7 @@
   align-items: center;
   width: 0px;
 }
+
+.error {
+  color: rgb(255, 77, 79);
+}
