@@ -56,7 +56,7 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
       setTimeout(() => {
         setIsUploadingGap(false);
         setUploadDone(0);
-      }, 2000);
+      }, 1000);
     }
   }, [isUploading]);
 

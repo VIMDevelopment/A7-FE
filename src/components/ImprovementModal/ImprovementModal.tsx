@@ -17,6 +17,7 @@ import {
   ReactCompareSliderImage,
 } from "react-compare-slider";
 import cn from "classnames";
+import InputTextArea from "../TextArea/Input";
 
 type Props = {
   photoId: string;
@@ -27,6 +28,7 @@ type Props = {
 
 const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
   const [promptIds, setPromptIds] = useState<string[]>([]);
+  const [customPromptText, setCustomPromptText] = useState<string>("");
   const [improvementInProgress, setImprovementInProgress] = useState(false);
 
   const {
@@ -165,10 +167,24 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
                 size="large"
               />
 
+              <InputTextArea
+                label="Кастомный запрос"
+                onChange={(e) => setCustomPromptText(e.target.value)}
+                value={customPromptText}
+                disabled={
+                  improvementInProgress ||
+                  isImprovementLoading ||
+                  isPhotoLoading
+                }
+                placeholder="Введите запрос"
+                autoSize={{ minRows: 2, maxRows: 2 }}
+                count={{}}
+              />
+
               <Button
                 onClick={handleImprovePhoto}
                 disabled={
-                  !promptIds.length ||
+                  (!promptIds.length && !customPromptText) ||
                   isPromptsLoading ||
                   improvementInProgress ||
                   isPhotoLoading
