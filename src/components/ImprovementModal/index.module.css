@@ -20,7 +20,7 @@
   align-items: center;
   margin-top: 20px;
   height: calc(100vh - 240px);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   position: relative;
 }
 
@@ -54,11 +54,13 @@
 
 .bottomContainer {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
 }
 
 .bottomContainerInner {
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
   width: 100%;
   max-width: 700px;
 }
@@ -70,4 +72,9 @@
   font-weight: bold;
   font-size: 16px;
   height: 25px;
+}
+
+.info {
+  font-size: 16px;
+  margin-bottom: -16px;
 }

@@ -1,4 +1,4 @@
-import { UserRole } from "../../apiV2/a7-service/model";
+import { ProjectPreviewDto, UserRole } from "../../apiV2/a7-service/model";
 import { getRoleDescription } from "../../components/SideMenu/helpers";
 
 export const getRolePriority = (role?: UserRole) => {
@@ -59,3 +59,17 @@ export const getRolesOptions = (currentUserRole?: UserRole) => {
     (item) => getRolePriority(item.value) < currentRoleLevel
   );
 };
+
+export const getWorkplaceOptions = (
+  projects: ProjectPreviewDto[],
+  userRole?: UserRole,
+  userWorkplace?: string[]
+) =>
+  projects.map((item) => ({
+    key: item.id,
+    value: item.id,
+    label: item.name,
+    disabled:
+      userRole === UserRole.supervisor &&
+      !userWorkplace?.includes(item.id ?? ""),
+  }));

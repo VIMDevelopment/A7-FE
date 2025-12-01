@@ -13,12 +13,14 @@ import {
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import Input from "../../../../components/Input/Input";
-import { downloadImageByUrl, handlePrintPhoto } from "./helpers";
+import { downloadImageByUrl, handlePrintPhoto, makeFileName } from "./helpers";
 import { useMediaQuery } from "react-responsive";
 import ImprovementModal from "../../../../components/ImprovementModal/ImprovementModal";
 
 type Props = {
   id: string;
+  isOriginal: boolean;
+  hasImprovedVersion: boolean;
   url: string;
   smallUrl: string;
   name: string;
@@ -29,6 +31,8 @@ type Props = {
 
 const PhotoCard: FC<Props> = ({
   id,
+  isOriginal,
+  hasImprovedVersion,
   url,
   smallUrl,
   name,
@@ -99,30 +103,48 @@ const PhotoCard: FC<Props> = ({
   const items: ItemType[] = [
     {
       key: "0",
-      label: "Улучшить",
+      label: hasImprovedVersion ? "Обработать заново" : "Улучшить",
       onClick: () => setIsImprovePhotoModalOpen(true),
     },
     {
       key: "1",
       label: "Печать",
-      onClick: () => handlePrintPhoto(url, name),
+      onClick: () =>
+        handlePrintPhoto(
+          url,
+          makeFileName({
+            fileName: name,
+            isOriginal,
+          })
+        ),
     },
     {
       key: "2",
       label: "Скачать",
-      onClick: () => downloadImageByUrl(url, name),
+      onClick: () =>
+        downloadImageByUrl(
+          url,
+          makeFileName({
+            fileName: name,
+            isOriginal,
+          })
+        ),
     },
-    {
-      key: "3",
-      label: "Переименовать",
-      onClick: () => setIsEditPhotoNameModalOpen(true),
-    },
-    {
-      key: "4",
-      label: "Удалить",
-      danger: true,
-      onClick: () => setIsDeletePhotoModalOpen(true),
-    },
+    ...(isOriginal
+      ? [
+          {
+            key: "3",
+            label: "Переименовать",
+            onClick: () => setIsEditPhotoNameModalOpen(true),
+          },
+          {
+            key: "4",
+            label: "Удалить",
+            danger: true,
+            onClick: () => setIsDeletePhotoModalOpen(true),
+          },
+        ]
+      : []),
   ];
 
   const handleEditPhotoNameOk = () => {
@@ -189,6 +211,7 @@ const PhotoCard: FC<Props> = ({
         <ImprovementModal
           photoId={id}
           isOpen={isImprovePhotoModalOpen}
+          hasImprovedVersion={hasImprovedVersion}
           onCancel={handleImprovePhotoCancel}
           onOk={handleImprovePhotoCancel}
         />
@@ -221,8 +244,12 @@ const PhotoCard: FC<Props> = ({
           isLoading={isDeletePhotoLoading}
           customOkButtonClassName={css.deleteButton}
         >
-          {`Вы уверены, что хотите удалить фото ${name}? Данные будут безвозвратно
-        утеряны.`}
+          <div className={css.modalContent}>
+            <div>{`Вы уверены, что хотите удалить фото ${name}? Данные будут безвозвратно утеряны.`}</div>
+            <div
+              className={css.warningInfo}
+            >{`Внимание! При удалении оригинала фото, удаляется также его улучшенная версия`}</div>
+          </div>
         </Modal>
       </div>
     </div>

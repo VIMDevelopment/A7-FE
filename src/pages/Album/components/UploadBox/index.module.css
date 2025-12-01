@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 60px;
+  margin: 30px 0px 10px;
 }
 
 .dragger {

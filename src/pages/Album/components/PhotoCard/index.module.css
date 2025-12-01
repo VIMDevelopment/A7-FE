@@ -88,6 +88,17 @@
   background: var(--color-error-btn-hovered) !important;
 }
 
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.warningInfo {
+  color: var(--color-error);
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .container {
     max-width: unset;

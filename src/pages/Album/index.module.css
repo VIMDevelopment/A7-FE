@@ -102,6 +102,42 @@
   }
 }
 
+.divider {
+  margin: 16px 0 0 !important;
+}
+
+.divider::before {
+  border-block-start: 2px solid white !important;
+}
+.divider::after {
+  border-block-start: 2px solid white !important;
+}
+
+.divider :global(.ant-divider-inner-text) {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.emptyInfo {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  width: 100%;
+  color: var(--color-text-secondary);
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.warningInfo {
+  color: var(--color-error);
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .breadCrumbs :global(a) {
     font-size: 20px;

@@ -16,6 +16,8 @@ import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import Input from "../../../../components/Input/Input";
 import { useMediaQuery } from "react-responsive";
+import { useShowPermissions } from "../../../../auth/userData";
+import { UserRole } from "../../../../apiV2/a7-service/model";
 
 type Props = {
   id?: string;
@@ -26,6 +28,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useMediaQuery({ maxWidth: 768 });
+  const { hasPrivileges } = useShowPermissions();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,6 +48,13 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
     axios: defaultApiAxiosParams,
   });
 
+  const canEditProject = hasPrivileges([
+    UserRole.admin,
+    UserRole.owner,
+    UserRole.agency,
+    UserRole.cluster,
+  ]);
+
   const allProjectsNames =
     allProjectsData?.data.projects?.map((item) => item.name ?? "") ?? [];
 
@@ -58,7 +68,9 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
 
   const handleEditOk = () => {
     const isNameUniq = !allProjectsNames.some(
-      (item) => item.toLocaleLowerCase().trim() === inputValue.toLocaleLowerCase().trim()
+      (item) =>
+        item.toLocaleLowerCase().trim() ===
+        inputValue.toLocaleLowerCase().trim()
     );
 
     if (isNameUniq) {
@@ -129,23 +141,25 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
 
   return (
     <div>
-      <div className={css.actionMenuIconContainer}>
-        <div className={css.menuIconButton}>
-          <Dropdown
-            overlayClassName={css.dropdown}
-            placement="bottomRight"
-            menu={{ items }}
-            trigger={["click"]}
-          >
-            <MoreOutlined
-              style={{
-                color: "white",
-                fontSize: isMobile ? "30px" : "unset",
-              }}
-            />
-          </Dropdown>
+      {canEditProject && (
+        <div className={css.actionMenuIconContainer}>
+          <div className={css.menuIconButton}>
+            <Dropdown
+              overlayClassName={css.dropdown}
+              placement="bottomRight"
+              menu={{ items }}
+              trigger={["click"]}
+            >
+              <MoreOutlined
+                style={{
+                  color: "white",
+                  fontSize: isMobile ? "30px" : "unset",
+                }}
+              />
+            </Dropdown>
+          </div>
         </div>
-      </div>
+      )}
       <div className={css.container} onClick={handleProjectClick}>
         {name ?? "Безымянный"}
       </div>

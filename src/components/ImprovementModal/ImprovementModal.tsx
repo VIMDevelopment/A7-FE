@@ -18,18 +18,30 @@ import {
 } from "react-compare-slider";
 import cn from "classnames";
 import InputTextArea from "../TextArea/Input";
+import { useQueryClient } from "react-query";
+import { useParams } from "react-router-dom";
 
 type Props = {
   photoId: string;
+  hasImprovedVersion: boolean;
   isOpen: boolean;
   onOk: () => void;
   onCancel: () => void;
 };
 
-const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
+const ImprovementModal: FC<Props> = ({
+  photoId,
+  isOpen,
+  hasImprovedVersion,
+  onOk,
+  onCancel,
+}) => {
   const [promptIds, setPromptIds] = useState<string[]>([]);
   const [customPromptText, setCustomPromptText] = useState<string>("");
   const [improvementInProgress, setImprovementInProgress] = useState(false);
+
+  const { albumId } = useParams();
+  const queryClient = useQueryClient();
 
   const {
     data: photoData,
@@ -75,6 +87,9 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
         setImprovementInProgress(true);
         setTimeout(() => {
           refetchPhoto();
+          void queryClient.invalidateQueries({
+            queryKey: [`/photos/album/${albumId}`],
+          });
           showNotification({
             message: "Фото улучшено",
             type: "success",
@@ -109,7 +124,9 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
       {isOpen && (
         <Modal
           customRootClassName={css.improveModal}
-          title={"Улучшение фото"}
+          title={
+            hasImprovedVersion ? "Повторная обработка фото" : "Улучшение фото"
+          }
           open={isOpen}
           destroyOnHidden
           onOk={onOk}
@@ -119,20 +136,32 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
           blur
           style={{ top: 20 }}
         >
-          <div className={css.beforeAfterText}>
-            <span>До</span>
-            <span>После</span>
-          </div>
+          {hasImprovedVersion && (
+            <div className={css.beforeAfterText}>
+              <span>Оригинал</span>
+              <span>Улучшенная версия</span>
+            </div>
+          )}
           <div className={css.improvePhotoImgContainer}>
-            <ReactCompareSlider
-              className={cn(
-                css.sliderInModal,
-                improvementInProgress && css.filter
-              )}
-              itemOne={<ReactCompareSliderImage src={originalPhoto} />}
-              itemTwo={<ReactCompareSliderImage src={improvedPhoto} />}
-              position={50}
-            />
+            {hasImprovedVersion ? (
+              <ReactCompareSlider
+                className={cn(
+                  css.sliderInModal,
+                  improvementInProgress && css.filter
+                )}
+                itemOne={<ReactCompareSliderImage src={originalPhoto} />}
+                itemTwo={<ReactCompareSliderImage src={improvedPhoto} />}
+                position={50}
+              />
+            ) : (
+              <img
+                src={originalPhoto}
+                className={cn(
+                  css.imgInModal,
+                  improvementInProgress && css.filter
+                )}
+              />
+            )}
 
             {improvementInProgress && (
               <div className={css.spinnerOverlay}>
@@ -180,6 +209,12 @@ const ImprovementModal: FC<Props> = ({ photoId, isOpen, onOk, onCancel }) => {
                 autoSize={{ minRows: 2, maxRows: 2 }}
                 count={{}}
               />
+
+              <div className={css.info}>
+                P.S. Эффекты всегда применяются только к оригиналу. При
+                повторной обработке предыдущая обработанная версия автоматически
+                заменяется.
+              </div>
 
               <Button
                 onClick={handleImprovePhoto}

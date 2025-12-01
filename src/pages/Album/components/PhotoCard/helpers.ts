@@ -2,6 +2,25 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { showNotification } from "../../../../components/ShowNotification";
 
+export function makeFileName({
+  fileName,
+  isOriginal,
+}: {
+  fileName: string;
+  isOriginal: boolean;
+}) {
+  const dotIndex = fileName.lastIndexOf(".");
+
+  if (dotIndex === -1) {
+    return `${fileName}_${isOriginal ? "оригинал" : "улучшенная"}`;
+  }
+
+  const name = fileName.slice(0, dotIndex);
+  const ext = fileName.slice(dotIndex);
+
+  return `${name}_${isOriginal ? "оригинал" : "улучшенная"}${ext}`;
+}
+
 export type FileForZip = {
   url: string;
   fileName: string;
@@ -37,9 +56,32 @@ export const downloadImageByUrl = async (url: string, filename: string) => {
   }
 };
 
-export const handleDownloadAll = async (files: FileForZip[]) => {
+export const handleDownloadAll = async ({
+  files,
+  albumName,
+  isOriginal,
+}: {
+  files: FileForZip[];
+  albumName: string;
+  isOriginal: boolean;
+}) => {
+  if (files.length === 1) {
+    const file = files[0];
+    downloadImageByUrl(
+      file.url,
+      makeFileName({
+        fileName: file.fileName,
+        isOriginal,
+      })
+    );
+
+    return;
+  }
+
   const zip = new JSZip();
-  const folder = zip.folder("photos");
+  const folder = zip.folder(
+    `Фото_${albumName}_${isOriginal ? "оригинальные" : "улучшенные"}`
+  );
 
   for (const file of files) {
     const filename = file.fileName;
@@ -56,7 +98,10 @@ export const handleDownloadAll = async (files: FileForZip[]) => {
   }
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
-  saveAs(zipBlob, "photos.zip");
+  saveAs(
+    zipBlob,
+    `Фото_${albumName}_${isOriginal ? "оригинальные" : "улучшенные"}.zip`
+  );
 };
 
 export const handlePrintPhoto = (url: string, name: string) => {

@@ -3,13 +3,13 @@ import css from "./index.module.css";
 import Input from "../../components/Input/Input";
 import {
   UserRegisterDto,
-  UserRegisterDtoRole,
   UserRole,
   UserUpdateDto,
   UserUpdateDtoRole,
 } from "../../apiV2/a7-service/model";
 import Button from "../../components/Button/Button";
 import {
+  useGetProjects,
   useGetUsersAll,
   usePostUsersRegister,
   usePutUsersUpdate,
@@ -19,7 +19,11 @@ import { showNotification } from "../../components/ShowNotification";
 import Select from "../../components/Select/Select";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
-import { getRolePriority, getRolesOptions } from "./helpers";
+import {
+  getRolePriority,
+  getRolesOptions,
+  getWorkplaceOptions,
+} from "./helpers";
 
 type UserCreateForm = UserRegisterDto & {
   repeatPassword?: string;
@@ -33,18 +37,22 @@ const initialCreateUserValues = {
   email: "",
   name: "",
   password: "",
-  role: UserRegisterDtoRole.maker,
 };
 
 const AdministrationPage = () => {
-  const { data: user } = useProfile();
   const [isCreatePasswordError, setIsCreatePasswordError] = useState(false);
   const [isUpdatePasswordError, setIsUpdatePasswordError] = useState(false);
   const [createFormState, setCreateFormState] = useState<UserCreateForm>(
     initialCreateUserValues
   );
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
+
+  const { data: currentUser } = useProfile();
   const queryClient = useQueryClient();
+
+  const { data: projectsData, isLoading: isProjectsLoading } = useGetProjects({
+    axios: defaultApiAxiosParams,
+  });
 
   const {
     isLoading: isLoadingCreateUser,
@@ -102,6 +110,7 @@ const AdministrationPage = () => {
           password: createFormState.password,
           email: createFormState.email,
           role: createFormState.role,
+          workplace: createFormState.workplace,
         },
       });
       setIsCreatePasswordError(false);
@@ -127,6 +136,7 @@ const AdministrationPage = () => {
           email: updateFormState?.email,
           password: updateFormState?.password,
           role: updateFormState?.role,
+          workplace: updateFormState?.workplace,
         },
       });
       setIsUpdatePasswordError(false);
@@ -141,15 +151,26 @@ const AdministrationPage = () => {
     }
   };
 
-  const currentUserLevel = getRolePriority(user?.role);
+  const currentUserLevel = getRolePriority(currentUser?.role);
+
+  const isSupervisor = currentUser?.role === UserRole.supervisor;
 
   const allUsersDataOptions = data?.data
-    .filter(
-      (item) =>
-        item.id !== user?.id &&
+    .filter((item) => {
+      const defaultFilter =
+        item.id !== currentUser?.id &&
         item.role &&
-        getRolePriority(item.role as UserRole) < currentUserLevel
-    )
+        getRolePriority(item.role as UserRole) < currentUserLevel;
+
+      if (isSupervisor) {
+        return (
+          defaultFilter &&
+          currentUser.workplace?.some((el) => item.workplace?.includes(el))
+        );
+      }
+
+      return defaultFilter;
+    })
     .map((item) => ({
       key: item.id,
       value: item.id,
@@ -217,6 +238,25 @@ const AdministrationPage = () => {
           status={isCreatePasswordError ? "error" : ""}
         />
         <Select
+          label="Место работы"
+          onChange={(value) =>
+            setCreateFormState((prev) => ({
+              ...prev,
+              workplace: value,
+            }))
+          }
+          mode="multiple"
+          value={createFormState.workplace}
+          placeholder="Выберите из списка"
+          disabled={isLoadingCreateUser || isProjectsLoading}
+          loading={isProjectsLoading}
+          options={getWorkplaceOptions(
+            projectsData?.data.projects ?? [],
+            currentUser?.role,
+            currentUser?.workplace
+          )}
+        />
+        <Select
           label="Роль"
           onChange={(value) =>
             setCreateFormState((prev) => ({
@@ -227,7 +267,7 @@ const AdministrationPage = () => {
           value={createFormState.role}
           placeholder="Выберите из списка"
           disabled={isLoadingCreateUser}
-          options={getRolesOptions(user?.role)}
+          options={getRolesOptions(currentUser?.role)}
         />
         <Button
           className={css.btn}
@@ -236,7 +276,9 @@ const AdministrationPage = () => {
             isCreatePasswordError ||
             !createFormState.name ||
             !createFormState.email ||
-            !createFormState.password
+            !createFormState.password ||
+            !createFormState.role ||
+            !createFormState.workplace
           }
           onClick={handleCreateClick}
           showSpinner={isLoadingCreateUser}
@@ -259,6 +301,7 @@ const AdministrationPage = () => {
               name: selectedUser?.name,
               email: selectedUser?.email,
               role: selectedUser?.role as UserUpdateDtoRole,
+              workplace: selectedUser?.workplace,
             });
           }}
           value={updateFormState?.id}
@@ -320,7 +363,28 @@ const AdministrationPage = () => {
           status={isUpdatePasswordError ? "error" : ""}
         />
         <Select
-          label="Новая роль"
+          label="Место работы"
+          onChange={(value) =>
+            setUpdateFormState((prev) => ({
+              ...prev,
+              workplace: value,
+            }))
+          }
+          mode="multiple"
+          value={updateFormState?.workplace}
+          placeholder="Выберите из списка"
+          disabled={
+            isLoadingCreateUser || isProjectsLoading || !updateFormState?.id
+          }
+          loading={isProjectsLoading}
+          options={getWorkplaceOptions(
+            projectsData?.data.projects ?? [],
+            currentUser?.role,
+            currentUser?.workplace
+          )}
+        />
+        <Select
+          label="Роль"
           onChange={(value) =>
             setUpdateFormState((prev) => ({
               ...prev,
@@ -330,11 +394,11 @@ const AdministrationPage = () => {
           value={updateFormState?.role}
           placeholder="Выберите из списка"
           disabled={isLoading || !updateFormState?.id}
-          options={getRolesOptions(user?.role)}
+          options={getRolesOptions(currentUser?.role)}
         />
         <Button
           className={css.btn}
-          disabled={isLoading || isUpdatePasswordError}
+          disabled={isLoading || isUpdatePasswordError || !updateFormState?.id}
           onClick={handleUpdateClick}
           showSpinner={isLoading}
         >
