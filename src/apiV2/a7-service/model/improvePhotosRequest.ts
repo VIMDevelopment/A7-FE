@@ -9,6 +9,6 @@
 export interface ImprovePhotosRequest {
   /** Массив ID фотографий для улучшения */
   photoIds: string[];
-  /** ID промпта для улучшения */
-  promptId: string;
+  /** Массив ID промптов для улучшения. Все промпты будут склеены через запятую в один промпт. */
+  promptIds: string[];
 }

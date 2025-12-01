@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
@@ -39,6 +39,7 @@ const ImprovementModal: FC<Props> = ({
   const [promptIds, setPromptIds] = useState<string[]>([]);
   const [customPromptText, setCustomPromptText] = useState<string>("");
   const [improvementInProgress, setImprovementInProgress] = useState(false);
+  const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
 
   const { albumId } = useParams();
   const queryClient = useQueryClient();
@@ -76,26 +77,42 @@ const ImprovementModal: FC<Props> = ({
       axios: defaultApiAxiosParams,
     });
 
+  useEffect(() => {
+    if (!improvementInProgress) return;
+
+    const interval = setInterval(() => {
+      const improvedPhotoUrl = photoData?.data.current?.original;
+      const isOldImprovedPhotoUrl = improvedPhotoUrl === initialCurrentUrl;
+
+      if (!improvedPhotoUrl || isOldImprovedPhotoUrl) {
+        refetchPhoto();
+      } else {
+        clearInterval(interval);
+        showNotification({
+          message: "Фото улучшено",
+          type: "success",
+        });
+        void queryClient.invalidateQueries({
+          queryKey: [`/photos/album/${albumId}`],
+        });
+        setInitialCurrentUrl(photoData.data.current?.original ?? "");
+        setImprovementInProgress(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [improvementInProgress, photoData, initialCurrentUrl]);
+
   const handleImprovePhoto = () => {
     improvePhoto({
       data: {
         photoIds: [photoId],
-        promptId: promptIds[0],
+        promptIds: promptIds,
       },
     })
       .then(() => {
+        setInitialCurrentUrl(photoData?.data.current?.original ?? "");
         setImprovementInProgress(true);
-        setTimeout(() => {
-          refetchPhoto();
-          void queryClient.invalidateQueries({
-            queryKey: [`/photos/album/${albumId}`],
-          });
-          showNotification({
-            message: "Фото улучшено",
-            type: "success",
-          });
-          setImprovementInProgress(false);
-        }, 10000);
       })
       .catch(() => {
         showNotification({
@@ -117,7 +134,7 @@ const ImprovementModal: FC<Props> = ({
 
   const originalPhoto = photoData?.data.default.original;
 
-  const improvedPhoto = photoData?.data.current.original;
+  const improvedPhoto = photoData?.data.current?.original;
 
   return (
     <>

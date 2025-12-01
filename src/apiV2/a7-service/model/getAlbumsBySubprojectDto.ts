@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface GetAlbumsByProjectDto {
-  /** ID проекта */
-  projectId: string;
+export interface GetAlbumsBySubprojectDto {
+  /** ID подпроекта */
+  subprojectId: string;
 }

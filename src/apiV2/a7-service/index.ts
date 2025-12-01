@@ -1290,6 +1290,8 @@ export const putPhotosIdSetcover = (
 После улучшения поле `current` обновляется новыми версиями, а `default` остается неизменным.
 Это позволяет откатить изменения, скопировав `default` в `current`.
 
+**Промпты:** Можно указать массив `promptIds`. Все промпты будут склеены через запятую в один промпт.
+
  * @summary Улучшение фотографий
  */
 export const postPhotosImprovement = (

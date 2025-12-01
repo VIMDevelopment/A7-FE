@@ -90,7 +90,7 @@ const AlbumPage = () => {
   );
 
   const improvedPhotos = useMemo(
-    () => albumPhotos?.filter((item) => !!item.current.original),
+    () => albumPhotos?.filter((item) => !!item.current?.original),
     [albumPhotos]
   );
 
@@ -134,7 +134,7 @@ const AlbumPage = () => {
           : selectedImprovedPhotos.includes(item.id)
       )
       .map((item) => ({
-        url: isOriginal ? item.default.original : item.current.original,
+        url: isOriginal ? item.default.original : item.current?.original ?? "",
         fileName: makeFileName({
           fileName: item.fileName,
           isOriginal,
@@ -467,7 +467,7 @@ const AlbumPage = () => {
                         <PrinterOutlined
                           onClick={() =>
                             handlePrintPhoto(
-                              currentPhoto.current.original,
+                              currentPhoto.current?.original ?? "",
                               makeFileName({
                                 fileName: currentPhoto.fileName,
                                 isOriginal: false,
@@ -480,7 +480,7 @@ const AlbumPage = () => {
                           className={css.toolbarBtn}
                           onClick={() =>
                             downloadImageByUrl(
-                              currentPhoto.current.original,
+                              currentPhoto.current?.original ?? "",
                               makeFileName({
                                 fileName: currentPhoto.fileName,
                                 isOriginal: false,
@@ -500,7 +500,7 @@ const AlbumPage = () => {
                   );
                 },
               }}
-              items={improvedPhotos.map((item) => item.current.original)}
+              items={improvedPhotos.map((item) => item.current?.original ?? "")}
             >
               {improvedPhotos.map((item) => (
                 <PhotoCard
@@ -510,8 +510,8 @@ const AlbumPage = () => {
                   hasImprovedVersion={improvedPhotos.some(
                     (el) => el.id === item.id
                   )}
-                  url={item.current.original}
-                  smallUrl={item.current.small}
+                  url={item.current?.original ?? ""}
+                  smallUrl={item.current?.small ?? ""}
                   name={item.fileName}
                   isSelected={selectedImprovedPhotos.includes(item.id)}
                   albumId={albumId ?? ""}

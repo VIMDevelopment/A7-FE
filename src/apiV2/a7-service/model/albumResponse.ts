@@ -13,8 +13,8 @@ export interface AlbumResponse {
   title?: string;
   /** Описание альбома */
   description?: string;
-  /** ID проекта */
-  projectId?: string;
+  /** ID подпроекта */
+  subprojectId?: string;
   /** Публичный ли альбом */
   isPublic?: boolean;
   /** Ссылка для шаринга */
