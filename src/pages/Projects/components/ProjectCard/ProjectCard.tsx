@@ -81,7 +81,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
         },
       }).then(() => {
         showNotification({
-          message: "Проект переименован",
+          message: "Филиал переименован",
           type: "success",
         });
         setIsEditModalOpen(false);
@@ -91,7 +91,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
       showNotification({
         type: "error",
         message:
-          "Проект с таким названием уже существует. Пожалуйста, введите другое название.",
+          "Филиал с таким названием уже существует. Пожалуйста, введите другое название.",
       });
     }
   };
@@ -103,7 +103,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
       },
     }).then(() => {
       showNotification({
-        message: "Проект удален",
+        message: "Филиал удален",
         type: "success",
       });
       setIsDeleteModalOpen(false);
@@ -165,7 +165,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
       </div>
 
       <Modal
-        title={"Редактирование проекта"}
+        title={"Редактирование филиала"}
         open={isEditModalOpen}
         onOk={handleEditOk}
         onCancel={handleEditCancel}
@@ -180,7 +180,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
         />
       </Modal>
       <Modal
-        title={"Удаление проекта"}
+        title={"Удаление филиала"}
         open={isDeleteModalOpen}
         onOk={handleDeleteOk}
         onCancel={handleDeleteCancel}
@@ -189,7 +189,7 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
         isLoading={isDeleteLoading}
         customOkButtonClassName={css.deleteButton}
       >
-        {`Вы уверены, что хотите удалить проект "${name}"? Все данные будут безвозвратно
+        {`Вы уверены, что хотите удалить филиал "${name}"? Все данные будут безвозвратно
         утеряны.`}
       </Modal>
     </div>

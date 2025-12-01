@@ -39,7 +39,7 @@ export const getMenuItems: ({
 }) => SideMenuItemProps[] = ({ isMobileMenu, onLogout }) => [
   {
     icon: <ProjectsIcon />,
-    title: "Проекты",
+    title: "Файлы",
     route: PublicRoutes.PROJECTS.static,
   },
   // {

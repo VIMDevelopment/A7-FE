@@ -296,12 +296,16 @@ const AdministrationPage = () => {
           placeholder="Выберите из списка"
           onChange={(value) => {
             const selectedUser = data?.data.find((item) => item.id === value);
+            const projectsIds = projectsData?.data.projects?.map((el) => el.id);
+            
             setUpdateFormState({
               id: selectedUser?.id,
               name: selectedUser?.name,
               email: selectedUser?.email,
               role: selectedUser?.role as UserUpdateDtoRole,
-              workplace: selectedUser?.workplace,
+              workplace: selectedUser?.workplace?.filter((item) =>
+                projectsIds?.includes(item)
+              ),
             });
           }}
           value={updateFormState?.id}

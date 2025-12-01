@@ -40,7 +40,7 @@ const SubprojectPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{subprojectName}</div>
+      <div className={css.pageTitle}>{`Папка: "${subprojectName}"`}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
@@ -48,7 +48,7 @@ const SubprojectPage = () => {
           items={[
             ...backButton,
             {
-              title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
+              title: <Link to={PublicRoutes.PROJECTS.static}>Все филиалы</Link>,
             },
             {
               type: "separator",
@@ -58,7 +58,7 @@ const SubprojectPage = () => {
                 <Link
                   to={PublicRoutes.PROJECT.get({ projectId: projectId ?? "" })}
                 >
-                  {`Проект: "${projectName}"`}
+                  {`Филиал: "${projectName}"`}
                 </Link>
               ),
             },

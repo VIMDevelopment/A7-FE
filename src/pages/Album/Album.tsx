@@ -227,7 +227,7 @@ const AlbumPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{albumName}</div>
+      <div className={css.pageTitle}>{`Альбом: "${albumName}"`}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
@@ -235,7 +235,7 @@ const AlbumPage = () => {
           items={[
             ...backButton,
             {
-              title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
+              title: <Link to={PublicRoutes.PROJECTS.static}>Все филиалы</Link>,
             },
             {
               type: "separator",
@@ -245,7 +245,7 @@ const AlbumPage = () => {
                 <Link
                   to={PublicRoutes.PROJECT.get({ projectId: projectId ?? "" })}
                 >
-                  Проект: "{projectName}"
+                  Филиал: "{projectName}"
                 </Link>
               ),
             },

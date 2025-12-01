@@ -31,13 +31,13 @@ const ProjectPage = () => {
   const allSubprojectsNames =
     data?.data.subprojects?.map((item) => item.name ?? "") ?? [];
 
-  const projectName = projectData?.data.name;
+  const projectName = projectData?.data.name ?? "";
 
   const { backButton } = useBreadcrumbsBackButton();
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{`Все папки проекта ${projectName}`}</div>
+      <div className={css.pageTitle}>{`Все папки филиала "${projectName}"`}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
@@ -45,13 +45,13 @@ const ProjectPage = () => {
           items={[
             ...backButton,
             {
-              title: <Link to={PublicRoutes.PROJECTS.static}>Все проекты</Link>,
+              title: <Link to={PublicRoutes.PROJECTS.static}>Все филиалы</Link>,
             },
             {
               type: "separator",
             },
             {
-              title: `Проект: "${projectName ?? ""}"`,
+              title: `Филиал: "${projectName}"`,
             },
           ]}
         />

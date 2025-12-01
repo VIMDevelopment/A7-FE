@@ -37,7 +37,7 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
         },
       }).then(() => {
         showNotification({
-          message: "Проект создан",
+          message: "Филиал создан",
           type: "success",
         });
         setIsModalOpen(false);
@@ -48,7 +48,7 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
       showNotification({
         type: "error",
         message:
-          "Проект с таким названием уже существует. Пожалуйста, введите другое название.",
+          "Филиал с таким названием уже существует. Пожалуйста, введите другое название.",
       });
     }
   };
@@ -63,10 +63,10 @@ const AddProjectCard: FC<Props> = ({ allProjectsNames }) => {
       <div
         className={css.container}
         onClick={showModal}
-      >{`+\nДобавить\nпроект`}</div>
+      >{`+\nДобавить\nфилиал`}</div>
 
       <Modal
-        title={"Добавление проекта"}
+        title={"Добавление филиала"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}

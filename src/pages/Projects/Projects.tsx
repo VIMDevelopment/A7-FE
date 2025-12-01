@@ -42,7 +42,7 @@ const ProjectsPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>Все проекты</div>
+      <div className={css.pageTitle}>Все филиалы</div>
       <div className={css.grid}>
         {allowedProjects?.map((item) => (
           <ProjectCard key={item.id} id={item.id} name={item.name} />
