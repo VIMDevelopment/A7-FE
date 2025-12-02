@@ -13,7 +13,7 @@ export interface Photo {
   /** ID альбома, к которому принадлежит фото */
   albumId: string;
   /** Текущие версии фото (могут изменяться при улучшении) */
-  current: PhotoVersions | null;
+  current?: PhotoVersions;
   /** Версии по умолчанию (неизменны, для отката) */
   default: PhotoVersions;
   /** Оригинальное имя файла */

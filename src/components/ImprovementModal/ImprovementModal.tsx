@@ -107,7 +107,8 @@ const ImprovementModal: FC<Props> = ({
     improvePhoto({
       data: {
         photoIds: [photoId],
-        promptIds: promptIds,
+        promptIds: promptIds.length > 0 ? promptIds : undefined,
+        customPromptText: customPromptText || undefined,
       },
     })
       .then(() => {
