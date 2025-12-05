@@ -33,6 +33,9 @@ import type {
   UserUpdateDto,
   UserInfoResponse,
   UserResponse,
+  DeleteResponse,
+  UserDeleteError,
+  UserDeleteDto,
   ProjectResponse,
   ProjectCreationRolesError,
   CreateProjectDto,
@@ -74,7 +77,10 @@ import type {
   PromptResponse,
   PromptErrorResponse,
   CreatePromptRequest,
-  UpdatePromptRequest
+  UpdatePromptRequest,
+  AimodelResponse,
+  AimodelErrorResponse,
+  CreateAimodelRequest
 } from './model'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -258,6 +264,39 @@ export const useGetUsersAll = <TData = AsyncReturnType<typeof getUsersAll>, TErr
 }
 
 
+/**
+ * Удаление пользователя из системы. Сам себя удалить нельзя, только вышестоящая роль может удалить нижестоящую.
+ * @summary Удаление пользователя
+ */
+export const deleteUsersDelete = (
+    userDeleteDto: UserDeleteDto, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DeleteResponse>> => {
+    return axios.delete(
+      `/users/delete`,{data:
+      userDeleteDto, ...options}
+    );
+  }
+
+
+
+    export const useDeleteUsersDelete = <TError = AxiosError<ErrorResponse | AuthError | UserDeleteError>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof deleteUsersDelete>, TError,{data: UserDeleteDto}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof deleteUsersDelete>, {data: UserDeleteDto}> = (props) => {
+          const {data} = props || {};
+
+          return  deleteUsersDelete(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof deleteUsersDelete>, TError, {data: UserDeleteDto}, TContext>(mutationFn, mutationOptions)
+    }
+    
 /**
  * Создание нового проекта с указанным названием
  * @summary Создание нового проекта
@@ -1292,6 +1331,8 @@ export const putPhotosIdSetcover = (
 
 **Промпты:** Можно указать массив `promptIds` (ID промптов из БД), опциональный `customPromptText` (произвольный текст), или оба. Все промпты будут склеены через точку в один промпт. Хотя бы один источник промптов должен быть указан.
 
+**AI Модель:** Обязательно указать `modelId` (ID AI модели из БД).
+
  * @summary Улучшение фотографий
  */
 export const postPhotosImprovement = (
@@ -1565,5 +1606,108 @@ export const deletePromptsId = (
         }
 
       return useMutation<AsyncReturnType<typeof deletePromptsId>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Создает новую AI модель с указанным названием и описанием
+ * @summary Создание новой AI модели
+ */
+export const postAimodels = (
+    createAimodelRequest: CreateAimodelRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AimodelResponse>> => {
+    return axios.post(
+      `/aimodels`,
+      createAimodelRequest,options
+    );
+  }
+
+
+
+    export const usePostAimodels = <TError = AxiosError<AimodelErrorResponse | void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postAimodels>, TError,{data: CreateAimodelRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postAimodels>, {data: CreateAimodelRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postAimodels(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postAimodels>, TError, {data: CreateAimodelRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Возвращает список всех AI моделей, отсортированных по дате создания (новые первыми)
+ * @summary Получение списка всех AI моделей
+ */
+export const getAimodels = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AimodelResponse[]>> => {
+    return axios.get(
+      `/aimodels`,options
+    );
+  }
+
+
+export const getGetAimodelsQueryKey = () => [`/aimodels`];
+
+    
+export const useGetAimodels = <TData = AsyncReturnType<typeof getAimodels>, TError = AxiosError<void>>(
+  options?: { query?:UseQueryOptions<AsyncReturnType<typeof getAimodels>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetAimodelsQueryKey();
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getAimodels>> = () => getAimodels(axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getAimodels>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Удаляет AI модель по ее уникальному идентификатору
+ * @summary Удаление AI модели
+ */
+export const deleteAimodelsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.delete(
+      `/aimodels/${id}`,options
+    );
+  }
+
+
+
+    export const useDeleteAimodelsId = <TError = AxiosError<AimodelErrorResponse>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof deleteAimodelsId>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof deleteAimodelsId>, {id: string}> = (props) => {
+          const {id} = props || {};
+
+          return  deleteAimodelsId(id,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof deleteAimodelsId>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
     }
     

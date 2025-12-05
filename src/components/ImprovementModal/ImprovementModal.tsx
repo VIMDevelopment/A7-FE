@@ -2,6 +2,7 @@ import React, { FC, useEffect, useMemo, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
+  useGetAimodels,
   useGetPhotosId,
   useGetPrompts,
   usePostPhotosImprovement,
@@ -10,8 +11,8 @@ import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import Select from "../Select/Select";
 import Button from "../Button/Button";
-import { Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import { Spin, Tooltip } from "antd";
+import { InfoCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -37,6 +38,7 @@ const ImprovementModal: FC<Props> = ({
   onCancel,
 }) => {
   const [promptIds, setPromptIds] = useState<string[]>([]);
+  const [modelId, setModelId] = useState<string>();
   const [customPromptText, setCustomPromptText] = useState<string>("");
   const [improvementInProgress, setImprovementInProgress] = useState(false);
   const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
@@ -54,6 +56,18 @@ const ImprovementModal: FC<Props> = ({
       onError: () => {
         showNotification({
           message: "Произошла ошибка при загрузке фото",
+          type: "error",
+        });
+      },
+    },
+  });
+
+  const { data: modelsData, isLoading: isModelsLoading } = useGetAimodels({
+    axios: defaultApiAxiosParams,
+    query: {
+      onError: () => {
+        showNotification({
+          message: "Произошла ошибка при загрузке списка моделей",
           type: "error",
         });
       },
@@ -109,6 +123,7 @@ const ImprovementModal: FC<Props> = ({
         photoIds: [photoId],
         promptIds: promptIds.length > 0 ? promptIds : undefined,
         customPromptText: customPromptText || undefined,
+        modelId: modelId ?? "",
       },
     })
       .then(() => {
@@ -123,7 +138,17 @@ const ImprovementModal: FC<Props> = ({
       });
   };
 
-  const options = useMemo(
+  const modelOptions = useMemo(
+    () =>
+      (modelsData?.data ?? []).map((item) => ({
+        key: item.id,
+        value: item.id,
+        label: item.title,
+      })),
+    [modelsData]
+  );
+
+  const promptsOptions = useMemo(
     () =>
       (promptsData?.data ?? []).map((item) => ({
         key: item.id,
@@ -197,6 +222,35 @@ const ImprovementModal: FC<Props> = ({
 
           <div className={css.bottomContainer}>
             <div className={css.bottomContainerInner}>
+              <div className={css.modelSelectContainer}>
+                <Select
+                  label="Выберите модель"
+                  onChange={(value) => setModelId(value)}
+                  value={modelId}
+                  placeholder="Выберите из списка"
+                  disabled={
+                    isModelsLoading ||
+                    isImprovementLoading ||
+                    improvementInProgress ||
+                    isPhotoLoading
+                  }
+                  loading={isModelsLoading}
+                  options={modelOptions}
+                  size="large"
+                />
+                <Tooltip
+                  className={css.tooltip}
+                  title={
+                    !modelId
+                      ? "Модель не выбрана"
+                      : modelsData?.data.find((item) => item.id === modelId)
+                          ?.description ?? "Описание не найдено"
+                  }
+                >
+                  <InfoCircleOutlined style={{ fontSize: "20px" }} />
+                </Tooltip>
+              </div>
+
               <Select
                 label="Выберите что вы хотите улучшить"
                 onChange={(value) => setPromptIds(value)}
@@ -209,7 +263,7 @@ const ImprovementModal: FC<Props> = ({
                   isPhotoLoading
                 }
                 loading={isPromptsLoading}
-                options={options}
+                options={promptsOptions}
                 mode="multiple"
                 size="large"
               />

@@ -13,4 +13,6 @@ export interface ImprovePhotosRequest {
   promptIds?: string[];
   /** Произвольный текст промпта для улучшения (опционально). Будет склеен с промптами из promptIds через точку. Может быть указан один, без promptIds. */
   customPromptText?: string;
+  /** ID AI модели из базы данных (обязательно). */
+  modelId: string;
 }
