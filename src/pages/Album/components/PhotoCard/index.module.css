@@ -52,6 +52,26 @@
   height: 0;
 }
 
+.rocketWrapper {
+  position: absolute;
+  height: 0;
+}
+
+.fastImproveButton {
+  position: relative;
+  left: 100px;
+  top: 4px;
+  display: flex;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(63, 63, 63, 0.799);
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  z-index: 1;
+}
+
 .menuIconButton {
   position: relative;
   left: 126px;
@@ -114,6 +134,13 @@
     max-height: 300px;
     max-width: calc(100vw - 40px);
     object-fit: contain;
+  }
+  
+  .fastImproveButton {
+    left: calc(100vw - 138px);
+    top: 8px;
+    height: 40px;
+    width: 40px;
   }
 
   .menuIconButton {

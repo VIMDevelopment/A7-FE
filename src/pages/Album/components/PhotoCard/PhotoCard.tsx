@@ -2,7 +2,7 @@ import React, { FC, useRef, useState } from "react";
 import css from "./index.module.css";
 import { Dropdown, Image, InputRef } from "antd";
 import Checkbox from "antd/es/checkbox/Checkbox";
-import { MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined, RocketOutlined } from "@ant-design/icons";
 import { ItemType } from "antd/es/menu/interface";
 import Modal from "../../../../components/Modal/Modal";
 import { useQueryClient } from "react-query";
@@ -179,6 +179,19 @@ const PhotoCard: FC<Props> = ({
             checked={isSelected}
             onClick={() => onSelect(id)}
           />
+        </div>
+        <div className={css.rocketWrapper}>
+          <div
+            className={css.fastImproveButton}
+            onClick={() => setIsImprovePhotoModalOpen(true)}
+          >
+            <RocketOutlined
+              style={{
+                color: "white",
+                fontSize: isMobile ? "30px" : "unset",
+              }}
+            />
+          </div>
         </div>
         <div className={css.menuIconButton}>
           <Dropdown

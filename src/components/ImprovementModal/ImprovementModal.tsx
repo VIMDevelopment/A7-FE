@@ -1,24 +1,20 @@
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
-  useGetAimodels,
   useGetPhotosId,
-  useGetPrompts,
   usePostPhotosImprovement,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
-import Select from "../Select/Select";
 import Button from "../Button/Button";
-import { Spin, Tooltip } from "antd";
-import { InfoCircleOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
 } from "react-compare-slider";
 import cn from "classnames";
-import InputTextArea from "../TextArea/Input";
 import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 
@@ -37,9 +33,9 @@ const ImprovementModal: FC<Props> = ({
   onOk,
   onCancel,
 }) => {
-  const [promptIds, setPromptIds] = useState<string[]>([]);
-  const [modelId, setModelId] = useState<string>();
-  const [customPromptText, setCustomPromptText] = useState<string>("");
+  // const [promptIds, setPromptIds] = useState<string[]>([]);
+  // const [modelId, setModelId] = useState<string>();
+  // const [customPromptText, setCustomPromptText] = useState<string>("");
   const [improvementInProgress, setImprovementInProgress] = useState(false);
   const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
 
@@ -62,29 +58,29 @@ const ImprovementModal: FC<Props> = ({
     },
   });
 
-  const { data: modelsData, isLoading: isModelsLoading } = useGetAimodels({
-    axios: defaultApiAxiosParams,
-    query: {
-      onError: () => {
-        showNotification({
-          message: "Произошла ошибка при загрузке списка моделей",
-          type: "error",
-        });
-      },
-    },
-  });
+  // const { data: modelsData, isLoading: isModelsLoading } = useGetAimodels({
+  //   axios: defaultApiAxiosParams,
+  //   query: {
+  //     onError: () => {
+  //       showNotification({
+  //         message: "Произошла ошибка при загрузке списка моделей",
+  //         type: "error",
+  //       });
+  //     },
+  //   },
+  // });
 
-  const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
-    axios: defaultApiAxiosParams,
-    query: {
-      onError: () => {
-        showNotification({
-          message: "Произошла ошибка при загрузке списка промптов",
-          type: "error",
-        });
-      },
-    },
-  });
+  // const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
+  //   axios: defaultApiAxiosParams,
+  //   query: {
+  //     onError: () => {
+  //       showNotification({
+  //         message: "Произошла ошибка при загрузке списка промптов",
+  //         type: "error",
+  //       });
+  //     },
+  //   },
+  // });
 
   const { isLoading: isImprovementLoading, mutateAsync: improvePhoto } =
     usePostPhotosImprovement({
@@ -121,9 +117,9 @@ const ImprovementModal: FC<Props> = ({
     improvePhoto({
       data: {
         photoIds: [photoId],
-        promptIds: promptIds.length > 0 ? promptIds : undefined,
-        customPromptText: customPromptText || undefined,
-        modelId: modelId ?? "",
+        // promptIds: promptIds.length > 0 ? promptIds : undefined,
+        // customPromptText: customPromptText || undefined,
+        // modelId: modelId ?? "",
       },
     })
       .then(() => {
@@ -138,25 +134,25 @@ const ImprovementModal: FC<Props> = ({
       });
   };
 
-  const modelOptions = useMemo(
-    () =>
-      (modelsData?.data ?? []).map((item) => ({
-        key: item.id,
-        value: item.id,
-        label: item.title,
-      })),
-    [modelsData]
-  );
+  // const modelOptions = useMemo(
+  //   () =>
+  //     (modelsData?.data ?? []).map((item) => ({
+  //       key: item.id,
+  //       value: item.id,
+  //       label: item.title,
+  //     })),
+  //   [modelsData]
+  // );
 
-  const promptsOptions = useMemo(
-    () =>
-      (promptsData?.data ?? []).map((item) => ({
-        key: item.id,
-        value: item.id,
-        label: item.title,
-      })),
-    [promptsData]
-  );
+  // const promptsOptions = useMemo(
+  //   () =>
+  //     (promptsData?.data ?? []).map((item) => ({
+  //       key: item.id,
+  //       value: item.id,
+  //       label: item.title,
+  //     })),
+  //   [promptsData]
+  // );
 
   const originalPhoto = photoData?.data.default.original;
 
@@ -222,7 +218,7 @@ const ImprovementModal: FC<Props> = ({
 
           <div className={css.bottomContainer}>
             <div className={css.bottomContainerInner}>
-              <div className={css.modelSelectContainer}>
+              {/* <div className={css.modelSelectContainer}>
                 <Select
                   label="Выберите модель"
                   onChange={(value) => setModelId(value)}
@@ -280,7 +276,7 @@ const ImprovementModal: FC<Props> = ({
                 placeholder="Введите запрос"
                 autoSize={{ minRows: 2, maxRows: 2 }}
                 count={{}}
-              />
+              /> */}
 
               <div className={css.info}>
                 P.S. Эффекты всегда применяются только к оригиналу. При
@@ -291,9 +287,10 @@ const ImprovementModal: FC<Props> = ({
               <Button
                 onClick={handleImprovePhoto}
                 disabled={
-                  (!promptIds.length && !customPromptText) ||
-                  isPromptsLoading ||
+                  // (!promptIds.length && !customPromptText) ||
+                  // isPromptsLoading ||
                   improvementInProgress ||
+                  isImprovementLoading ||
                   isPhotoLoading
                 }
                 loading={

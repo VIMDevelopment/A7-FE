@@ -70,8 +70,8 @@ import type {
   DeletePhotoResponse,
   PhotoListResponse,
   SetCoverRequest,
-  ImprovePhotosResponse,
-  ImprovePhotosRequest,
+  PostPhotosImprovement200,
+  PostPhotosImprovementBody,
   DescriptorMatchResponse,
   DescriptorMatchRequest,
   PromptResponse,
@@ -1324,44 +1324,40 @@ export const putPhotosIdSetcover = (
     }
     
 /**
- * Добавляет фотографии в очередь для улучшения с использованием указанного промпта.
+ * Добавляет фотографии в очередь для улучшения через GFPGAN.
 
 После улучшения поле `current` обновляется новыми версиями, а `default` остается неизменным.
 Это позволяет откатить изменения, скопировав `default` в `current`.
 
-**Промпты:** Можно указать массив `promptIds` (ID промптов из БД), опциональный `customPromptText` (произвольный текст), или оба. Все промпты будут склеены через точку в один промпт. Хотя бы один источник промптов должен быть указан.
-
-**AI Модель:** Обязательно указать `modelId` (ID AI модели из БД).
-
  * @summary Улучшение фотографий
  */
 export const postPhotosImprovement = (
-    improvePhotosRequest: ImprovePhotosRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ImprovePhotosResponse>> => {
+    postPhotosImprovementBody: PostPhotosImprovementBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PostPhotosImprovement200>> => {
     return axios.post(
       `/photos/improvement`,
-      improvePhotosRequest,options
+      postPhotosImprovementBody,options
     );
   }
 
 
 
-    export const usePostPhotosImprovement = <TError = AxiosError<PhotoErrorResponse | void>,
+    export const usePostPhotosImprovement = <TError = AxiosError<void>,
     
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovement>, TError,{data: ImprovePhotosRequest}, TContext>, axios?: AxiosRequestConfig}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovement>, TError,{data: PostPhotosImprovementBody}, TContext>, axios?: AxiosRequestConfig}
 ) => {
       const {mutation: mutationOptions, axios: axiosOptions} = options || {}
 
       
 
 
-      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovement>, {data: ImprovePhotosRequest}> = (props) => {
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovement>, {data: PostPhotosImprovementBody}> = (props) => {
           const {data} = props || {};
 
           return  postPhotosImprovement(data,axiosOptions)
         }
 
-      return useMutation<AsyncReturnType<typeof postPhotosImprovement>, TError, {data: ImprovePhotosRequest}, TContext>(mutationFn, mutationOptions)
+      return useMutation<AsyncReturnType<typeof postPhotosImprovement>, TError, {data: PostPhotosImprovementBody}, TContext>(mutationFn, mutationOptions)
     }
     
 /**
