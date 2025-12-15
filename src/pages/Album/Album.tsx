@@ -9,6 +9,7 @@ import {
   useGetPhotosAlbumAlbumId,
   useGetProjectsProjectId,
   useGetSubprojectsId,
+  usePostPhotosImprovement,
   usePutAlbumsCover,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
@@ -48,6 +49,11 @@ const AlbumPage = () => {
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
   const [improvementPhotoId, setImprovementPhotoId] = useState("");
+
+  const { mutateAsync: improvePhoto } =
+    usePostPhotosImprovement({
+      axios: defaultApiAxiosParams,
+    });
 
   const { data: projectData } = useGetProjectsProjectId(projectId ?? "", {
     axios: defaultApiAxiosParams,
@@ -181,6 +187,27 @@ const AlbumPage = () => {
     setIsImprovePhotoModalOpen(false);
   };
 
+  const handleImprovePhotosClick = () => {
+    improvePhoto({
+      data: {
+        photoIds: selectedOriginalPhotos,
+      },
+    })
+      .then(() => {
+        showNotification({
+          message: "Фотографии отправлены на улучшение",
+          type: "success",
+        });
+        setSelectedOriginalPhotos([])
+      })
+      .catch(() => {
+        showNotification({
+          message: "Произошла ошибка при улучшении фото",
+          type: "error",
+        });
+      });
+  };
+
   const toggleSelectPhoto = ({
     id,
     isOriginal,
@@ -294,6 +321,12 @@ const AlbumPage = () => {
           }
         >
           Отменить выбор
+        </Button>
+        <Button
+          disabled={selectedOriginalPhotos.length === 0}
+          onClick={() => handleImprovePhotosClick()}
+        >
+          Улучшить выбранные
         </Button>
         <Button
           disabled={selectedOriginalPhotos.length === 0}
