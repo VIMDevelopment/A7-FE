@@ -72,6 +72,8 @@ import type {
   SetCoverRequest,
   PostPhotosImprovement200,
   PostPhotosImprovementBody,
+  ImprovementCustomResponse,
+  ImprovementCustomRequest,
   DescriptorMatchResponse,
   DescriptorMatchRequest,
   PromptResponse,
@@ -1358,6 +1360,39 @@ export const postPhotosImprovement = (
         }
 
       return useMutation<AsyncReturnType<typeof postPhotosImprovement>, TError, {data: PostPhotosImprovementBody}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Улучшение фотографии с использованием пользовательского промпта
+ * @summary Кастомное улучшение фотографии
+ */
+export const postPhotosImprovementcustom = (
+    improvementCustomRequest: ImprovementCustomRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ImprovementCustomResponse>> => {
+    return axios.post(
+      `/photos/improvement-custom`,
+      improvementCustomRequest,options
+    );
+  }
+
+
+
+    export const usePostPhotosImprovementcustom = <TError = AxiosError<PhotoErrorResponse | void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovementcustom>, TError,{data: ImprovementCustomRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovementcustom>, {data: ImprovementCustomRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postPhotosImprovementcustom(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPhotosImprovementcustom>, TError, {data: ImprovementCustomRequest}, TContext>(mutationFn, mutationOptions)
     }
     
 /**
