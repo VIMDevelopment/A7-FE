@@ -1,4 +1,4 @@
-import { BankOutlined, LogoutOutlined } from "@ant-design/icons";
+import { BankOutlined, LogoutOutlined, EyeOutlined } from "@ant-design/icons";
 import ProjectsIcon from "../../assets/ProjectsIcon";
 import SettingsIcon from "../../assets/SettingsIcon";
 import { PublicRoutes } from "../../routes/routes";
@@ -41,6 +41,19 @@ export const getMenuItems: ({
     icon: <ProjectsIcon />,
     title: "Файлы",
     route: PublicRoutes.PROJECTS.static,
+  },
+  {
+    icon: (
+      <EyeOutlined
+        style={{
+          color: "rgba(255, 255, 255, 0.5)",
+          fontSize: "28px",
+          paddingBottom: "2px",
+        }}
+      />
+    ),
+    title: "Распознавание",
+    route: PublicRoutes.RECOGNITION.static,
   },
   // {
   //   icon: <ReportsIcon />,
