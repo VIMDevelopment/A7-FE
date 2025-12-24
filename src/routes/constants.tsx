@@ -9,6 +9,7 @@ import AlbumPage from "../pages/Album/Album";
 import { UserRole } from "../apiV2/a7-service/model";
 import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
+import RecognitionPage from "../pages/Recognition/Recognition";
 
 const ALL_ROLES = [
   UserRole.admin,
@@ -93,6 +94,12 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.SETTINGS.static,
     roles: ALL_ROLES,
     component: <SettingsPage />,
+  },
+  {
+    id: "recognition",
+    path: PublicRoutes.RECOGNITION.static,
+    roles: ALL_ROLES,
+    component: <RecognitionPage />,
   },
   // {
   //   id: "statistics",
