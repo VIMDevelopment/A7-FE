@@ -1,6 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
 .pageTitle {
@@ -8,5 +9,22 @@
   font-weight: 500;
   color: var(--color-text);
   text-transform: uppercase;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recognizeButton {
+  max-width: 300px;
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .recognizeButton {
+    max-width: 100%;
+  }
 }
 
