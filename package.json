@@ -18,6 +18,7 @@
     "date-fns": "^2.30.0",
     "effector": "^23.4.2",
     "effector-react": "^23.3.0",
+    "face-api.js": "^0.22.2",
     "file-saver": "^2.0.5",
     "import": "^0.0.6",
     "js-cookie": "^3.0.1",
@@ -29,6 +30,7 @@
     "react-responsive": "^10.0.1",
     "react-router-dom": "^6.10.0",
     "react-scripts": "5.0.1",
+    "react-webcam": "^7.2.0",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
