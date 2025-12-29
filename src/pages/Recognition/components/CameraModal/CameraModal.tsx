@@ -3,7 +3,11 @@ import Webcam from "react-webcam";
 import Modal from "../../../../components/Modal/Modal";
 import Button from "../../../../components/Button/Button";
 import Select from "../../../../components/Select/Select";
+import { extractFaceDescriptors, loadFaceApiModels } from "../../../../utils/faceDetection";
+import { usePostDescriptors } from "../../../../apiV2/a7-service";
+import type { DescriptorMatchRequest } from "../../../../apiV2/a7-service/model/descriptorMatchRequest";
 import css from "./index.module.css";
+import { defaultApiAxiosParams } from "../../../../api/helpers";
 
 type CameraModalProps = {
   open: boolean;
@@ -18,6 +22,31 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
   const [isLoadingDevices, setIsLoadingDevices] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSwitchingCamera, setIsSwitchingCamera] = useState(false);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [faceDetectionError, setFaceDetectionError] = useState<string | null>(
+    null
+  );
+
+  // Хук для отправки дескрипторов
+  const { mutate: sendDescriptors, isLoading: isSendingDescriptors } =
+    usePostDescriptors({
+      axios: defaultApiAxiosParams,
+      mutation: {
+        onSuccess: () => {
+          setError(null);
+          setFaceDetectionError(null);
+          // Можно показать уведомление об успехе
+        },
+        onError: (error) => {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Ошибка при отправке дескрипторов на сервер";
+          setError(errorMessage);
+        },
+      },
+    });
 
   // Получение списка доступных камер
   const getDevices = useCallback(async () => {
@@ -54,10 +83,27 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
     }
   }, [selectedDeviceId]);
 
-  // Загрузка устройств при открытии модалки
+  // Загрузка устройств и моделей face-api.js при открытии модалки
   useEffect(() => {
     if (open) {
       getDevices();
+      // Загружаем модели face-api.js при первом открытии
+      const loadModels = async () => {
+        try {
+          setIsLoadingModels(true);
+          await loadFaceApiModels();
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error
+              ? err.message
+              : "Не удалось загрузить модели распознавания лиц";
+          setError(errorMessage);
+          console.error("Ошибка загрузки моделей:", err);
+        } finally {
+          setIsLoadingModels(false);
+        }
+      };
+      loadModels();
     }
   }, [open, getDevices]);
 
@@ -74,7 +120,39 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
   // Обработка пересъемки
   const retakePhoto = useCallback(() => {
     setCapturedImage(null);
+    setFaceDetectionError(null);
   }, []);
+
+  // Обработка отправки дескрипторов
+  const handleSendDescriptors = useCallback(async () => {
+    if (!capturedImage) {
+      return;
+    }
+
+    try {
+      setIsProcessingImage(true);
+      setFaceDetectionError(null);
+      setError(null);
+
+      // Извлекаем дескрипторы из изображения
+      const descriptors = await extractFaceDescriptors(capturedImage);
+
+      // Формируем запрос
+      const request: DescriptorMatchRequest = {
+        descriptors,
+      };
+
+      // Отправляем на сервер
+      sendDescriptors({ data: request });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Ошибка при обработке изображения";
+      setFaceDetectionError(errorMessage);
+      console.error("Ошибка извлечения дескрипторов:", err);
+    } finally {
+      setIsProcessingImage(false);
+    }
+  }, [capturedImage, sendDescriptors]);
 
   // Обработка закрытия модалки
   const handleClose = useCallback(() => {
@@ -88,8 +166,10 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
     // Сбрасываем состояния
     setCapturedImage(null);
     setError(null);
+    setFaceDetectionError(null);
     setSelectedDeviceId("");
     setIsSwitchingCamera(false);
+    setIsProcessingImage(false);
 
     onClose();
   }, [onClose]);
@@ -160,6 +240,15 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
             <div className={css.cameraContainer}>
               {capturedImage ? (
                 <div className={css.previewContainer}>
+                  {(isProcessingImage || isSendingDescriptors) && (
+                    <div className={css.loadingOverlay}>
+                      <div className={css.loadingText}>
+                        {isProcessingImage
+                          ? "Обработка изображения..."
+                          : "Отправка дескрипторов..."}
+                      </div>
+                    </div>
+                  )}
                   <img
                     src={capturedImage}
                     alt="Сфотографированное изображение"
@@ -178,6 +267,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
                   <Webcam
                     ref={webcamRef}
                     audio={false}
+                    mirrored
                     videoConstraints={{
                       deviceId: selectedDeviceId
                         ? { exact: selectedDeviceId }
@@ -186,6 +276,7 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
                     screenshotFormat="image/jpeg"
                     className={css.webcam}
                     onUserMediaError={handleUserMediaError}
+                    screenshotQuality={1}
                   />
                 </div>
               )}
@@ -196,13 +287,41 @@ const CameraModal: React.FC<CameraModalProps> = ({ open, onClose }) => {
                 <Button
                   onClick={capturePhoto}
                   disabled={
-                    isLoadingDevices || isSwitchingCamera || !selectedDeviceId
+                    isLoadingDevices ||
+                    isSwitchingCamera ||
+                    !selectedDeviceId ||
+                    isLoadingModels
                   }
                   className={css.captureButton}
                 >
-                  Сфотографировать
+                  {isLoadingModels ? "Загрузка моделей..." : "Сфотографировать"}
                 </Button>
               </div>
+            )}
+
+            {capturedImage && (
+              <>
+                {faceDetectionError && (
+                  <div className={css.errorContainer}>
+                    <div className={css.errorText}>{faceDetectionError}</div>
+                  </div>
+                )}
+                <div className={css.buttonContainer}>
+                  <Button
+                    onClick={handleSendDescriptors}
+                    disabled={
+                      isProcessingImage ||
+                      isSendingDescriptors ||
+                      isLoadingModels ||
+                      !!faceDetectionError
+                    }
+                    className={css.sendButton}
+                    showSpinner={isProcessingImage || isSendingDescriptors}
+                  >
+                    Отправить дескрипторы
+                  </Button>
+                </div>
+              </>
             )}
           </>
         )}
