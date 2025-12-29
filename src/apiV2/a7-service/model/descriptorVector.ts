@@ -9,4 +9,4 @@
 /**
  * Массив из 128 чисел, представляющих дескриптор лица
  */
-export type DescriptorVector = number[];
+export type DescriptorVector = { values: number[] };
