@@ -16,6 +16,7 @@ import Input from "../../../../components/Input/Input";
 import { downloadImageByUrl, handlePrintPhoto, makeFileName } from "./helpers";
 import { useMediaQuery } from "react-responsive";
 import ImprovementModal from "../../../../components/ImprovementModal/ImprovementModal";
+import cn from "classnames";
 
 type Props = {
   id: string;
@@ -210,7 +211,9 @@ const PhotoCard: FC<Props> = ({
         </div>
       </div>
       <div className={css.container}>
-        <div className={css.imgContainer}>
+        <div
+          className={cn(css.imgContainer, !hasImprovedVersion && css.orange)}
+        >
           <Image
             src={smallUrl}
             className={css.img}

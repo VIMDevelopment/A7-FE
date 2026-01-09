@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import css from "./index.module.css";
-import { Breadcrumb, Divider } from "antd";
+import { Breadcrumb } from "antd";
 import { useParams, Link } from "react-router-dom";
 import { PublicRoutes } from "../../routes/routes";
 import {
@@ -43,17 +43,13 @@ const AlbumPage = () => {
   const [selectedOriginalPhotos, setSelectedOriginalPhotos] = useState<
     string[]
   >([]);
-  const [selectedImprovedPhotos, setSelectedImprovedPhotos] = useState<
-    string[]
-  >([]);
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
   const [improvementPhotoId, setImprovementPhotoId] = useState("");
 
-  const { mutateAsync: improvePhoto } =
-    usePostPhotosImprovement({
-      axios: defaultApiAxiosParams,
-    });
+  const { mutateAsync: improvePhoto } = usePostPhotosImprovement({
+    axios: defaultApiAxiosParams,
+  });
 
   const { data: projectData } = useGetProjectsProjectId(projectId ?? "", {
     axios: defaultApiAxiosParams,
@@ -128,29 +124,21 @@ const AlbumPage = () => {
     }
   };
 
-  const handleDownloadPhotosClick = ({
-    isOriginal,
-  }: {
-    isOriginal: boolean;
-  }) => {
+  const handleDownloadPhotosClick = () => {
     const preparedFilesData: FileForZip[] = (albumPhotos ?? [])
-      .filter((item) =>
-        isOriginal
-          ? selectedOriginalPhotos.includes(item.id)
-          : selectedImprovedPhotos.includes(item.id)
-      )
+      .filter((item) => selectedOriginalPhotos.includes(item.id))
       .map((item) => ({
-        url: isOriginal ? item.default.original : item.current?.original ?? "",
+        url: item.default.original,
         fileName: makeFileName({
           fileName: item.fileName,
-          isOriginal,
+          isOriginal: true,
         }),
       }));
 
     handleDownloadAll({
       files: preparedFilesData,
       albumName: albumName,
-      isOriginal,
+      isOriginal: true,
     });
   };
 
@@ -198,7 +186,7 @@ const AlbumPage = () => {
           message: "Фотографии отправлены на улучшение",
           type: "success",
         });
-        setSelectedOriginalPhotos([])
+        setSelectedOriginalPhotos([]);
       })
       .catch(() => {
         showNotification({
@@ -208,46 +196,19 @@ const AlbumPage = () => {
       });
   };
 
-  const toggleSelectPhoto = ({
-    id,
-    isOriginal,
-  }: {
-    id: string;
-    isOriginal: boolean;
-  }) => {
-    if (isOriginal) {
-      setSelectedOriginalPhotos((prev) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      );
-    }
-    if (!isOriginal) {
-      setSelectedImprovedPhotos((prev) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      );
-    }
+  const toggleSelectPhoto = (id: string) => {
+    setSelectedOriginalPhotos((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
-  const handleSelectAllPhotos = ({ isOriginal }: { isOriginal: boolean }) => {
+  const handleSelectAllPhotos = () => {
     const photosIds = (albumPhotos ?? []).map((item) => item.id);
-    if (isOriginal) {
-      setSelectedOriginalPhotos(photosIds);
-    }
-    if (!isOriginal) {
-      setSelectedImprovedPhotos(photosIds);
-    }
+    setSelectedOriginalPhotos(photosIds);
   };
 
-  const handleResetSelectedPhotos = ({
-    isOriginal,
-  }: {
-    isOriginal: boolean;
-  }) => {
-    if (isOriginal) {
-      setSelectedOriginalPhotos([]);
-    }
-    if (!isOriginal) {
-      setSelectedImprovedPhotos([]);
-    }
+  const handleResetSelectedPhotos = () => {
+    setSelectedOriginalPhotos([]);
   };
 
   const { backButton } = useBreadcrumbsBackButton();
@@ -300,28 +261,9 @@ const AlbumPage = () => {
           ]}
         />
       </div>
-      <Divider className={css.divider} orientation="start">
-        Оригиналы
-      </Divider>
       <div className={css.actionsContainer}>
-        <Button
-          onClick={() =>
-            handleSelectAllPhotos({
-              isOriginal: true,
-            })
-          }
-        >
-          Выбрать все
-        </Button>
-        <Button
-          onClick={() =>
-            handleResetSelectedPhotos({
-              isOriginal: true,
-            })
-          }
-        >
-          Отменить выбор
-        </Button>
+        <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
+        <Button onClick={handleResetSelectedPhotos}>Отменить выбор</Button>
         <Button
           disabled={selectedOriginalPhotos.length === 0}
           onClick={() => handleImprovePhotosClick()}
@@ -330,11 +272,7 @@ const AlbumPage = () => {
         </Button>
         <Button
           disabled={selectedOriginalPhotos.length === 0}
-          onClick={() =>
-            handleDownloadPhotosClick({
-              isOriginal: true,
-            })
-          }
+          onClick={handleDownloadPhotosClick}
         >
           Скачать выбранные
         </Button>
@@ -427,12 +365,7 @@ const AlbumPage = () => {
                 name={item.fileName}
                 isSelected={selectedOriginalPhotos.includes(item.id)}
                 albumId={albumId ?? ""}
-                onSelect={(id: string) =>
-                  toggleSelectPhoto({
-                    id,
-                    isOriginal: true,
-                  })
-                }
+                onSelect={toggleSelectPhoto}
               />
             ))}
           </Image.PreviewGroup>
@@ -442,125 +375,6 @@ const AlbumPage = () => {
             albumId={albumId ?? ""}
           />
         </div>
-      )}
-
-      <Divider className={css.divider} orientation="start">
-        Улучшенные
-      </Divider>
-      {improvedPhotos?.length ? (
-        <>
-          <div className={css.actionsContainer}>
-            <Button
-              onClick={() =>
-                handleSelectAllPhotos({
-                  isOriginal: false,
-                })
-              }
-            >
-              Выбрать все
-            </Button>
-            <Button
-              onClick={() =>
-                handleResetSelectedPhotos({
-                  isOriginal: false,
-                })
-              }
-            >
-              Отменить выбор
-            </Button>
-            <Button
-              disabled={selectedImprovedPhotos.length === 0}
-              onClick={() =>
-                handleDownloadPhotosClick({
-                  isOriginal: false,
-                })
-              }
-            >
-              Скачать выбранные
-            </Button>
-          </div>
-          <div
-            className={css.counter}
-          >{`Выбрано фотографий: ${selectedImprovedPhotos.length} из ${improvedPhotos.length}`}</div>
-          <div className={css.grid}>
-            <Image.PreviewGroup
-              preview={{
-                toolbarRender: (_, info) => {
-                  const currentPhoto = improvedPhotos[info.current];
-
-                  return (
-                    <div className={css.toolbar}>
-                      {info.icons.flipXIcon}
-                      {info.icons.flipYIcon}
-                      {info.icons.rotateLeftIcon}
-                      {info.icons.rotateRightIcon}
-                      {info.icons.zoomOutIcon}
-                      {info.icons.zoomInIcon}
-                      <div className={css.customToolbarButtonsContainer}>
-                        <PrinterOutlined
-                          onClick={() =>
-                            handlePrintPhoto(
-                              currentPhoto.current?.original ?? "",
-                              makeFileName({
-                                fileName: currentPhoto.fileName,
-                                isOriginal: false,
-                              })
-                            )
-                          }
-                          className={css.toolbarBtn}
-                        />
-                        <DownloadOutlined
-                          className={css.toolbarBtn}
-                          onClick={() =>
-                            downloadImageByUrl(
-                              currentPhoto.current?.original ?? "",
-                              makeFileName({
-                                fileName: currentPhoto.fileName,
-                                isOriginal: false,
-                              })
-                            )
-                          }
-                        />
-                        <RocketOutlined
-                          className={css.toolbarBtn}
-                          onClick={() => {
-                            setImprovementPhotoId(currentPhoto.id);
-                            setIsImprovePhotoModalOpen(true);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                },
-              }}
-              items={improvedPhotos.map((item) => item.current?.original ?? "")}
-            >
-              {improvedPhotos.map((item) => (
-                <PhotoCard
-                  key={item.id}
-                  id={item.id}
-                  isOriginal={false}
-                  hasImprovedVersion={improvedPhotos.some(
-                    (el) => el.id === item.id
-                  )}
-                  url={item.current?.original ?? ""}
-                  smallUrl={item.current?.small ?? ""}
-                  name={item.fileName}
-                  isSelected={selectedImprovedPhotos.includes(item.id)}
-                  albumId={albumId ?? ""}
-                  onSelect={(id: string) =>
-                    toggleSelectPhoto({
-                      id,
-                      isOriginal: false,
-                    })
-                  }
-                />
-              ))}
-            </Image.PreviewGroup>
-          </div>
-        </>
-      ) : (
-        <div className={css.emptyInfo}>Здесь пока пусто</div>
       )}
 
       <ImprovementModal

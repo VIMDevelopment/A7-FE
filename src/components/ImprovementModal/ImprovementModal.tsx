@@ -33,9 +33,6 @@ const ImprovementModal: FC<Props> = ({
   onOk,
   onCancel,
 }) => {
-  // const [promptIds, setPromptIds] = useState<string[]>([]);
-  // const [modelId, setModelId] = useState<string>();
-  // const [customPromptText, setCustomPromptText] = useState<string>("");
   const [improvementInProgress, setImprovementInProgress] = useState(false);
   const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
 
@@ -57,30 +54,6 @@ const ImprovementModal: FC<Props> = ({
       },
     },
   });
-
-  // const { data: modelsData, isLoading: isModelsLoading } = useGetAimodels({
-  //   axios: defaultApiAxiosParams,
-  //   query: {
-  //     onError: () => {
-  //       showNotification({
-  //         message: "Произошла ошибка при загрузке списка моделей",
-  //         type: "error",
-  //       });
-  //     },
-  //   },
-  // });
-
-  // const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
-  //   axios: defaultApiAxiosParams,
-  //   query: {
-  //     onError: () => {
-  //       showNotification({
-  //         message: "Произошла ошибка при загрузке списка промптов",
-  //         type: "error",
-  //       });
-  //     },
-  //   },
-  // });
 
   const { isLoading: isImprovementLoading, mutateAsync: improvePhoto } =
     usePostPhotosImprovement({
@@ -117,9 +90,6 @@ const ImprovementModal: FC<Props> = ({
     improvePhoto({
       data: {
         photoIds: [photoId],
-        // promptIds: promptIds.length > 0 ? promptIds : undefined,
-        // customPromptText: customPromptText || undefined,
-        // modelId: modelId ?? "",
       },
     })
       .then(() => {
@@ -133,26 +103,6 @@ const ImprovementModal: FC<Props> = ({
         });
       });
   };
-
-  // const modelOptions = useMemo(
-  //   () =>
-  //     (modelsData?.data ?? []).map((item) => ({
-  //       key: item.id,
-  //       value: item.id,
-  //       label: item.title,
-  //     })),
-  //   [modelsData]
-  // );
-
-  // const promptsOptions = useMemo(
-  //   () =>
-  //     (promptsData?.data ?? []).map((item) => ({
-  //       key: item.id,
-  //       value: item.id,
-  //       label: item.title,
-  //     })),
-  //   [promptsData]
-  // );
 
   const originalPhoto = photoData?.data.default.original;
 
@@ -218,66 +168,6 @@ const ImprovementModal: FC<Props> = ({
 
           <div className={css.bottomContainer}>
             <div className={css.bottomContainerInner}>
-              {/* <div className={css.modelSelectContainer}>
-                <Select
-                  label="Выберите модель"
-                  onChange={(value) => setModelId(value)}
-                  value={modelId}
-                  placeholder="Выберите из списка"
-                  disabled={
-                    isModelsLoading ||
-                    isImprovementLoading ||
-                    improvementInProgress ||
-                    isPhotoLoading
-                  }
-                  loading={isModelsLoading}
-                  options={modelOptions}
-                  size="large"
-                />
-                <Tooltip
-                  className={css.tooltip}
-                  title={
-                    !modelId
-                      ? "Модель не выбрана"
-                      : modelsData?.data.find((item) => item.id === modelId)
-                          ?.description ?? "Описание не найдено"
-                  }
-                >
-                  <InfoCircleOutlined style={{ fontSize: "20px" }} />
-                </Tooltip>
-              </div>
-
-              <Select
-                label="Выберите что вы хотите улучшить"
-                onChange={(value) => setPromptIds(value)}
-                value={promptIds}
-                placeholder="Выберите из списка"
-                disabled={
-                  isPromptsLoading ||
-                  isImprovementLoading ||
-                  improvementInProgress ||
-                  isPhotoLoading
-                }
-                loading={isPromptsLoading}
-                options={promptsOptions}
-                mode="multiple"
-                size="large"
-              />
-
-              <InputTextArea
-                label="Кастомный запрос"
-                onChange={(e) => setCustomPromptText(e.target.value)}
-                value={customPromptText}
-                disabled={
-                  improvementInProgress ||
-                  isImprovementLoading ||
-                  isPhotoLoading
-                }
-                placeholder="Введите запрос"
-                autoSize={{ minRows: 2, maxRows: 2 }}
-                count={{}}
-              /> */}
-
               <div className={css.info}>
                 P.S. Эффекты всегда применяются только к оригиналу. При
                 повторной обработке предыдущая обработанная версия автоматически
@@ -287,8 +177,6 @@ const ImprovementModal: FC<Props> = ({
               <Button
                 onClick={handleImprovePhoto}
                 disabled={
-                  // (!promptIds.length && !customPromptText) ||
-                  // isPromptsLoading ||
                   improvementInProgress ||
                   isImprovementLoading ||
                   isPhotoLoading
