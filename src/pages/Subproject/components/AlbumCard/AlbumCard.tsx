@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useMemo } from "react";
 import css from "./index.module.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { PublicRoutes } from "../../../../routes/routes";
@@ -6,8 +6,8 @@ import {
   useDeleteAlbumsId,
   useGetAlbumsSubprojectSubprojectId,
   useGetPhotosId,
+  useGetPhotosAlbumAlbumId,
   usePutAlbumsId,
-  usePutAlbumsProcessed,
 } from "../../../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { Dropdown } from "antd";
@@ -33,8 +33,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
   const queryClient = useQueryClient();
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
-  const [isProcessedAlbumModalOpen, setIsProcessedAlbumModalOpen] =
-    useState(false);
   const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
   const [isDeleteAlbumModalOpen, setIsDeleteAlbumModalOpen] = useState(false);
   const [inputAlbumValue, setInputAlbumValue] = useState(name ?? "");
@@ -44,13 +42,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
     query: {
       onError: () => null,
     },
-  });
-
-  const {
-    isLoading: isProcessedAlbumLoading,
-    mutateAsync: processedAlbumUpdate,
-  } = usePutAlbumsProcessed({
-    axios: defaultApiAxiosParams,
   });
 
   const { isLoading: isEditAlbumLoading, mutateAsync: updateAlbum } =
@@ -70,7 +61,20 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
     }
   );
 
+  const { data: albumPhotosData } = useGetPhotosAlbumAlbumId(id ?? "", {
+    axios: defaultApiAxiosParams,
+    query: {
+      enabled: !!id,
+    },
+  });
+
   const allAlbumsNames = albumsData?.data.map((item) => item.title ?? "") ?? [];
+
+  const allPhotosImproved = useMemo(() => {
+    const photos = albumPhotosData?.data ?? [];
+    if (photos.length === 0) return true;
+    return photos.every((photo) => !!photo.current?.original);
+  }, [albumPhotosData]);
 
   const handleAlbumClick = () => {
     navigate(
@@ -80,26 +84,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
         albumId: id ?? "",
       })
     );
-  };
-
-  const handleProcessedAlbumOk = () => {
-    processedAlbumUpdate({
-      data: {
-        albumId: id ?? "",
-        processed: !isProcessed,
-      },
-    }).then(() => {
-      showNotification({
-        message: isProcessed
-          ? "Альбом отмечен как не обработанный"
-          : "Альбом отмечен как обработанный",
-        type: "success",
-      });
-      setIsProcessedAlbumModalOpen(false);
-      void queryClient.invalidateQueries({
-        queryKey: `/albums/subproject/${subprojectId}`,
-      });
-    });
   };
 
   const handleEditAlbumOk = () => {
@@ -151,13 +135,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
 
   const items: ItemType[] = [
     {
-      key: "1",
-      label: isProcessed
-        ? "Отметить как не обработанный"
-        : "Отметить как обработанный",
-      onClick: () => setIsProcessedAlbumModalOpen(true),
-    },
-    {
       key: "2",
       label: "Переименовать",
       onClick: () => setIsEditAlbumModalOpen(true),
@@ -169,10 +146,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
       onClick: () => setIsDeleteAlbumModalOpen(true),
     },
   ];
-
-  const handleProcessedAlbumCancel = () => {
-    setIsProcessedAlbumModalOpen(false);
-  };
 
   const handleEditAlbumCancel = () => {
     setIsEditAlbumModalOpen(false);
@@ -203,7 +176,10 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
         </div>
       </div>
       <div
-        className={cn(css.container, !isProcessed && css.orange)}
+        className={cn(
+          css.container,
+          !allPhotosImproved && !isProcessed && css.orange
+        )}
         onClick={handleAlbumClick}
       >
         {coverId && !isError && !isLoading ? (
@@ -220,19 +196,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
         )}
         {name ?? "Безымянный"}
       </div>
-      <Modal
-        title={"Обработка альбома"}
-        open={isProcessedAlbumModalOpen}
-        onOk={handleProcessedAlbumOk}
-        onCancel={handleProcessedAlbumCancel}
-        okButtonName="Подтвердить"
-        destroyOnHidden
-        isLoading={isProcessedAlbumLoading}
-      >
-        {isProcessed
-          ? `Вы уверены, что хотите отметить альбом "${name}" как не обработаный?`
-          : `Вы уверены, что хотите отметить альбом "${name}" как обработаный?`}
-      </Modal>
 
       <Modal
         title={"Редактирование альбома"}
