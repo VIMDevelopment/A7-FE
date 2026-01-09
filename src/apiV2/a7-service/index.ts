@@ -72,6 +72,10 @@ import type {
   SetCoverRequest,
   PostPhotosImprovement200,
   PostPhotosImprovementBody,
+  PostPhotosImprovementcustom200,
+  PostPhotosImprovementcustomBody,
+  RatingPhotoResponse,
+  RatingPhotoRequest,
   DescriptorMatchResponse,
   DescriptorMatchRequest,
   PromptResponse,
@@ -1361,6 +1365,39 @@ export const postPhotosImprovement = (
     }
     
 /**
+ * Улучшение фотографии с использованием пользовательского промпта
+ * @summary Кастомное улучшение фотографии
+ */
+export const postPhotosImprovementcustom = (
+    postPhotosImprovementcustomBody: PostPhotosImprovementcustomBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PostPhotosImprovementcustom200>> => {
+    return axios.post(
+      `/photos/improvement-custom`,
+      postPhotosImprovementcustomBody,options
+    );
+  }
+
+
+
+    export const usePostPhotosImprovementcustom = <TError = AxiosError<PhotoErrorResponse | void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovementcustom>, TError,{data: PostPhotosImprovementcustomBody}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovementcustom>, {data: PostPhotosImprovementcustomBody}> = (props) => {
+          const {data} = props || {};
+
+          return  postPhotosImprovementcustom(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPhotosImprovementcustom>, TError, {data: PostPhotosImprovementcustomBody}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
  * Восстанавливает значения из `default` в `current` и удаляет файлы из бакета,
 которые были в `current`, но отсутствуют в `default`.
 
@@ -1394,6 +1431,42 @@ export const postPhotosIdRevert = (
         }
 
       return useMutation<AsyncReturnType<typeof postPhotosIdRevert>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Отправляет фотографию на оценку нейросетью.
+В данный момент логирует photo ID. Позже будет подключена нейросеть для оценки фото по промпту.
+Оценка от нейросети будет сохранена в поле rating фотографии.
+
+ * @summary Оценка фотографии
+ */
+export const postPhotosRating = (
+    ratingPhotoRequest: RatingPhotoRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<RatingPhotoResponse>> => {
+    return axios.post(
+      `/photos/rating`,
+      ratingPhotoRequest,options
+    );
+  }
+
+
+
+    export const usePostPhotosRating = <TError = AxiosError<PhotoErrorResponse | void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosRating>, TError,{data: RatingPhotoRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosRating>, {data: RatingPhotoRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postPhotosRating(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPhotosRating>, TError, {data: RatingPhotoRequest}, TContext>(mutationFn, mutationOptions)
     }
     
 /**

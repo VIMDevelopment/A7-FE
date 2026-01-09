@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-/**
- * Массив из 128 чисел, представляющих дескриптор лица
- */
-export type DescriptorVector = { values: number[] };
+export interface DescriptorVector {
+  /** Массив из 128 чисел, представляющих дескриптор лица */
+  values: number[];
+}

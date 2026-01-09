@@ -26,6 +26,8 @@ export interface UploadPhotoResponse {
   isCover?: boolean;
   /** Теги */
   tags?: string[];
+  /** Оценка от нейросети (текстовая) */
+  rating?: string;
   /** Дата создания */
   createdAt?: string;
   /** Дата обновления */

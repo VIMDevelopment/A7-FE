@@ -6,7 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface DescriptorMatchResponse {
-  /** Массив идентификаторов фотографий с найденными совпадениями */
-  matches?: string[];
+export interface RatingPhotoResponse {
+  /** Сообщение о результате */
+  message?: string;
+  /** ID фотографии */
+  photoId?: string;
 }

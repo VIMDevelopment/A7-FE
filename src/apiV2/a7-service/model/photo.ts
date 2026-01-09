@@ -26,6 +26,8 @@ export interface Photo {
   isCover: boolean;
   /** Теги фото */
   tags: string[];
+  /** Оценка от нейросети (текстовая) */
+  rating?: string;
   /** Дата создания */
   createdAt: string;
   /** Дата последнего обновления */
