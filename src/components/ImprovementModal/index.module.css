@@ -11,16 +11,19 @@
 }
 
 .improveModal :global(.ant-modal-content) {
-  min-height: calc(100vh - 40px) !important;
+  min-height: calc(100vh - 46px) !important;
+}
+
+.improveModal :global(.ant-modal-footer) {
+  margin-top: 0px !important;
 }
 
 .improvePhotoImgContainer {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 10px;
   height: calc(100vh - 240px);
-  margin-bottom: 10px;
   position: relative;
 }
 

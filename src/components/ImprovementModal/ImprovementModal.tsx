@@ -168,12 +168,6 @@ const ImprovementModal: FC<Props> = ({
 
           <div className={css.bottomContainer}>
             <div className={css.bottomContainerInner}>
-              <div className={css.info}>
-                P.S. Эффекты всегда применяются только к оригиналу. При
-                повторной обработке предыдущая обработанная версия автоматически
-                заменяется.
-              </div>
-
               <Button
                 onClick={handleImprovePhoto}
                 disabled={
