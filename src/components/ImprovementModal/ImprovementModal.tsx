@@ -3,6 +3,7 @@ import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
   useGetPhotosId,
+  usePostPhotosIdRevert,
   usePostPhotosImprovement,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
@@ -60,6 +61,11 @@ const ImprovementModal: FC<Props> = ({
       axios: defaultApiAxiosParams,
     });
 
+  const { isLoading: isRevertLoading, mutateAsync: revertPhoto } =
+    usePostPhotosIdRevert({
+      axios: defaultApiAxiosParams,
+    });
+
   useEffect(() => {
     if (!improvementInProgress) return;
 
@@ -102,6 +108,17 @@ const ImprovementModal: FC<Props> = ({
           type: "error",
         });
       });
+  };
+
+  const handleRevertPhoto = () => {
+    revertPhoto({
+      id: photoId,
+    }).catch(() => {
+      showNotification({
+        message: "Произошла ошибка при откате фото",
+        type: "error",
+      });
+    });
   };
 
   const originalPhoto = photoData?.data.default.original;
@@ -168,12 +185,27 @@ const ImprovementModal: FC<Props> = ({
 
           <div className={css.bottomContainer}>
             <div className={css.bottomContainerInner}>
+              {/* {hasImprovedVersion && (
+                <Button
+                  onClick={handleRevertPhoto}
+                  disabled={
+                    improvementInProgress ||
+                    isImprovementLoading ||
+                    isPhotoLoading ||
+                    isRevertLoading
+                  }
+                  loading={isRevertLoading}
+                >
+                  Вернуть к оригиналу
+                </Button>
+              )} */}
               <Button
                 onClick={handleImprovePhoto}
                 disabled={
                   improvementInProgress ||
                   isImprovementLoading ||
-                  isPhotoLoading
+                  isPhotoLoading ||
+                  isRevertLoading
                 }
                 loading={
                   improvementInProgress ||
