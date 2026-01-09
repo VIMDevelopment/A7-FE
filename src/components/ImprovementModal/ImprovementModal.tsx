@@ -188,7 +188,9 @@ const ImprovementModal: FC<Props> = ({
                 }
               >
                 {improvementInProgress
-                  ? "Идёт улучшение фото"
+                  ? "Идёт обработка фото"
+                  : hasImprovedVersion
+                  ? "Обработать заново"
                   : "Улучшить фото"}
               </Button>
             </div>

@@ -29,6 +29,7 @@ import Button from "../../components/Button/Button";
 import {
   downloadImageByUrl,
   FileForZip,
+  getPhotoVersion,
   handleDownloadAll,
   handlePrintPhoto,
   makeFileName,
@@ -128,17 +129,16 @@ const AlbumPage = () => {
     const preparedFilesData: FileForZip[] = (albumPhotos ?? [])
       .filter((item) => selectedOriginalPhotos.includes(item.id))
       .map((item) => ({
-        url: item.default.original,
+        url: getPhotoVersion(item).original,
         fileName: makeFileName({
           fileName: item.fileName,
-          isOriginal: true,
+          isOriginal: !item.current,
         }),
       }));
 
     handleDownloadAll({
       files: preparedFilesData,
       albumName: albumName,
-      isOriginal: true,
     });
   };
 
@@ -311,10 +311,12 @@ const AlbumPage = () => {
                       <PrinterOutlined
                         onClick={() =>
                           handlePrintPhoto(
-                            currentPhoto?.default.original ?? "",
+                            currentPhoto
+                              ? getPhotoVersion(currentPhoto).original
+                              : "",
                             makeFileName({
                               fileName: currentPhoto?.fileName ?? "",
-                              isOriginal: true,
+                              isOriginal: !currentPhoto?.current,
                             })
                           )
                         }
@@ -324,10 +326,12 @@ const AlbumPage = () => {
                         className={css.toolbarBtn}
                         onClick={() =>
                           downloadImageByUrl(
-                            currentPhoto?.default.original ?? "",
+                            currentPhoto
+                              ? getPhotoVersion(currentPhoto).original
+                              : "",
                             makeFileName({
                               fileName: currentPhoto?.fileName ?? "",
-                              isOriginal: true,
+                              isOriginal: !currentPhoto?.current,
                             })
                           )
                         }
@@ -350,24 +354,28 @@ const AlbumPage = () => {
                 );
               },
             }}
-            items={albumPhotos?.map((item) => item.default.original)}
+            items={albumPhotos?.map((item) => getPhotoVersion(item).original)}
           >
-            {albumPhotos?.map((item) => (
-              <PhotoCard
-                key={item.id}
-                id={item.id}
-                isOriginal={true}
-                hasImprovedVersion={(improvedPhotos ?? []).some(
-                  (el) => item.id === el.id
-                )}
-                url={item.default.original}
-                smallUrl={item.default.small}
-                name={item.fileName}
-                isSelected={selectedOriginalPhotos.includes(item.id)}
-                albumId={albumId ?? ""}
-                onSelect={toggleSelectPhoto}
-              />
-            ))}
+            {albumPhotos?.map((item) => {
+              const photoVersion = getPhotoVersion(item);
+
+              return (
+                <PhotoCard
+                  key={item.id}
+                  id={item.id}
+                  isOriginal={!item.current}
+                  hasImprovedVersion={(improvedPhotos ?? []).some(
+                    (el) => item.id === el.id
+                  )}
+                  url={photoVersion.original}
+                  smallUrl={photoVersion.small}
+                  name={item.fileName}
+                  isSelected={selectedOriginalPhotos.includes(item.id)}
+                  albumId={albumId ?? ""}
+                  onSelect={toggleSelectPhoto}
+                />
+              );
+            })}
           </Image.PreviewGroup>
           <UploadBox
             isAlbumLoading={isAlbumPhotosLoading}

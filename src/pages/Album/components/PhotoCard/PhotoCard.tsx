@@ -131,21 +131,17 @@ const PhotoCard: FC<Props> = ({
           })
         ),
     },
-    ...(isOriginal
-      ? [
-          {
-            key: "3",
-            label: "Переименовать",
-            onClick: () => setIsEditPhotoNameModalOpen(true),
-          },
-          {
-            key: "4",
-            label: "Удалить",
-            danger: true,
-            onClick: () => setIsDeletePhotoModalOpen(true),
-          },
-        ]
-      : []),
+    {
+      key: "3",
+      label: "Переименовать",
+      onClick: () => setIsEditPhotoNameModalOpen(true),
+    },
+    {
+      key: "4",
+      label: "Удалить",
+      danger: true,
+      onClick: () => setIsDeletePhotoModalOpen(true),
+    },
   ];
 
   const handleEditPhotoNameOk = () => {

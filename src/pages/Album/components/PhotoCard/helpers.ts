@@ -1,6 +1,12 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { showNotification } from "../../../../components/ShowNotification";
+import type { Photo } from "../../../../apiV2/a7-service/model/photo";
+import type { PhotoVersions } from "../../../../apiV2/a7-service/model/photoVersions";
+
+export function getPhotoVersion(photo: Photo): PhotoVersions {
+  return photo.current ?? photo.default;
+}
 
 export function makeFileName({
   fileName,
@@ -59,29 +65,19 @@ export const downloadImageByUrl = async (url: string, filename: string) => {
 export const handleDownloadAll = async ({
   files,
   albumName,
-  isOriginal,
 }: {
   files: FileForZip[];
   albumName: string;
-  isOriginal: boolean;
 }) => {
   if (files.length === 1) {
     const file = files[0];
-    downloadImageByUrl(
-      file.url,
-      makeFileName({
-        fileName: file.fileName,
-        isOriginal,
-      })
-    );
+    downloadImageByUrl(file.url, file.fileName);
 
     return;
   }
 
   const zip = new JSZip();
-  const folder = zip.folder(
-    `Фото_${albumName}_${isOriginal ? "оригинальные" : "улучшенные"}`
-  );
+  const folder = zip.folder(`Фото_${albumName}`);
 
   for (const file of files) {
     const filename = file.fileName;
@@ -98,10 +94,7 @@ export const handleDownloadAll = async ({
   }
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
-  saveAs(
-    zipBlob,
-    `Фото_${albumName}_${isOriginal ? "оригинальные" : "улучшенные"}.zip`
-  );
+  saveAs(zipBlob, `Фото_${albumName}.zip`);
 };
 
 export const handlePrintPhoto = (url: string, name: string) => {

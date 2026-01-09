@@ -19,6 +19,7 @@ import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { useMediaQuery } from "react-responsive";
 import cn from "classnames";
+import { getPhotoVersion } from "../../../Album/components/PhotoCard/helpers";
 
 type Props = {
   id?: string;
@@ -182,9 +183,13 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
         )}
         onClick={handleAlbumClick}
       >
-        {coverId && !isError && !isLoading ? (
+        {coverId && !isError && !isLoading && data?.data ? (
           <div className={css.imgContainer}>
-            <img className={css.img} src={data?.data.default.small} alt="" />
+            <img
+              className={css.img}
+              src={getPhotoVersion(data.data).small}
+              alt=""
+            />
           </div>
         ) : (
           <div className={css.albumPreviewContainer}>
