@@ -84,7 +84,12 @@ import type {
   UpdatePromptRequest,
   AimodelResponse,
   AimodelErrorResponse,
-  CreateAimodelRequest
+  CreateAimodelRequest,
+  PostCameras201,
+  PostCamerasBody,
+  GetCameras200Item,
+  PutCamerasId200,
+  PutCamerasIdBody
 } from './model'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1778,5 +1783,142 @@ export const deleteAimodelsId = (
         }
 
       return useMutation<AsyncReturnType<typeof deleteAimodelsId>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Создает новую камеру с указанными параметрами
+ * @summary Создание новой камеры
+ */
+export const postCameras = (
+    postCamerasBody: PostCamerasBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PostCameras201>> => {
+    return axios.post(
+      `/cameras`,
+      postCamerasBody,options
+    );
+  }
+
+
+
+    export const usePostCameras = <TError = AxiosError<void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postCameras>, TError,{data: PostCamerasBody}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postCameras>, {data: PostCamerasBody}> = (props) => {
+          const {data} = props || {};
+
+          return  postCameras(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postCameras>, TError, {data: PostCamerasBody}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Возвращает список всех камер, отсортированных по дате создания (новые первыми)
+ * @summary Получение списка всех камер
+ */
+export const getCameras = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<GetCameras200Item[]>> => {
+    return axios.get(
+      `/cameras`,options
+    );
+  }
+
+
+export const getGetCamerasQueryKey = () => [`/cameras`];
+
+    
+export const useGetCameras = <TData = AsyncReturnType<typeof getCameras>, TError = AxiosError<void>>(
+  options?: { query?:UseQueryOptions<AsyncReturnType<typeof getCameras>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetCamerasQueryKey();
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getCameras>> = () => getCameras(axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getCameras>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Обновляет данные камеры по ее идентификатору. cameraId нельзя изменять после создания.
+ * @summary Обновление камеры
+ */
+export const putCamerasId = (
+    id: string,
+    putCamerasIdBody: PutCamerasIdBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PutCamerasId200>> => {
+    return axios.put(
+      `/cameras/${id}`,
+      putCamerasIdBody,options
+    );
+  }
+
+
+
+    export const usePutCamerasId = <TError = AxiosError<void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof putCamerasId>, TError,{id: string;data: PutCamerasIdBody}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof putCamerasId>, {id: string;data: PutCamerasIdBody}> = (props) => {
+          const {id,data} = props || {};
+
+          return  putCamerasId(id,data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof putCamerasId>, TError, {id: string;data: PutCamerasIdBody}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Удаляет камеру по ее уникальному идентификатору
+ * @summary Удаление камеры
+ */
+export const deleteCamerasId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.delete(
+      `/cameras/${id}`,options
+    );
+  }
+
+
+
+    export const useDeleteCamerasId = <TError = AxiosError<unknown>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof deleteCamerasId>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof deleteCamerasId>, {id: string}> = (props) => {
+          const {id} = props || {};
+
+          return  deleteCamerasId(id,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof deleteCamerasId>, TError, {id: string}, TContext>(mutationFn, mutationOptions)
     }
     

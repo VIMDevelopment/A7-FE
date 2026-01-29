@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import css from "./index.module.css";
 import Input from "../../components/Input/Input";
 import {
+  PostCameras201,
   UserRegisterDto,
   UserRole,
   UserUpdateDto,
@@ -11,6 +12,7 @@ import Button from "../../components/Button/Button";
 import {
   useGetProjects,
   useGetUsersAll,
+  usePostCameras,
   usePostUsersRegister,
   usePutUsersUpdate,
 } from "../../apiV2/a7-service";
@@ -46,6 +48,8 @@ const AdministrationPage = () => {
     initialCreateUserValues
   );
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
+  const [selectedProjectId, setSelectedProjectId] = useState<string>();
+  const [cameraData, setCameraData] = useState<PostCameras201>();
 
   const { data: currentUser } = useProfile();
   const queryClient = useQueryClient();
@@ -74,6 +78,15 @@ const AdministrationPage = () => {
     axios: defaultApiAxiosParams,
   });
 
+  const {
+    isLoading: isCameraLoading,
+    isSuccess: isCameraSuccess,
+    data: cameraResponse,
+    mutate: createCamera,
+  } = usePostCameras({
+    axios: defaultApiAxiosParams,
+  });
+
   useEffect(() => {
     if (isUserSuccessfulyCreated) {
       showNotification({
@@ -99,6 +112,16 @@ const AdministrationPage = () => {
       setUpdateFormState(undefined);
     }
   }, [isSuccess]);
+
+  useEffect(() => {
+    if (isCameraSuccess && cameraResponse) {
+      setCameraData(cameraResponse.data);
+      showNotification({
+        type: "success",
+        message: "Данные для привязки фотоаппарата сгенерированы",
+      });
+    }
+  }, [isCameraSuccess, cameraResponse]);
 
   const handleCreateClick = () => {
     const validPasswords =
@@ -151,6 +174,16 @@ const AdministrationPage = () => {
     }
   };
 
+  const handleGenerateCameraData = () => {
+    if (selectedProjectId) {
+      createCamera({
+        data: {
+          projectId: selectedProjectId,
+        },
+      });
+    }
+  };
+
   const currentUserLevel = getRolePriority(currentUser?.role);
 
   const isSupervisor = currentUser?.role === UserRole.supervisor;
@@ -180,6 +213,37 @@ const AdministrationPage = () => {
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>Администрирование</div>
+
+      <div className={css.subTitle}>Привязка фотоаппарата</div>
+      <div className={css.form}>
+        <Select
+          label="Филиал"
+          onChange={(value) => setSelectedProjectId(value as string)}
+          value={selectedProjectId}
+          placeholder="Выберите из списка"
+          disabled={isCameraLoading || isProjectsLoading}
+          loading={isProjectsLoading}
+          options={getWorkplaceOptions(
+            projectsData?.data.projects ?? [],
+            currentUser?.role,
+            currentUser?.workplace
+          )}
+        />
+        {cameraData && (
+          <pre className={css.jsonBlock}>
+            {JSON.stringify(cameraData, null, 2)}
+          </pre>
+        )}
+        <Button
+          className={css.btn}
+          disabled={isCameraLoading || !selectedProjectId}
+          onClick={handleGenerateCameraData}
+          showSpinner={isCameraLoading}
+        >
+          Сгенерировать данные для привязки
+        </Button>
+      </div>
+
       <div className={css.subTitle}>Создание нового пользователя</div>
       <div className={css.form}>
         <Input
@@ -297,7 +361,7 @@ const AdministrationPage = () => {
           onChange={(value) => {
             const selectedUser = data?.data.find((item) => item.id === value);
             const projectsIds = projectsData?.data.projects?.map((el) => el.id);
-            
+
             setUpdateFormState({
               id: selectedUser?.id,
               name: selectedUser?.name,

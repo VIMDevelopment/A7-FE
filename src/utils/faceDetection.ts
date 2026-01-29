@@ -1,5 +1,6 @@
 import * as faceapi from "face-api.js";
-import type { DescriptorVector } from "../apiV2/a7-service/model/descriptorVector";
+import { DescriptorVector } from "../apiV2/a7-service/model";
+
 
 let modelsLoaded = false;
 let isLoadingModels = false;
@@ -74,7 +75,7 @@ export const extractFaceDescriptors = async (
   const detections = await faceapi
     .detectAllFaces(image, new faceapi.TinyFaceDetectorOptions())
     .withFaceLandmarks()
-    .withFaceDescriptors();
+    .withFaceDescriptors(); 
 
   if (detections.length === 0) {
     throw new Error("На изображении не найдено лиц");

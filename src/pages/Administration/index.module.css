@@ -32,7 +32,22 @@
 }
 
 .btn {
-  width: 200px !important;
+  width: auto !important;
+  min-width: 200px !important;
+}
+
+.jsonBlock {
+  width: 100%;
+  max-width: 100%;
+  padding: 15px;
+  background-color: var(--color-modal-background);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--color-text);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-top: 10px;
 }
 
 @media (max-width: 768px) {
