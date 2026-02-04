@@ -1,0 +1,10 @@
+.container {
+  display: flex;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+  text-transform: uppercase;
+}

@@ -56,4 +56,7 @@ export const PublicRoutes = {
   RECOGNITION: {
     static: "/recognition",
   },
+  DISK: {
+    static: "/disk",
+  },
 };
