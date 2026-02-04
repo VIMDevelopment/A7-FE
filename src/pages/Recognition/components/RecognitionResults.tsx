@@ -1,6 +1,10 @@
 import React, { useState, useCallback, useMemo } from "react";
 import Button from "../../../components/Button/Button";
-import { useDeletePhotosId, getPhotosId } from "../../../apiV2/a7-service";
+import {
+  useDeletePhotosId,
+  getPhotosId,
+  usePostPhotosImprovement,
+} from "../../../apiV2/a7-service";
 import type { Photo } from "../../../apiV2/a7-service/model/photo";
 import css from "../index.module.css";
 import { defaultApiAxiosParams } from "../../../api/helpers";
@@ -33,6 +37,10 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
     useDeletePhotosId({
       axios: defaultApiAxiosParams,
     });
+
+  const { mutateAsync: improvePhoto } = usePostPhotosImprovement({
+    axios: defaultApiAxiosParams,
+  });
 
   // Загружаем данные о найденных фото
   React.useEffect(() => {
@@ -100,6 +108,28 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
     });
   }, [matchedPhotos, selectedPhotoIds]);
 
+  // Обработка улучшения фото
+  const handleImprovePhotosClick = useCallback(() => {
+    improvePhoto({
+      data: {
+        photoIds: selectedPhotoIds,
+      },
+    })
+      .then(() => {
+        showNotification({
+          message: "Фотографии отправлены на улучшение",
+          type: "success",
+        });
+        setSelectedPhotoIds([]);
+      })
+      .catch(() => {
+        showNotification({
+          message: "Произошла ошибка при улучшении фото",
+          type: "error",
+        });
+      });
+  }, [selectedPhotoIds, improvePhoto, photoIds]);
+
   // Обработка удаления фото
   const handleDeletePhotosClick = useCallback(() => {
     setIsDeletePhotosModalOpen(true);
@@ -143,6 +173,12 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
       <div className={css.actionsContainer}>
         <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
         <Button onClick={handleResetSelectedPhotos}>Отменить выбор</Button>
+        <Button
+          disabled={selectedPhotoIds.length === 0}
+          onClick={handleImprovePhotosClick}
+        >
+          Улучшить выбранные
+        </Button>
         <Button
           disabled={selectedPhotoIds.length === 0}
           onClick={handleDownloadPhotosClick}
