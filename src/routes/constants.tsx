@@ -11,6 +11,7 @@ import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
 import RecognitionPage from "../pages/Recognition/Recognition";
 import DiskPage from "../pages/Disk/Disk";
+import DiskCallbackPage from "../pages/Disk/DiskCallback";
 
 const ALL_ROLES = [
   UserRole.admin,
@@ -107,6 +108,12 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.DISK.static,
     roles: ALL_ROLES,
     component: <DiskPage />,
+  },
+  {
+    id: "disk-auth-callback",
+    path: PublicRoutes.DISK_AUTH_CALLBACK.static,
+    roles: ALL_ROLES,
+    component: <DiskCallbackPage />,
   },
   // {
   //   id: "statistics",
