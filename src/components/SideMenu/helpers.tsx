@@ -23,7 +23,7 @@ export const getRoleDescription = (role?: UserRole) => {
       return "Руководитель филиала";
 
     case UserRole.maker:
-      return "Мэйкер";
+      return "Мейкер";
 
     default:
       return "";
