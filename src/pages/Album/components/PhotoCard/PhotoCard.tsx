@@ -28,6 +28,7 @@ type Props = {
   isSelected: boolean;
   albumId: string;
   onSelect: (id: string) => void;
+  onDelete?: (id: string) => void;
 };
 
 const PhotoCard: FC<Props> = ({
@@ -40,6 +41,7 @@ const PhotoCard: FC<Props> = ({
   isSelected,
   albumId,
   onSelect,
+  onDelete,
 }) => {
   const queryClient = useQueryClient();
   const inputRef = useRef<InputRef>(null);
@@ -84,6 +86,8 @@ const PhotoCard: FC<Props> = ({
         void queryClient.invalidateQueries({
           queryKey: [`/photos/album/${albumId}`],
         });
+
+        onDelete?.(id);
       })
       .catch(() => {
         showNotification({

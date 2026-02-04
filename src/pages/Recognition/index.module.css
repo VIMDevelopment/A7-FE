@@ -247,6 +247,29 @@
   border-radius: 100px;
 }
 
+.customToolbarButtonsContainer {
+  display: flex;
+  align-items: center;
+}
+
+.customToolbarButtonsContainer > span {
+  padding: 12px;
+  margin-left: 12px;
+}
+
+.toolbarBtn {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.toolbarBtn:hover {
+  svg {
+    path {
+      color: rgba(255, 255, 255, 0.85);
+    }
+  }
+}
+
 .deleteButton {
   background: var(--color-error);
 }

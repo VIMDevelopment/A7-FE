@@ -16,8 +16,17 @@ import {
   handleDownloadAll,
   makeFileName,
   type FileForZip,
+  downloadImageByUrl,
+  handlePrintPhoto,
 } from "../../Album/components/PhotoCard/helpers";
 import Modal from "../../../components/Modal/Modal";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  PrinterOutlined,
+  RocketOutlined,
+} from "@ant-design/icons";
+import ImprovementModal from "../../../components/ImprovementModal/ImprovementModal";
 
 type RecognitionResultsProps = {
   photoIds: string[];
@@ -32,6 +41,8 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
+  const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
+  const [improvementPhotoId, setImprovementPhotoId] = useState("");
 
   const { isLoading: isDeletePhotosLoading, mutateAsync: deletePhoto } =
     useDeletePhotosId({
@@ -77,6 +88,12 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
     setSelectedPhotoIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
+  }, []);
+
+  // Обработка удаления фото через выпадающий список
+  const handlePhotoDelete = useCallback((id: string) => {
+    setMatchedPhotos((prev) => prev.filter((photo) => photo.id !== id));
+    setSelectedPhotoIds((prev) => prev.filter((photoId) => photoId !== id));
   }, []);
 
   // Выбрать все фото
@@ -131,8 +148,19 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
   }, [selectedPhotoIds, improvePhoto, photoIds]);
 
   // Обработка удаления фото
-  const handleDeletePhotosClick = useCallback(() => {
+  const handleDeletePhotosClick = useCallback((id?: string) => {
+    if (id) {
+      setSelectedPhotoIds([id]);
+    }
     setIsDeletePhotosModalOpen(true);
+  }, []);
+
+  const handleDeleteSelectedPhotosClick = useCallback(() => {
+    setIsDeletePhotosModalOpen(true);
+  }, []);
+
+  const handleImprovePhotoCancel = useCallback(() => {
+    setIsImprovePhotoModalOpen(false);
   }, []);
 
   const handleDeletePhotosOk = useCallback(async () => {
@@ -187,7 +215,7 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
         </Button>
         <Button
           disabled={selectedPhotoIds.length === 0}
-          onClick={handleDeletePhotosClick}
+          onClick={handleDeleteSelectedPhotosClick}
         >
           Удалить выбранные
         </Button>
@@ -206,16 +234,63 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
         <div className={css.grid}>
           <Image.PreviewGroup
             preview={{
-              toolbarRender: (_, info) => (
-                <div className={css.toolbar}>
-                  {info.icons.flipXIcon}
-                  {info.icons.flipYIcon}
-                  {info.icons.rotateLeftIcon}
-                  {info.icons.rotateRightIcon}
-                  {info.icons.zoomOutIcon}
-                  {info.icons.zoomInIcon}
-                </div>
-              )
+              toolbarRender: (_, info) => {
+                const currentPhoto = matchedPhotos?.[info.current];
+
+                return (
+                  <div className={css.toolbar}>
+                    {info.icons.flipXIcon}
+                    {info.icons.flipYIcon}
+                    {info.icons.rotateLeftIcon}
+                    {info.icons.rotateRightIcon}
+                    {info.icons.zoomOutIcon}
+                    {info.icons.zoomInIcon}
+                    <div className={css.customToolbarButtonsContainer}>
+                      <PrinterOutlined
+                        onClick={() =>
+                          handlePrintPhoto(
+                            currentPhoto
+                              ? getPhotoVersion(currentPhoto).original
+                              : "",
+                            makeFileName({
+                              fileName: currentPhoto?.fileName ?? "",
+                              isOriginal: !currentPhoto?.current,
+                            })
+                          )
+                        }
+                        className={css.toolbarBtn}
+                      />
+                      <DownloadOutlined
+                        className={css.toolbarBtn}
+                        onClick={() =>
+                          downloadImageByUrl(
+                            currentPhoto
+                              ? getPhotoVersion(currentPhoto).original
+                              : "",
+                            makeFileName({
+                              fileName: currentPhoto?.fileName ?? "",
+                              isOriginal: !currentPhoto?.current,
+                            })
+                          )
+                        }
+                      />
+                      <DeleteOutlined
+                        className={css.toolbarBtn}
+                        onClick={() => {
+                          handleDeletePhotosClick(currentPhoto?.id);
+                        }}
+                      />
+                      <RocketOutlined
+                        className={css.toolbarBtn}
+                        onClick={() => {
+                          setImprovementPhotoId(currentPhoto?.id ?? "");
+                          setIsImprovePhotoModalOpen(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              },
             }}
             items={matchedPhotos.map((item) =>
               getPhotoVersion(item).original
@@ -238,6 +313,7 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
                   isSelected={selectedPhotoIds.includes(item.id)}
                   albumId={item.albumId}
                   onSelect={toggleSelectPhoto}
+                  onDelete={handlePhotoDelete}
                 />
               );
             })}
@@ -269,6 +345,16 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
           >{`Внимание! При удалении оригинала фото, удаляется также его улучшенная версия`}</div>
         </div>
       </Modal>
+
+      <ImprovementModal
+        photoId={improvementPhotoId}
+        isOpen={isImprovePhotoModalOpen}
+        hasImprovedVersion={improvedPhotos.some(
+          (item) => item.id === improvementPhotoId
+        )}
+        onCancel={handleImprovePhotoCancel}
+        onOk={handleImprovePhotoCancel}
+      />
     </>
   );
 };
