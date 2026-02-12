@@ -26,6 +26,9 @@ import {
   getRolesOptions,
   getWorkplaceOptions,
 } from "./helpers";
+import Modal from "../../components/Modal/Modal";
+import CameraSetupSlider from "../../components/CameraSetupSlider/CameraSetupSlider";
+import { getCameraSetupSteps } from "./cameraSetupSteps";
 
 type UserCreateForm = UserRegisterDto & {
   repeatPassword?: string;
@@ -49,7 +52,20 @@ const AdministrationPage = () => {
   );
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
-  const [cameraData, setCameraData] = useState<PostCameras201>();
+  const [cameraData, setCameraData] = useState<PostCameras201>({
+    "id": "nkjf3nkljn",
+    "cameraId": "A1B2",
+    "projectId": "3b4235mbmn4325m",
+    "isActive": true,
+    "ftpUsername": "a1b2Username",
+    "ftpPassword": "a1b2Password",
+    "ftpPort": "1.1.1.1",
+    "pasvUrl": "2.2.2.2",
+    "description": "description",
+    "createdAt": "2026-02-12T11:43:29.539Z",
+    "updatedAt": "2026-02-12T11:43:29.539Z"
+  });
+  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
 
   const { data: currentUser } = useProfile();
   const queryClient = useQueryClient();
@@ -114,7 +130,7 @@ const AdministrationPage = () => {
   }, [isSuccess]);
 
   useEffect(() => {
-    if (isCameraSuccess && cameraResponse) {
+    if (isCameraSuccess) {
       setCameraData(cameraResponse.data);
       showNotification({
         type: "success",
@@ -184,6 +200,22 @@ const AdministrationPage = () => {
     }
   };
 
+  const handleShowInstruction = () => {
+    setIsInstructionModalOpen(true);
+  };
+
+  const handleCloseInstruction = () => {
+    setIsInstructionModalOpen(false);
+  };
+
+  const cameraSetupSteps = cameraData
+    ? getCameraSetupSteps(
+      cameraData.cameraId,
+      cameraData.ftpUsername,
+      cameraData.ftpPassword
+    )
+    : [];
+
   const currentUserLevel = getRolePriority(currentUser?.role);
 
   const isSupervisor = currentUser?.role === UserRole.supervisor;
@@ -242,6 +274,14 @@ const AdministrationPage = () => {
         >
           Сгенерировать данные для привязки
         </Button>
+        {cameraData?.cameraId && (
+          <Button
+            className={css.btn}
+            onClick={handleShowInstruction}
+          >
+            Показать инструкцию
+          </Button>
+        )}
       </div>
 
       <div className={css.subTitle}>Создание нового пользователя</div>
@@ -473,6 +513,19 @@ const AdministrationPage = () => {
           Сохранить
         </Button>
       </div>
+
+      <Modal
+        title="Инструкция по настройке Canon R6"
+        open={isInstructionModalOpen}
+        onCancel={handleCloseInstruction}
+        onOk={handleCloseInstruction}
+        withFooter={false}
+        width={1000}
+      >
+        {cameraSetupSteps.length > 0 && (
+          <CameraSetupSlider steps={cameraSetupSteps} />
+        )}
+      </Modal>
     </div>
   );
 };

@@ -16,6 +16,8 @@ export type PostCameras201 = {
   ftpUsername?: string;
   /** Генерируется автоматически при создании */
   ftpPassword?: string;
+  ftpPort: string;
+  pasvUrl: string;
   description?: string;
   createdAt?: string;
   updatedAt?: string;
