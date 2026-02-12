@@ -54,6 +54,11 @@
   color: var(--color-text);
 }
 
+.filesSection {
+  margin-top: 30px;
+  width: 100%;
+}
+
 .modalContent {
   display: flex;
   flex-direction: column;

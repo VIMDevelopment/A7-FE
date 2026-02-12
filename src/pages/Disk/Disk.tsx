@@ -117,24 +117,26 @@ const DiskPage = () => {
             </Button>
           </div>
         ) : (
-          <div className={css.authBlock}>
-            <div className={css.connectedStatus}>
-              <CheckCircleOutlined style={{ color: "#52c41a", marginRight: "8px" }} />
-              <span>Яндекс Диск подключен</span>
-              {userInfo && (
-                <div className={css.userInfo}>
-                  {userInfo.display_name || userInfo.login}
-                </div>
-              )}
+          <>
+            <div className={css.authBlock}>
+              <div className={css.connectedStatus}>
+                <CheckCircleOutlined style={{ color: "#52c41a", marginRight: "8px" }} />
+                <span>Яндекс Диск подключен</span>
+                {userInfo && (
+                  <div className={css.userInfo}>
+                    {userInfo.display_name || userInfo.login}
+                  </div>
+                )}
+              </div>
+              <Button
+                onClick={handleDisconnect}
+                disabled={isLoading}
+                icon={<DisconnectOutlined />}
+              >
+                Отключить
+              </Button>
             </div>
-            <Button
-              onClick={handleDisconnect}
-              disabled={isLoading}
-              icon={<DisconnectOutlined />}
-            >
-              Отключить
-            </Button>
-          </div>
+          </>
         )}
       </div>
 

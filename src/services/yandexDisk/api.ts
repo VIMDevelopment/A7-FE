@@ -101,7 +101,7 @@ export const exchangeCodeForToken = async (
  */
 const createYandexDiskApiClient = (): AxiosInstance => {
   const token = getYandexDiskToken();
-  
+
   if (!token) {
     throw new Error("Токен доступа не найден. Необходима авторизация.");
   }
@@ -132,15 +132,76 @@ export const getYandexDiskResources = async (
   limit?: number,
   offset?: number
 ): Promise<YandexDiskResource> => {
-  const client = createYandexDiskApiClient();
-  const response = await client.get<YandexDiskResource>("/disk/resources", {
-    params: {
-      path: path ?? "/",
-      limit: limit ?? 20,
-      offset: offset ?? 0,
-    },
-  });
-  return response.data;
+  try {
+    const client = createYandexDiskApiClient();
+    const response = await client.get<YandexDiskResource>("/disk/resources", {
+      params: {
+        path: path ?? "/",
+        limit: limit ?? 20,
+        offset: offset ?? 0,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        removeYandexDiskToken();
+        throw new Error("Токен доступа истёк. Необходима повторная авторизация.");
+      }
+
+      if (status === 403) {
+        throw new Error("Нет доступа к указанной папке.");
+      }
+
+      if (status === 404) {
+        throw new Error("Папка не найдена.");
+      }
+
+      const errorData = error.response.data as YandexDiskErrorResponse;
+      throw new Error(errorData.error_description || errorData.error || "Ошибка при получении списка файлов");
+    }
+    throw error;
+  }
+};
+
+/**
+ * Получить список файлов (упрощённая версия для компонентов)
+ */
+export const getFiles = async (path = "/"): Promise<YandexDiskResource[]> => {
+  const resource = await getYandexDiskResources(path);
+  return resource._embedded?.items || [];
+};
+
+/**
+ * Получить ссылку на скачивание файла
+ */
+export const getFileDownloadLink = async (path: string): Promise<string> => {
+  try {
+    const client = createYandexDiskApiClient();
+    const response = await client.get<{ href: string }>("/disk/resources/download", {
+      params: { path },
+    });
+    return response.data.href;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const status = error.response.status;
+
+      if (status === 401) {
+        removeYandexDiskToken();
+        throw new Error("Токен доступа истёк. Необходима повторная авторизация.");
+      }
+
+      if (status === 404) {
+        throw new Error("Файл не найден.");
+      }
+
+      const errorData = error.response.data as YandexDiskErrorResponse;
+      throw new Error(errorData.error_description || errorData.error || "Ошибка при получении ссылки на скачивание");
+    }
+    throw error;
+  }
 };
 
 /**
