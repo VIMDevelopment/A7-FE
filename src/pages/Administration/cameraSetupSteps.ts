@@ -43,19 +43,12 @@ export const getCameraSetupSteps = (
     {
       id: 3,
       section: "naming",
-      description: `Введите префикс для имен файлов: ${dynamicValues.cameraId}\n\nИспользуйте диск быстрого управления или джойстик для выбора символов, затем нажмите SET для ввода. Введите ровно 4 символа.`,
+      description: `Введите префикс для имен файлов: ${dynamicValues.cameraId}\n\nИспользуйте диск быстрого управления или джойстик для выбора символов, затем нажмите SET для ввода. Введите ровно 4 символа.\n\nНажмите кнопку MENU, затем нажмите "OK" для сохранения настроек.`,
       imagePath: "/images/instructions/canon-r6/naming-step-3.jpg",
       dynamicValues: { cameraId: dynamicValues.cameraId },
     },
     {
       id: 4,
-      section: "naming",
-      description:
-        'Нажмите кнопку MENU, затем нажмите "OK" для сохранения настроек.',
-      imagePath: "/images/instructions/canon-r6/naming-step-4.jpg",
-    },
-    {
-      id: 5,
       section: "naming",
       description:
         'Вернитесь в пункт "Имя файла" и выберите зарегистрированное имя файла (Польз. настр.1).',

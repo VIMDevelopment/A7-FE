@@ -46,9 +46,10 @@ const CameraSetupSlider: React.FC<Props> = ({ steps }) => {
           <img
             src={currentStep.imagePath}
             className={css.stepImage}
+            alt=""
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = "/images/instructions/canon-r6/placeholder.jpg";
+              target.src = "";
             }}
           />
         </div>
