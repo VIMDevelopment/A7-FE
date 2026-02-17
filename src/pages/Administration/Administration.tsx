@@ -52,7 +52,7 @@ const AdministrationPage = () => {
   );
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
-  const [cameraData, setCameraData] = useState<PostCameras201>({
+  const [cameraData, setCameraData] = useState<PostCameras201 | undefined>({
     "id": "nkjf3nkljn",
     "cameraId": "A1B2",
     "projectId": "3b4235mbmn4325m",
@@ -212,7 +212,8 @@ const AdministrationPage = () => {
     ? getCameraSetupSteps(
       cameraData.cameraId,
       cameraData.ftpUsername,
-      cameraData.ftpPassword
+      cameraData.ftpPassword,
+      cameraData.pasvUrl
     )
     : [];
 
@@ -248,39 +249,42 @@ const AdministrationPage = () => {
 
       <div className={css.subTitle}>Привязка фотоаппарата</div>
       <div className={css.form}>
-        <Select
-          label="Филиал"
-          onChange={(value) => setSelectedProjectId(value as string)}
-          value={selectedProjectId}
-          placeholder="Выберите из списка"
-          disabled={isCameraLoading || isProjectsLoading}
-          loading={isProjectsLoading}
-          options={getWorkplaceOptions(
-            projectsData?.data.projects ?? [],
-            currentUser?.role,
-            currentUser?.workplace
-          )}
-        />
-        {cameraData && (
-          <pre className={css.jsonBlock}>
-            {JSON.stringify(cameraData, null, 2)}
-          </pre>
-        )}
-        <Button
-          className={css.btn}
-          disabled={isCameraLoading || !selectedProjectId}
-          onClick={handleGenerateCameraData}
-          showSpinner={isCameraLoading}
-        >
-          Сгенерировать данные для привязки
-        </Button>
-        {cameraData?.cameraId && (
-          <Button
-            className={css.btn}
-            onClick={handleShowInstruction}
-          >
-            Показать инструкцию
-          </Button>
+        {isCameraSuccess ? (
+          <>
+            <div className={css.notificationText}>
+              Фотоаппарат готов к привязке. Пожалуйста, подключите фотоаппарат по инструкции.
+            </div>
+            <Button
+              className={css.btn}
+              onClick={handleShowInstruction}
+            >
+              Настроить фотоаппарат
+            </Button>
+          </>
+        ) : (
+          <>
+            <Select
+              label="Филиал"
+              onChange={(value) => setSelectedProjectId(value as string)}
+              value={selectedProjectId}
+              placeholder="Выберите из списка"
+              disabled={isCameraLoading || isProjectsLoading}
+              loading={isProjectsLoading}
+              options={getWorkplaceOptions(
+                projectsData?.data.projects ?? [],
+                currentUser?.role,
+                currentUser?.workplace
+              )}
+            />
+            <Button
+              className={css.btn}
+              disabled={isCameraLoading || !selectedProjectId}
+              onClick={handleGenerateCameraData}
+              showSpinner={isCameraLoading}
+            >
+              Сгенерировать данные для привязки
+            </Button>
+          </>
         )}
       </div>
 
