@@ -52,19 +52,7 @@ const AdministrationPage = () => {
   );
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
-  const [cameraData, setCameraData] = useState<PostCameras201 | undefined>({
-    "id": "nkjf3nkljn",
-    "cameraId": "A1B2",
-    "projectId": "3b4235mbmn4325m",
-    "isActive": true,
-    "ftpUsername": "a1b2Username",
-    "ftpPassword": "a1b2Password",
-    "ftpPort": "1.1.1.1",
-    "pasvUrl": "2.2.2.2",
-    "description": "description",
-    "createdAt": "2026-02-12T11:43:29.539Z",
-    "updatedAt": "2026-02-12T11:43:29.539Z"
-  });
+  const [cameraData, setCameraData] = useState<PostCameras201 | undefined>();
   const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
 
   const { data: currentUser } = useProfile();
@@ -304,6 +292,8 @@ const AdministrationPage = () => {
         />
         <Input
           label="E-mail"
+          name="create-user-email"
+          autoComplete="off"
           onChange={(e) =>
             setCreateFormState((prev) => ({
               ...prev,
@@ -318,6 +308,8 @@ const AdministrationPage = () => {
         <Input
           label="Пароль"
           isPasswordInput
+          name="create-user-password"
+          autoComplete="new-password"
           onChange={(e) => {
             setCreateFormState((prev) => ({
               ...prev,
@@ -333,6 +325,8 @@ const AdministrationPage = () => {
         <Input
           label="Подтвердите пароль"
           isPasswordInput
+          name="create-user-repeat-password"
+          autoComplete="new-password"
           onChange={(e) => {
             setCreateFormState((prev) => ({
               ...prev,
@@ -433,6 +427,8 @@ const AdministrationPage = () => {
         />
         <Input
           label="Новый e-mail"
+          name="update-user-email"
+          autoComplete="off"
           onChange={(e) =>
             setUpdateFormState((prev) => ({
               ...prev,
@@ -447,6 +443,8 @@ const AdministrationPage = () => {
         <Input
           label="Новый пароль"
           isPasswordInput
+          name="update-user-password"
+          autoComplete="new-password"
           onChange={(e) => {
             setUpdateFormState((prev) => ({
               ...prev,
@@ -462,6 +460,8 @@ const AdministrationPage = () => {
         <Input
           label="Подтвердите новый пароль"
           isPasswordInput
+          name="update-user-repeat-password"
+          autoComplete="new-password"
           onChange={(e) => {
             setUpdateFormState((prev) => ({
               ...prev,

@@ -41,33 +41,6 @@ const CameraSetupSlider: React.FC<Props> = ({ steps }) => {
         </div>
       </div>
 
-      <div className={css.content}>
-        <div className={css.imageContainer}>
-          <img
-            src={currentStep.imagePath}
-            className={css.stepImage}
-            alt=""
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "";
-            }}
-          />
-        </div>
-
-        <div className={css.textContainer}>
-          <div className={css.stepDescription}>
-            {currentStep.description.split("\n").map((line, index) => (
-              <React.Fragment key={index}>
-                {line}
-                {index < currentStep.description.split("\n").length - 1 && (
-                  <br />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <div className={css.navigation}>
         <Button
           className={cn(css.navButton, css.navButtonLeft)}
@@ -104,6 +77,33 @@ const CameraSetupSlider: React.FC<Props> = ({ steps }) => {
           <span>Далее</span>
           <RightOutlined />
         </Button>
+      </div>
+
+      <div className={css.content}>
+        <div className={css.imageContainer}>
+          <img
+            src={currentStep.imagePath}
+            className={css.stepImage}
+            alt=""
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "";
+            }}
+          />
+        </div>
+
+        <div className={css.textContainer}>
+          <div className={css.stepDescription}>
+            {currentStep.description.split("\n").map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                {index < currentStep.description.split("\n").length - 1 && (
+                  <br />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

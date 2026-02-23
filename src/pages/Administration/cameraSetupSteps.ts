@@ -18,10 +18,10 @@ export const getCameraSetupSteps = (
   ftpServerIp?: string
 ): CameraSetupStep[] => {
   const dynamicValues = {
-    cameraId: cameraId || "XXXX",
-    ftpUsername: ftpUsername || "username",
-    ftpPassword: ftpPassword || "password",
-    ftpServerIp: ftpServerIp || "0.0.0.0",
+    cameraId: cameraId || "",
+    ftpUsername: ftpUsername || "",
+    ftpPassword: ftpPassword || "",
+    ftpServerIp: ftpServerIp || "",
   };
 
   return [
@@ -121,7 +121,7 @@ export const getCameraSetupSteps = (
     {
       id: 14,
       section: "ftp",
-      description: `Введите IP-адрес FTP-сервера: ${dynamicValues.ftpServerIp}.`,
+      description: `Введите IP-адрес FTP-сервера: ${dynamicValues.ftpServerIp}`,
       imagePath: "/images/instructions/canon-r6/ftp-step-11.jpg",
       dynamicValues: { ftpServerIp: dynamicValues.ftpServerIp },
     },
