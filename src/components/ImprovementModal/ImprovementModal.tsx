@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
+  getGetPhotosAlbumAlbumIdQueryKey,
   useGetPhotosId,
   usePostPhotosIdRevert,
   usePostPhotosImprovement,
@@ -113,7 +114,13 @@ const ImprovementModal: FC<Props> = ({
   const handleRevertPhoto = () => {
     revertPhoto({
       id: photoId,
-    }).catch(() => {
+    })
+    .then(() => {
+      void queryClient.invalidateQueries({
+        queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
+      });
+    })
+    .catch(() => {
       showNotification({
         message: "Произошла ошибка при откате фото",
         type: "error",
@@ -185,7 +192,7 @@ const ImprovementModal: FC<Props> = ({
 
           <div className={css.bottomContainer}>
             <div className={css.bottomContainerInner}>
-              {/* {hasImprovedVersion && (
+              {hasImprovedVersion && (
                 <Button
                   onClick={handleRevertPhoto}
                   disabled={
@@ -198,7 +205,7 @@ const ImprovementModal: FC<Props> = ({
                 >
                   Вернуть к оригиналу
                 </Button>
-              )} */}
+              )}
               <Button
                 onClick={handleImprovePhoto}
                 disabled={

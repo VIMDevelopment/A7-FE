@@ -354,7 +354,7 @@ const AlbumPage = () => {
                 );
               },
             }}
-            items={albumPhotos?.map((item) => getPhotoVersion(item).original)}
+            items={albumPhotos?.map((item) => getPhotoVersion(item).preview)}
           >
             {albumPhotos?.map((item) => {
               const photoVersion = getPhotoVersion(item);
