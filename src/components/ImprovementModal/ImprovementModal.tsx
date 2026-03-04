@@ -233,10 +233,10 @@ const ImprovementModal: FC<Props> = ({
                 placeholder="Выберите промпт"
                 value={selectedPromptId}
                 onChange={(value) => setSelectedPromptId(value ?? undefined)}
-                options={[{ label: null, value: null }, ...promptsList.map((p) => ({
+                options={promptsList.map((p) => ({
                   label: p.title ?? "",
                   value: p.id ?? "",
-                }))]}
+                }))}
                 disabled={
                   improvementInProgress ||
                   isImprovementLoading ||
@@ -270,7 +270,8 @@ const ImprovementModal: FC<Props> = ({
                   isImprovementLoading ||
                   isAddlayerLoading ||
                   isPhotoLoading ||
-                  isRevertLoading
+                  isRevertLoading ||
+                  !selectedPromptId
                 }
                 loading={
                   improvementInProgress ||
