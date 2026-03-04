@@ -4,12 +4,15 @@ import Modal from "../Modal/Modal";
 import {
   getGetPhotosAlbumAlbumIdQueryKey,
   useGetPhotosId,
+  useGetPrompts,
+  usePostPhotosAddlayer,
   usePostPhotosIdRevert,
   usePostPhotosImprovement,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import Button from "../Button/Button";
+import Select from "../Select/Select";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
@@ -37,6 +40,7 @@ const ImprovementModal: FC<Props> = ({
 }) => {
   const [improvementInProgress, setImprovementInProgress] = useState(false);
   const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
+  const [selectedPromptId, setSelectedPromptId] = useState();
 
   const { albumId } = useParams();
   const queryClient = useQueryClient();
@@ -62,10 +66,21 @@ const ImprovementModal: FC<Props> = ({
       axios: defaultApiAxiosParams,
     });
 
+  const { isLoading: isAddlayerLoading, mutateAsync: addLayerPhoto } =
+    usePostPhotosAddlayer({
+      axios: defaultApiAxiosParams,
+    });
+
   const { isLoading: isRevertLoading, mutateAsync: revertPhoto } =
     usePostPhotosIdRevert({
       axios: defaultApiAxiosParams,
     });
+
+  const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
+    axios: defaultApiAxiosParams,
+  });
+
+  const promptsList = promptsData?.data ?? [];
 
   useEffect(() => {
     if (!improvementInProgress) return;
@@ -94,38 +109,59 @@ const ImprovementModal: FC<Props> = ({
   }, [improvementInProgress, photoData, initialCurrentUrl]);
 
   const handleImprovePhoto = () => {
-    improvePhoto({
-      data: {
-        photoIds: [photoId],
-      },
-    })
-      .then(() => {
-        setInitialCurrentUrl(photoData?.data.current?.original ?? "");
-        setImprovementInProgress(true);
+    const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
+
+    if (selectedPromptId && selectedPrompt?.body != null) {
+      addLayerPhoto({
+        data: {
+          photoId,
+          prompt: selectedPrompt.body,
+        },
       })
-      .catch(() => {
-        showNotification({
-          message: "Произошла ошибка при улучшении фото",
-          type: "error",
+        .then(() => {
+          setInitialCurrentUrl(photoData?.data.current?.original ?? "");
+          setImprovementInProgress(true);
+        })
+        .catch(() => {
+          showNotification({
+            message: "Произошла ошибка при улучшении фото",
+            type: "error",
+          });
         });
-      });
+    } else {
+      improvePhoto({
+        data: {
+          photoIds: [photoId],
+        },
+      })
+        .then(() => {
+          setInitialCurrentUrl(photoData?.data.current?.original ?? "");
+          setImprovementInProgress(true);
+        })
+        .catch(() => {
+          showNotification({
+            message: "Произошла ошибка при улучшении фото",
+            type: "error",
+          });
+        });
+    }
   };
 
   const handleRevertPhoto = () => {
     revertPhoto({
       id: photoId,
     })
-    .then(() => {
-      void queryClient.invalidateQueries({
-        queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
+      .then(() => {
+        void queryClient.invalidateQueries({
+          queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
+        });
+      })
+      .catch(() => {
+        showNotification({
+          message: "Произошла ошибка при откате фото",
+          type: "error",
+        });
       });
-    })
-    .catch(() => {
-      showNotification({
-        message: "Произошла ошибка при откате фото",
-        type: "error",
-      });
-    });
   };
 
   const originalPhoto = photoData?.data.default.original;
@@ -191,6 +227,26 @@ const ImprovementModal: FC<Props> = ({
           </div>
 
           <div className={css.bottomContainer}>
+            <div className={css.modelSelectContainer}>
+              <Select
+                label="Промпт"
+                placeholder="Выберите промпт"
+                value={selectedPromptId}
+                onChange={(value) => setSelectedPromptId(value ?? undefined)}
+                options={[{ label: null, value: null }, ...promptsList.map((p) => ({
+                  label: p.title ?? "",
+                  value: p.id ?? "",
+                }))]}
+                disabled={
+                  improvementInProgress ||
+                  isImprovementLoading ||
+                  isAddlayerLoading ||
+                  isPhotoLoading ||
+                  isRevertLoading
+                }
+                loading={isPromptsLoading}
+              />
+            </div>
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (
                 <Button
@@ -198,6 +254,7 @@ const ImprovementModal: FC<Props> = ({
                   disabled={
                     improvementInProgress ||
                     isImprovementLoading ||
+                    isAddlayerLoading ||
                     isPhotoLoading ||
                     isRevertLoading
                   }
@@ -211,20 +268,22 @@ const ImprovementModal: FC<Props> = ({
                 disabled={
                   improvementInProgress ||
                   isImprovementLoading ||
+                  isAddlayerLoading ||
                   isPhotoLoading ||
                   isRevertLoading
                 }
                 loading={
                   improvementInProgress ||
                   isImprovementLoading ||
+                  isAddlayerLoading ||
                   isPhotoLoading
                 }
               >
                 {improvementInProgress
                   ? "Идёт обработка фото"
                   : hasImprovedVersion
-                  ? "Обработать заново"
-                  : "Улучшить фото"}
+                    ? "Обработать заново"
+                    : "Улучшить фото"}
               </Button>
             </div>
           </div>

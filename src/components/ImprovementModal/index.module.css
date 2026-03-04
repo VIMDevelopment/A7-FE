@@ -23,7 +23,7 @@
   justify-content: center;
   align-items: center;
   margin-top: 10px;
-  height: calc(100vh - 240px);
+  height: calc(100vh - 320px);
   position: relative;
 }
 
@@ -57,7 +57,10 @@
 
 .bottomContainer {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  margin-top: 10px;
 }
 
 .bottomContainerInner {
@@ -65,6 +68,10 @@
   column-gap: 16px;
   width: 100%;
   max-width: 700px;
+}
+
+.bottomContainerInner > button {
+  margin-top: 0;
 }
 
 .beforeAfterText {
@@ -85,6 +92,8 @@
   display: flex;
   align-items: flex-end;
   width: 100%;
+  max-width: 700px;
+  margin-bottom: 16px;
 }
 
 .tooltip {
