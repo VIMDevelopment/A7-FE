@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import css from "./index.module.css";
 import {
   useGetAlbumsSubprojectSubprojectId,
@@ -36,6 +36,17 @@ const SubprojectPage = () => {
 
   const allAlbumsNames = albumsData?.data.map((item) => item.title ?? "") ?? [];
 
+  const sortedAlbums = useMemo(() => {
+    const data = albumsData?.data ?? [];
+    return [...data].sort((a, b) => {
+      const matchA = (a.title ?? "").match(/^(\d{1,2})/);
+      const matchB = (b.title ?? "").match(/^(\d{1,2})/);
+      const numA = matchA ? parseInt(matchA[1], 10) : 999;
+      const numB = matchB ? parseInt(matchB[1], 10) : 999;
+      return numA - numB;
+    });
+  }, [albumsData?.data]);
+
   const { backButton } = useBreadcrumbsBackButton();
 
   return (
@@ -72,7 +83,7 @@ const SubprojectPage = () => {
         />
       </div>
       <div className={css.grid}>
-        {albumsData?.data.map((item) => (
+        {sortedAlbums.map((item) => (
           <AlbumCard
             key={item.id}
             id={item.id}
