@@ -41,20 +41,48 @@ const PromptsPage = () => {
   const promptHistory = selectedPrompt?.history ?? []
 
   useEffect(() => {
-    setSelectedVersion(null);
-    if (selectedPrompt?.body != null) {
-      setEditBody(selectedPrompt.body);
-    } else {
+    if (selectedPrompt == null) {
+      setSelectedVersion(null);
       setEditBody("");
+      return;
     }
-  }, [selectedPrompt?.id, selectedPrompt?.body]);
+    const history = selectedPrompt.history ?? [];
+    if (history.length > 0) {
+      const lastVersion = history[history.length - 1];
+      setSelectedVersion(lastVersion.promptVersion);
+      setEditBody(lastVersion.promptBody);
+    } else {
+      setSelectedVersion(null);
+      setEditBody(selectedPrompt.body ?? "");
+    }
+  }, [selectedPrompt?.id, selectedPrompt?.body, selectedPrompt?.history]);
 
   const handleCreate = async () => {
     if (!createTitle.trim() || !createBody.trim()) return;
+    const title = createTitle.trim();
+    const body = createBody.trim();
     try {
-      await createPrompt({
-        data: { title: createTitle.trim(), body: createBody.trim() },
+      const response = await createPrompt({
+        data: { title, body },
       });
+      const createdId = response.data.id;
+      if (createdId) {
+        await updatePrompt({
+          id: createdId,
+          data: {
+            title,
+            body,
+            history: [
+              {
+                promptVersion: "1",
+                promptBody: body,
+                description: "",
+                rate: 0,
+              },
+            ],
+          },
+        });
+      }
       showNotification({
         type: "success",
         message: "Промпт создан",
@@ -69,12 +97,24 @@ const PromptsPage = () => {
 
   const handleUpdate = async () => {
     if (!selectedPromptId || selectedPrompt == null) return;
+    const prevHistory = selectedPrompt.history ?? [];
+    const nextVersion = String(prevHistory.length + 1);
+    const newHistory = [
+      ...prevHistory,
+      {
+        promptVersion: nextVersion,
+        promptBody: editBody,
+        description: "",
+        rate: 0,
+      },
+    ];
     try {
       await updatePrompt({
         id: selectedPromptId,
         data: {
           title: selectedPrompt.title,
           body: editBody,
+          history: newHistory,
         },
       });
       showNotification({
