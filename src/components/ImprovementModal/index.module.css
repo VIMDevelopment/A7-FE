@@ -91,15 +91,19 @@
 .modelSelectContainer {
   display: flex;
   align-items: flex-end;
+  gap: 16px;
   width: 100%;
   max-width: 700px;
   margin-bottom: 16px;
 }
 
+.versionSelect {
+  min-width: 120px;
+}
+
 .tooltip {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
-  margin: 0px 0px 16px 10px
 }

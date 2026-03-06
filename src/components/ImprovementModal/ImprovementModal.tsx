@@ -13,7 +13,7 @@ import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import Button from "../Button/Button";
 import Select from "../Select/Select";
-import { Spin } from "antd";
+import { Spin, Tooltip } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
   ReactCompareSlider,
@@ -22,6 +22,7 @@ import {
 import cn from "classnames";
 import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
+import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
 
 type Props = {
   photoId: string;
@@ -40,7 +41,8 @@ const ImprovementModal: FC<Props> = ({
 }) => {
   const [improvementInProgress, setImprovementInProgress] = useState(false);
   const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
-  const [selectedPromptId, setSelectedPromptId] = useState();
+  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
   const { albumId } = useParams();
   const queryClient = useQueryClient();
@@ -81,6 +83,13 @@ const ImprovementModal: FC<Props> = ({
   });
 
   const promptsList = promptsData?.data ?? [];
+  const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
+  const promptHistory = selectedPrompt?.history ?? [];
+  const bodyForRequest =
+    selectedVersion != null
+      ? promptHistory.find((h) => h.promptVersion === selectedVersion)
+          ?.promptBody ?? selectedPrompt?.body
+      : selectedPrompt?.body;
 
   useEffect(() => {
     if (!improvementInProgress) return;
@@ -109,13 +118,11 @@ const ImprovementModal: FC<Props> = ({
   }, [improvementInProgress, photoData, initialCurrentUrl]);
 
   const handleImprovePhoto = () => {
-    const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
-
-    if (selectedPromptId && selectedPrompt?.body != null) {
+    if (selectedPromptId && bodyForRequest != null) {
       addLayerPhoto({
         data: {
           photoId,
-          prompt: selectedPrompt.body,
+          prompt: bodyForRequest,
         },
       })
         .then(() => {
@@ -232,7 +239,16 @@ const ImprovementModal: FC<Props> = ({
                 label="Промпт"
                 placeholder="Выберите промпт"
                 value={selectedPromptId}
-                onChange={(value) => setSelectedPromptId(value ?? undefined)}
+                onChange={(value) => {
+                  setSelectedPromptId(value ?? undefined);
+                  const prompt = promptsList.find((p) => p.id === value);
+                  const history = prompt?.history ?? [];
+                  setSelectedVersion(
+                    history.length > 0
+                      ? history[history.length - 1].promptVersion
+                      : null
+                  );
+                }}
                 options={promptsList.map((p) => ({
                   label: p.title ?? "",
                   value: p.id ?? "",
@@ -246,6 +262,43 @@ const ImprovementModal: FC<Props> = ({
                 }
                 loading={isPromptsLoading}
               />
+              {selectedPromptId && promptHistory.length > 0 && (
+                <div className={css.versionSelect}>
+                  <Select
+                    label="Версия"
+                    placeholder="Выберите версию"
+                    value={selectedVersion}
+                    onChange={(value) => setSelectedVersion(value ?? null)}
+                    options={promptHistory.map(
+                      (item: PromptResponseHistoryItem) => ({
+                        label: item.promptVersion,
+                        value: item.promptVersion,
+                      })
+                    )}
+                    optionRender={({ data }) => {
+                      const item = promptHistory.find(
+                        (h) => h.promptVersion === data.value
+                      );
+                      return (
+                        <Tooltip
+                          title={item?.promptBody ?? ""}
+                          placement="left"
+                          className={css.tooltip}
+                        >
+                          <span>{item?.promptVersion ?? data.value}</span>
+                        </Tooltip>
+                      );
+                    }}
+                    disabled={
+                      improvementInProgress ||
+                      isImprovementLoading ||
+                      isAddlayerLoading ||
+                      isPhotoLoading ||
+                      isRevertLoading
+                    }
+                  />
+                </div>
+              )}
             </div>
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (
@@ -271,7 +324,8 @@ const ImprovementModal: FC<Props> = ({
                   isAddlayerLoading ||
                   isPhotoLoading ||
                   isRevertLoading ||
-                  !selectedPromptId
+                  !selectedPromptId ||
+                  bodyForRequest == null
                 }
                 loading={
                   improvementInProgress ||
