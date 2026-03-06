@@ -64,3 +64,18 @@
   width: 140px;
   flex-shrink: 0;
 }
+
+.deleteButton {
+  background: var(--color-error);
+}
+
+.deleteButton:not(:disabled):hover {
+  background: var(--color-error-btn-hovered) !important;
+}
+
+.deletePromptContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}

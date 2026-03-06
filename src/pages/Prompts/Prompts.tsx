@@ -9,10 +9,12 @@ import {
   useGetPrompts,
   usePostPrompts,
   usePutPromptsId,
+  useDeletePromptsId,
 } from "../../apiV2/a7-service";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
+import Modal from "../../components/Modal/Modal";
 
 const PromptsPage = () => {
   const queryClient = useQueryClient();
@@ -21,6 +23,13 @@ const PromptsPage = () => {
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
+  const [promptToDelete, setPromptToDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [deleteSelectedPromptId, setDeleteSelectedPromptId] = useState<
+    string | undefined
+  >(undefined);
 
   const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
     axios: defaultApiAxiosParams,
@@ -33,6 +42,11 @@ const PromptsPage = () => {
 
   const { mutateAsync: updatePrompt, isLoading: isUpdateLoading } =
     usePutPromptsId({
+      axios: defaultApiAxiosParams,
+    });
+
+  const { mutateAsync: deletePrompt, isLoading: isDeleteLoading } =
+    useDeletePromptsId({
       axios: defaultApiAxiosParams,
     });
 
@@ -121,6 +135,22 @@ const PromptsPage = () => {
         type: "success",
         message: "Промпт обновлён",
       });
+      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+    } catch {
+      // ошибка показывается через глобальный onError в QueryClient
+    }
+  };
+
+  const handleDeleteOk = async () => {
+    if (!promptToDelete) return;
+    try {
+      await deletePrompt({ id: promptToDelete.id });
+      showNotification({
+        type: "success",
+        message: "Промпт удалён",
+      });
+      setPromptToDelete(null);
+      setDeleteSelectedPromptId(undefined);
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
@@ -221,6 +251,56 @@ const PromptsPage = () => {
           </Button>
         </div>
       </div>
+
+      <div className={css.section}>
+        <div className={css.sectionTitle}>Удаление промптов</div>
+        <div className={css.form}>
+          <div className={css.deletePromptContainer}>
+            <div className={css.selectPrompt}>
+              <Select
+                label="Промпт"
+                placeholder="Выберите промпт"
+                value={deleteSelectedPromptId}
+                onChange={(value) => setDeleteSelectedPromptId(value ?? undefined)}
+                options={promptsList.map((p) => ({
+                  label: p.title ?? "",
+                  value: p.id ?? "",
+                }))}
+                disabled={isPromptsLoading}
+                loading={isPromptsLoading}
+              />
+            </div>
+            <Button
+              className={`${css.btn} ${css.deleteButton}`}
+              disabled={isPromptsLoading || !deleteSelectedPromptId}
+              onClick={() => {
+                const p = promptsList.find((x) => x.id === deleteSelectedPromptId);
+                if (p)
+                  setPromptToDelete({
+                    id: p.id ?? "",
+                    title: p.title ?? "",
+                  });
+              }}
+            >
+              Удалить
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <Modal
+        title="Удаление промпта"
+        open={promptToDelete !== null}
+        onOk={handleDeleteOk}
+        onCancel={() => setPromptToDelete(null)}
+        okButtonName="Удалить"
+        destroyOnHidden
+        isLoading={isDeleteLoading}
+        customOkButtonClassName={css.deleteButton}
+      >
+        {promptToDelete &&
+          `Вы уверены, что хотите удалить промпт «${promptToDelete.title}»? Это действие необратимо.`}
+      </Modal>
     </div>
   );
 };
