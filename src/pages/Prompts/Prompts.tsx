@@ -10,6 +10,7 @@ import {
   usePostPrompts,
   usePutPromptsId,
 } from "../../apiV2/a7-service";
+import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 
@@ -18,6 +19,7 @@ const PromptsPage = () => {
   const [createTitle, setCreateTitle] = useState("");
   const [createBody, setCreateBody] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
 
   const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
@@ -36,8 +38,10 @@ const PromptsPage = () => {
 
   const promptsList = promptsData?.data ?? [];
   const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
+  const promptHistory = selectedPrompt?.history ?? []
 
   useEffect(() => {
+    setSelectedVersion(null);
     if (selectedPrompt?.body != null) {
       setEditBody(selectedPrompt.body);
     } else {
@@ -121,18 +125,40 @@ const PromptsPage = () => {
       <div className={css.section}>
         <div className={css.sectionTitle}>Изменить существующий промпт</div>
         <div className={css.form}>
-          <Select
-            label="Промпт"
-            placeholder="Выберите промпт"
-            value={selectedPromptId ?? undefined}
-            onChange={(value) => setSelectedPromptId(value ?? undefined)}
-            options={promptsList.map((p) => ({
-              label: p.title ?? "",
-              value: p.id ?? "",
-            }))}
-            disabled={isPromptsLoading}
-            loading={isPromptsLoading}
-          />
+          <div className={css.editPromptRow}>
+            <div className={css.selectPrompt}>
+              <Select
+                label="Промпт"
+                placeholder="Выберите промпт"
+                value={selectedPromptId ?? undefined}
+                onChange={(value) => setSelectedPromptId(value ?? undefined)}
+                options={promptsList.map((p) => ({
+                  label: p.title ?? "",
+                  value: p.id ?? "",
+                }))}
+                disabled={isPromptsLoading}
+                loading={isPromptsLoading}
+              />
+            </div>
+            {selectedPromptId && promptHistory.length > 0 && (
+                <div className={css.selectVersion}>
+                  <Select
+                    label="Версия"
+                    placeholder="Версия"
+                    value={selectedVersion}
+                    onChange={(value) => {
+                      setSelectedVersion(value);
+                      const currentVersionBody = promptHistory.find(item => item.promptVersion === value)?.promptBody ?? "";
+                      setEditBody(currentVersionBody)
+                    }}
+                    options={promptHistory.map((item: PromptResponseHistoryItem) => ({
+                      label: item.promptVersion,
+                      value: item.promptVersion,
+                    }))}
+                  />
+                </div>
+              )}
+          </div>
           <InputTextArea
             label="Текст промпта"
             value={editBody}

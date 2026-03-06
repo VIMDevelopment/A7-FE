@@ -47,3 +47,20 @@
 .select {
   width: 100%;
 }
+
+.editPromptRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.selectPrompt {
+  flex: 1;
+  min-width: 0;
+}
+
+.selectVersion {
+  width: 140px;
+  flex-shrink: 0;
+}
