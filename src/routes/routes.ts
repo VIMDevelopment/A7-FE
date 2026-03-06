@@ -62,4 +62,7 @@ export const PublicRoutes = {
   DISK_AUTH_CALLBACK: {
     static: "/disk/auth/callback",
   },
+  PROMPTS: {
+    static: "/prompts",
+  },
 };

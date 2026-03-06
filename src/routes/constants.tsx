@@ -12,6 +12,7 @@ import SubprojectPage from "../pages/Subproject/Subproject";
 import RecognitionPage from "../pages/Recognition/Recognition";
 import DiskPage from "../pages/Disk/Disk";
 import DiskCallbackPage from "../pages/Disk/DiskCallback";
+import PromptsPage from "../pages/Prompts/Prompts";
 
 const ALL_ROLES = [
   UserRole.admin,
@@ -96,6 +97,12 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.SETTINGS.static,
     roles: ALL_ROLES,
     component: <SettingsPage />,
+  },
+  {
+    id: "prompts",
+    path: PublicRoutes.PROMPTS.static,
+    roles: ALL_ROLES,
+    component: <PromptsPage />,
   },
   {
     id: "recognition",
