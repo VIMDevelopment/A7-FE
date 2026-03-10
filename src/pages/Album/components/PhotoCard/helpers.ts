@@ -65,20 +65,25 @@ export const downloadImageByUrl = async (url: string, filename: string) => {
 export const handleDownloadAll = async ({
   files,
   albumName,
+  onProgress,
 }: {
   files: FileForZip[];
   albumName: string;
+  onProgress?: (done: number, total: number) => void;
 }) => {
   if (files.length === 1) {
     const file = files[0];
-    downloadImageByUrl(file.url, file.fileName);
-
+    onProgress?.(0, 1);
+    await downloadImageByUrl(file.url, file.fileName);
+    onProgress?.(1, 1);
     return;
   }
 
+  const total = files.length;
   const zip = new JSZip();
   const folder = zip.folder(`Фото_${albumName}`);
 
+  let done = 0;
   for (const file of files) {
     const filename = file.fileName;
     try {
@@ -91,10 +96,13 @@ export const handleDownloadAll = async ({
         type: "error",
       });
     }
+    done += 1;
+    onProgress?.(done, total);
   }
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
   saveAs(zipBlob, `Фото_${albumName}.zip`);
+  onProgress?.(total, total);
 };
 
 export const handlePrintPhoto = (url: string, name: string) => {

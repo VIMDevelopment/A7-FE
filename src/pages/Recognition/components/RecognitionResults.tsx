@@ -9,7 +9,7 @@ import type { Photo } from "../../../apiV2/a7-service/model/photo";
 import css from "../index.module.css";
 import { defaultApiAxiosParams } from "../../../api/helpers";
 import { showNotification } from "../../../components/ShowNotification";
-import { Image } from "antd";
+import { Image, Progress } from "antd";
 import PhotoCard from "../../Album/components/PhotoCard/PhotoCard";
 import {
   getPhotoVersion,
@@ -43,6 +43,8 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
   const [improvementPhotoId, setImprovementPhotoId] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const { isLoading: isDeletePhotosLoading, mutateAsync: deletePhoto } =
     useDeletePhotosId({
@@ -119,10 +121,25 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
         }),
       }));
 
-    handleDownloadAll({
-      files: preparedFilesData,
-      albumName: "Результаты распознавания",
-    });
+    setIsDownloading(true);
+      setDownloadProgress(0);
+      handleDownloadAll({
+        files: preparedFilesData,
+        albumName: "Результаты распознавания",
+        onProgress: (done, total) =>
+          setDownloadProgress(Math.round((100 / total) * done)),
+      })
+        .then(() => {
+          setDownloadProgress(100);
+          setTimeout(() => {
+            setIsDownloading(false);
+            setDownloadProgress(0);
+          }, 2000);
+        })
+        .catch(() => {
+          setIsDownloading(false);
+          setDownloadProgress(0);
+        });
   }, [matchedPhotos, selectedPhotoIds]);
 
   // Обработка улучшения фото
@@ -198,6 +215,18 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
 
   return (
     <>
+      {isDownloading && (
+        <div className={css.downloadProgressPopup}>
+          <div className={css.downloadProgressTitle}>Скачивание</div>
+          <Progress
+            className={css.downloadProgress}
+            strokeColor="#b4b4b4"
+            type="circle"
+            percent={downloadProgress}
+          />
+        </div>
+      )}
+
       <div className={css.actionsContainer}>
         <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
         <Button onClick={handleResetSelectedPhotos}>Отменить выбор</Button>

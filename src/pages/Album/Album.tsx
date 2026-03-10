@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import css from "./index.module.css";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Progress } from "antd";
 import { useParams, Link } from "react-router-dom";
 import { PublicRoutes } from "../../routes/routes";
 import {
@@ -47,6 +47,8 @@ const AlbumPage = () => {
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
   const [improvementPhotoId, setImprovementPhotoId] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   const { mutateAsync: improvePhoto } = usePostPhotosImprovement({
     axios: defaultApiAxiosParams,
@@ -136,10 +138,25 @@ const AlbumPage = () => {
         }),
       }));
 
+    setIsDownloading(true);
+    setDownloadProgress(0);
     handleDownloadAll({
       files: preparedFilesData,
       albumName: albumName,
-    });
+      onProgress: (done, total) =>
+        setDownloadProgress(Math.round((100 / total) * done)),
+    })
+      .then(() => {
+        setDownloadProgress(100);
+        setTimeout(() => {
+          setIsDownloading(false);
+          setDownloadProgress(0);
+        }, 2000);
+      })
+      .catch(() => {
+        setIsDownloading(false);
+        setDownloadProgress(0);
+      });
   };
 
   const handleDeletePhotosOk = async () => {
@@ -381,6 +398,18 @@ const AlbumPage = () => {
             isAlbumLoading={isAlbumPhotosLoading}
             size="small"
             albumId={albumId ?? ""}
+          />
+        </div>
+      )}
+
+      {isDownloading && (
+        <div className={css.downloadProgressPopup}>
+          <div className={css.downloadProgressTitle}>Скачивание</div>
+          <Progress
+            className={css.downloadProgress}
+            strokeColor="#b4b4b4"
+            type="circle"
+            percent={downloadProgress}
           />
         </div>
       )}
