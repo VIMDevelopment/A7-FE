@@ -4,17 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PublicRoutes } from "../../../../routes/routes";
 import {
   useDeleteAlbumsId,
-  useGetAlbumsSubprojectSubprojectId,
   useGetPhotosId,
   useGetPhotosAlbumAlbumId,
-  usePutAlbumsId,
 } from "../../../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { Dropdown } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import { ItemType } from "antd/es/menu/interface";
 import Modal from "../../../../components/Modal/Modal";
-import Input from "../../../../components/Input/Input";
 import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { useMediaQuery } from "react-responsive";
@@ -25,7 +22,7 @@ type Props = {
   id?: string;
   name?: string;
   coverId?: string;
-  isProcessed?: boolean;
+  isProcessed?: boolean; 
 };
 
 const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
@@ -34,9 +31,7 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
   const queryClient = useQueryClient();
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
-  const [isEditAlbumModalOpen, setIsEditAlbumModalOpen] = useState(false);
   const [isDeleteAlbumModalOpen, setIsDeleteAlbumModalOpen] = useState(false);
-  const [inputAlbumValue, setInputAlbumValue] = useState(name ?? "");
 
   const { data, isError, isLoading } = useGetPhotosId(coverId ?? "", {
     axios: defaultApiAxiosParams,
@@ -45,22 +40,10 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
     },
   });
 
-  const { isLoading: isEditAlbumLoading, mutateAsync: updateAlbum } =
-    usePutAlbumsId({
-      axios: defaultApiAxiosParams,
-    });
-
   const { isLoading: isDeleteAlbumLoading, mutateAsync: deleteAlbum } =
     useDeleteAlbumsId({
       axios: defaultApiAxiosParams,
     });
-
-  const { data: albumsData } = useGetAlbumsSubprojectSubprojectId(
-    subprojectId ?? "",
-    {
-      axios: defaultApiAxiosParams,
-    }
-  );
 
   const { data: albumPhotosData } = useGetPhotosAlbumAlbumId(id ?? "", {
     axios: defaultApiAxiosParams,
@@ -68,8 +51,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
       enabled: !!id,
     },
   });
-
-  const allAlbumsNames = albumsData?.data.map((item) => item.title ?? "") ?? [];
 
   const allPhotosImproved = useMemo(() => {
     const photos = albumPhotosData?.data ?? [];
@@ -87,36 +68,8 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
     );
   };
 
-  const handleEditAlbumOk = () => {
-    const isNameUniq = !allAlbumsNames.some(
-      (item) =>
-        item.toLocaleLowerCase().trim() ===
-        inputAlbumValue.toLocaleLowerCase().trim()
-    );
-
-    if (isNameUniq) {
-      updateAlbum({
-        id: id ?? "",
-        data: {
-          title: inputAlbumValue,
-        },
-      }).then(() => {
-        showNotification({
-          message: "Альбом переименован",
-          type: "success",
-        });
-        setIsEditAlbumModalOpen(false);
-        void queryClient.invalidateQueries({
-          queryKey: `/albums/subproject/${subprojectId}`,
-        });
-      });
-    } else {
-      showNotification({
-        type: "error",
-        message:
-          "Альбом с таким названием уже существует. Пожалуйста, введите другое название.",
-      });
-    }
+  const handleDeleteAlbumCancel = () => {
+    setIsDeleteAlbumModalOpen(false);
   };
 
   const handleDeleteAlbumOk = () => {
@@ -136,26 +89,12 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
 
   const items: ItemType[] = [
     {
-      key: "2",
-      label: "Переименовать",
-      onClick: () => setIsEditAlbumModalOpen(true),
-    },
-    {
-      key: "3",
+      key: "1",
       label: "Удалить",
       danger: true,
       onClick: () => setIsDeleteAlbumModalOpen(true),
     },
   ];
-
-  const handleEditAlbumCancel = () => {
-    setIsEditAlbumModalOpen(false);
-    setInputAlbumValue(name ?? "");
-  };
-
-  const handleDeleteAlbumCancel = () => {
-    setIsDeleteAlbumModalOpen(false);
-  };
 
   return (
     <div>
@@ -201,22 +140,6 @@ const AlbumCard: FC<Props> = ({ id, name, coverId, isProcessed }) => {
         )}
         {name ?? "Безымянный"}
       </div>
-
-      <Modal
-        title={"Редактирование альбома"}
-        open={isEditAlbumModalOpen}
-        onOk={handleEditAlbumOk}
-        onCancel={handleEditAlbumCancel}
-        okButtonName="Сохранить"
-        destroyOnHidden
-        isLoading={isEditAlbumLoading}
-      >
-        <Input
-          label="Введите название"
-          value={inputAlbumValue}
-          onChange={(e) => setInputAlbumValue(e.target.value)}
-        />
-      </Modal>
 
       <Modal
         title={"Удаление альбома"}

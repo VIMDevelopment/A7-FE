@@ -1,24 +1,15 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import css from "./index.module.css";
-import Modal from "../../../../components/Modal/Modal";
-import Input from "../../../../components/Input/Input";
 import { usePostAlbums } from "../../../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
-import { formatDateWithMinutes } from "../../../../lib/formatters/date";
 import { useParams } from "react-router-dom";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
-type Props = {
-  allAlbumsNames: string[];
-};
-
-const AddAlbumCard: FC<Props> = ({ allAlbumsNames }) => {
+const AddAlbumCard: FC = () => {
   const { subprojectId } = useParams();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(
-    `${formatDateWithMinutes(new Date())}`
-  );
 
   const queryClient = useQueryClient();
 
@@ -26,71 +17,30 @@ const AddAlbumCard: FC<Props> = ({ allAlbumsNames }) => {
     axios: defaultApiAxiosParams,
   });
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
   const handleOk = () => {
-    const isNameUniq = !allAlbumsNames.some(
-      (item) => item.toLocaleLowerCase().trim() === inputValue.toLocaleLowerCase().trim()
-    );
-
-    if (isNameUniq) {
-      createAlbum({
-        data: {
-          title: inputValue,
-          subprojectId: subprojectId ?? "",
-          isPublic: true,
-          description: "",
-          tags: [],
-        },
-      }).then(() => {
-        showNotification({
-          message: "Альбом создан",
-          type: "success",
-        });
-        setIsModalOpen(false);
-        void queryClient.invalidateQueries({
-          queryKey: `/albums/subproject/${subprojectId}`,
-        });
-        setInputValue(`${formatDateWithMinutes(new Date())}`);
-      });
-    } else {
+    createAlbum({
+      data: {
+        subprojectId: subprojectId ?? "",
+      },
+    }).then(() => {
       showNotification({
-        type: "error",
-        message:
-          "Альбом с таким названием уже существует. Пожалуйста, введите другое название.",
+        message: "Альбом создан",
+        type: "success",
       });
-    }
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setInputValue(`${formatDateWithMinutes(new Date())}`);
-  };
+      void queryClient.invalidateQueries({
+        queryKey: `/albums/subproject/${subprojectId}`,
+      });
+    });
+  }
 
   return (
     <>
       <div
         className={css.container}
-        onClick={showModal}
-      >{`+\nДобавить\nальбом`}</div>
-
-      <Modal
-        title={"Добавление альбома"}
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okButtonName="Добавить"
-        destroyOnHidden
-        isLoading={isLoading}
+        onClick={handleOk}
       >
-        <Input
-          label="Введите название"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-      </Modal>
+        {isLoading ? <Spin size="large" indicator={<LoadingOutlined spin style={{ color: "white", fontSize: "60px" }} />} /> : `+\nДобавить\nальбом`}
+      </div>
     </>
   );
 };

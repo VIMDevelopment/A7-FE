@@ -34,8 +34,6 @@ const SubprojectPage = () => {
   const projectName = projectData?.data.name ?? "";
   const subprojectName = subprojectData?.data.name ?? "";
 
-  const allAlbumsNames = albumsData?.data.map((item) => item.title ?? "") ?? [];
-
   const sortedAlbums = useMemo(() => {
     const data = albumsData?.data ?? [];
     return [...data].sort((a, b) => {
@@ -92,7 +90,7 @@ const SubprojectPage = () => {
             isProcessed={item.processed}
           />
         ))}
-        <AddAlbumCard allAlbumsNames={allAlbumsNames} />
+        <AddAlbumCard />
       </div>
     </div>
   );

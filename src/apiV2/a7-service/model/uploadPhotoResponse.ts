@@ -28,6 +28,8 @@ export interface UploadPhotoResponse {
   tags?: string[];
   /** Оценка от нейросети (текстовая) */
   rating?: string;
+  /** Относительный путь файла на Яндекс.Диске */
+  yadisk?: string | null;
   /** Дата создания */
   createdAt?: string;
   /** Дата обновления */

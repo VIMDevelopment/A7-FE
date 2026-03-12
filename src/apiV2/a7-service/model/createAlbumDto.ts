@@ -6,9 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Название (title) генерируется автоматически как следующий чанк: 01, 02, 03 и т.д.
+ */
 export interface CreateAlbumDto {
-  /** Название альбома */
-  title: string;
   /** ID подпроекта */
   subprojectId: string;
   /** Описание альбома */
