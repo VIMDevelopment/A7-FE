@@ -73,14 +73,13 @@ const PromptsPage = () => {
       return;
     }
     const history = selectedPrompt.history ?? [];
-    if (history.length > 0) {
-      const lastVersion = history[history.length - 1];
-      setSelectedVersion(lastVersion.promptVersion);
-      setEditBody(lastVersion.promptBody);
-      setEditDescription(lastVersion.description);
-    } else {
+    const hasSelectedVersion =
+      selectedVersion != null &&
+      history.some((item) => item.promptVersion === selectedVersion);
+
+    if (!hasSelectedVersion) {
       setSelectedVersion(null);
-      setEditBody(selectedPrompt.body ?? "");
+      setEditBody("");
       setEditDescription("");
     }
     setVersionForSave("");
@@ -136,23 +135,23 @@ const PromptsPage = () => {
     const newHistory =
       version !== ""
         ? [
-            ...prevHistory,
-            {
-              promptVersion: version,
+          ...prevHistory,
+          {
+            promptVersion: version,
+            promptBody: editBody,
+            description: editDescription.trim(),
+            rate: 0,
+          },
+        ]
+        : prevHistory.map((item) =>
+          item.promptVersion === selectedVersion
+            ? {
+              ...item,
               promptBody: editBody,
               description: editDescription.trim(),
-              rate: 0,
-            },
-          ]
-        : prevHistory.map((item) =>
-            item.promptVersion === selectedVersion
-              ? {
-                  ...item,
-                  promptBody: editBody,
-                  description: editDescription.trim(),
-                }
-              : item
-          );
+            }
+            : item
+        );
 
     try {
       await updatePrompt({
@@ -167,6 +166,9 @@ const PromptsPage = () => {
         type: "success",
         message: "Промпт обновлён",
       });
+      if (version !== "") {
+        setSelectedVersion(version);
+      }
       setVersionForSave("");
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     } catch {
@@ -356,6 +358,16 @@ const PromptsPage = () => {
             rows={4}
             count={1}
           />
+          <InputTextArea
+            label="Описание версии (опционально)"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            disabled={isUpdateLoading || !selectedPromptId}
+            placeholder="Введите описание версии"
+            className={css.bodyField}
+            rows={2}
+            count={1}
+          />
           <Input
             label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
             value={versionForSave}
@@ -369,21 +381,12 @@ const PromptsPage = () => {
             disabled={isUpdateLoading || !selectedPromptId}
             placeholder="Введите название новой версии"
           />
-          <InputTextArea
-            label="Описание версии (опционально)"
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            disabled={isUpdateLoading || !selectedPromptId}
-            placeholder="Введите описание версии"
-            className={css.bodyField}
-            rows={2}
-            count={1}
-          />
           <Button
             className={css.btn}
             disabled={
               isUpdateLoading ||
-              !selectedPromptId
+              !selectedPromptId || 
+              (!selectedVersion && !versionForSave)
             }
             onClick={handleUpdate}
             showSpinner={isUpdateLoading}
