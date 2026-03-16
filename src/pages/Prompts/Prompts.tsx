@@ -15,6 +15,7 @@ import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/pro
 import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import Modal from "../../components/Modal/Modal";
+import { DeleteOutlined } from "@ant-design/icons";
 
 const PromptsPage = () => {
   const queryClient = useQueryClient();
@@ -32,6 +33,11 @@ const PromptsPage = () => {
   const [deleteSelectedPromptId, setDeleteSelectedPromptId] = useState<
     string | undefined
   >(undefined);
+  const [versionToDelete, setVersionToDelete] = useState<{
+    promptId: string;
+    promptTitle: string;
+    version: string;
+  } | null>(null);
 
   const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
     axios: defaultApiAxiosParams,
@@ -173,6 +179,43 @@ const PromptsPage = () => {
     }
   };
 
+  const handleDeleteVersionOk = async () => {
+    if (!versionToDelete) return;
+    const prompt = promptsList.find((p) => p.id === versionToDelete.promptId);
+    if (!prompt) return;
+    const prevHistory = prompt.history ?? [];
+    if (prevHistory.length <= 1) return;
+    const newHistory = prevHistory.filter(
+      (item) => item.promptVersion !== versionToDelete.version
+    );
+    const newBody =
+      newHistory.length > 0
+        ? newHistory[newHistory.length - 1].promptBody
+        : prompt.body ?? "";
+    try {
+      await updatePrompt({
+        id: versionToDelete.promptId,
+        data: {
+          title: prompt.title,
+          body: newBody,
+          history: newHistory,
+        },
+      });
+      showNotification({
+        type: "success",
+        message: "Версия промпта удалена",
+      });
+      setVersionToDelete(null);
+      if (selectedPromptId === versionToDelete.promptId && selectedVersion === versionToDelete.version) {
+        setSelectedVersion(newHistory.length > 0 ? newHistory[newHistory.length - 1].promptVersion : null);
+        setEditBody(newBody);
+      }
+      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+    } catch {
+      // ошибка показывается через глобальный onError в QueryClient
+    }
+  };
+
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>Промпты</div>
@@ -254,6 +297,27 @@ const PromptsPage = () => {
                     label: item.promptVersion,
                     value: item.promptVersion,
                   }))}
+                  optionRender={(option) => (
+                    <div className={css.versionOption}>
+                      <span>{option.label ?? option.value}</span>
+                      {promptHistory.length > 1 && (
+                        <DeleteOutlined
+                          className={css.versionOptionDelete}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (selectedPromptId && selectedPrompt) {
+                              setVersionToDelete({
+                                promptId: selectedPromptId,
+                                promptTitle: selectedPrompt.title ?? "",
+                                version: String(option.value),
+                              });
+                            }
+                          }}
+                        />
+                      )}
+                    </div>
+                  )}
                 />
               </div>
             )}
@@ -342,7 +406,21 @@ const PromptsPage = () => {
         customOkButtonClassName={css.deleteButton}
       >
         {promptToDelete &&
-          `Вы уверены, что хотите удалить промпт «${promptToDelete.title}»? Это действие необратимо.`}
+          `Вы уверены, что хотите удалить промпт «${promptToDelete.title}» и все его версии? Это действие необратимо.`}
+      </Modal>
+
+      <Modal
+        title="Удаление версии промпта"
+        open={versionToDelete !== null}
+        onOk={handleDeleteVersionOk}
+        onCancel={() => setVersionToDelete(null)}
+        okButtonName="Удалить"
+        destroyOnHidden
+        isLoading={isUpdateLoading}
+        customOkButtonClassName={css.deleteButton}
+      >
+        {versionToDelete &&
+          `Вы уверены, что хотите удалить версию «${versionToDelete.version}» промпта «${versionToDelete.promptTitle}»? Это действие необратимо.`}
       </Modal>
     </div>
   );

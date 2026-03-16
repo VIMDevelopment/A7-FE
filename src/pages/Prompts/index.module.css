@@ -76,3 +76,21 @@
   gap: 12px;
   width: 100%;
 }
+
+.versionOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.versionOptionDelete {
+  flex-shrink: 0;
+  color: var(--color-error);
+  cursor: pointer;
+}
+
+.versionOptionDelete:hover {
+  opacity: 0.8;
+}
