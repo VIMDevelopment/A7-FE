@@ -85,6 +85,10 @@ const ImprovementModal: FC<Props> = ({
   const promptsList = promptsData?.data ?? [];
   const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
   const promptHistory = selectedPrompt?.history ?? [];
+  const selectedHistoryItem =
+    selectedVersion != null
+      ? promptHistory.find((h) => h.promptVersion === selectedVersion)
+      : undefined;
   const bodyForRequest =
     selectedVersion != null
       ? promptHistory.find((h) => h.promptVersion === selectedVersion)
@@ -234,7 +238,7 @@ const ImprovementModal: FC<Props> = ({
           </div>
 
           <div className={css.bottomContainer}>
-            <div className={css.modelSelectContainer}>
+            <div className={css.promptSelectContainer}>
               <Select
                 label="Промпт"
                 placeholder="Выберите промпт"
@@ -300,6 +304,14 @@ const ImprovementModal: FC<Props> = ({
                 </div>
               )}
             </div>
+            {selectedPromptId && selectedHistoryItem?.description && (
+              <div className={css.promptDescriptionBlock}>
+                <div className={css.promptDescriptionTitle}>Описание</div>
+                <div className={css.promptDescriptionText}>
+                  {selectedHistoryItem.description}
+                </div>
+              </div>
+            )}
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (
                 <Button

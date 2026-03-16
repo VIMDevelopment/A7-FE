@@ -23,7 +23,7 @@
   justify-content: center;
   align-items: center;
   margin-top: 10px;
-  height: calc(100vh - 320px);
+  height: calc(100vh - 370px);
   position: relative;
 }
 
@@ -88,17 +88,38 @@
   margin-bottom: -16px;
 }
 
-.modelSelectContainer {
+.promptSelectContainer {
   display: flex;
-  align-items: flex-end;
   gap: 16px;
   width: 100%;
   max-width: 700px;
   margin-bottom: 16px;
 }
 
+.promptDescriptionBlock {
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.promptDescriptionTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--color-text);
+}
+
+.promptDescriptionText {
+  white-space: pre-wrap;
+}
+
 .versionSelect {
-  min-width: 120px;
+  width: 100%;
 }
 
 .tooltip {
