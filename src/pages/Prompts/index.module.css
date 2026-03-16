@@ -60,6 +60,7 @@
 
 .selectVersion {
   width: 100%;
+  max-width: 294px;
 }
 
 .deleteButton {
@@ -93,4 +94,9 @@
 
 .versionOptionDelete:hover {
   opacity: 0.8;
+}
+
+.optionText {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

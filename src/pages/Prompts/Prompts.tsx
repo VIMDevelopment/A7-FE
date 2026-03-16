@@ -299,7 +299,7 @@ const PromptsPage = () => {
                   }))}
                   optionRender={(option) => (
                     <div className={css.versionOption}>
-                      <span>{option.label ?? option.value}</span>
+                      <span className={css.optionText}>{option.label ?? option.value}</span>
                       {promptHistory.length > 1 && (
                         <DeleteOutlined
                           className={css.versionOptionDelete}
