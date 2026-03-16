@@ -20,7 +20,9 @@ const PromptsPage = () => {
   const queryClient = useQueryClient();
   const [createTitle, setCreateTitle] = useState("");
   const [createBody, setCreateBody] = useState("");
+  const [createVersion, setCreateVersion] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
+  const [versionForSave, setVersionForSave] = useState("");
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
   const [promptToDelete, setPromptToDelete] = useState<{
@@ -58,6 +60,7 @@ const PromptsPage = () => {
     if (selectedPrompt == null) {
       setSelectedVersion(null);
       setEditBody("");
+      setVersionForSave("");
       return;
     }
     const history = selectedPrompt.history ?? [];
@@ -69,10 +72,12 @@ const PromptsPage = () => {
       setSelectedVersion(null);
       setEditBody(selectedPrompt.body ?? "");
     }
+    setVersionForSave("");
   }, [selectedPrompt?.id, selectedPrompt?.body, selectedPrompt?.history]);
 
   const handleCreate = async () => {
-    if (!createTitle.trim() || !createBody.trim()) return;
+    const version = createVersion.trim();
+    if (!createTitle.trim() || !createBody.trim() || !version) return;
     const title = createTitle.trim();
     const body = createBody.trim();
     try {
@@ -88,7 +93,7 @@ const PromptsPage = () => {
             body,
             history: [
               {
-                promptVersion: "1",
+                promptVersion: version,
                 promptBody: body,
                 description: "",
                 rate: 0,
@@ -103,6 +108,7 @@ const PromptsPage = () => {
       });
       setCreateTitle("");
       setCreateBody("");
+      setCreateVersion("");
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
@@ -110,13 +116,13 @@ const PromptsPage = () => {
   };
 
   const handleUpdate = async () => {
-    if (!selectedPromptId || selectedPrompt == null) return;
+    const version = versionForSave.trim();
+    if (!selectedPromptId || selectedPrompt == null || !version) return;
     const prevHistory = selectedPrompt.history ?? [];
-    const nextVersion = String(prevHistory.length + 1);
     const newHistory = [
       ...prevHistory,
       {
-        promptVersion: nextVersion,
+        promptVersion: version,
         promptBody: editBody,
         description: "",
         rate: 0,
@@ -135,6 +141,7 @@ const PromptsPage = () => {
         type: "success",
         message: "Промпт обновлён",
       });
+      setVersionForSave("");
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
@@ -169,7 +176,14 @@ const PromptsPage = () => {
             value={createTitle}
             onChange={(e) => setCreateTitle(e.target.value)}
             disabled={isCreateLoading}
-            placeholder="Введите название"
+            placeholder="Введите название промпта"
+          />
+          <Input
+            label="Название первой версии"
+            value={createVersion}
+            onChange={(e) => setCreateVersion(e.target.value)}
+            disabled={isCreateLoading}
+            placeholder="Введите название первой версии"
           />
           <InputTextArea
             label="Текст промпта"
@@ -183,7 +197,12 @@ const PromptsPage = () => {
           />
           <Button
             className={css.btn}
-            disabled={isCreateLoading || !createTitle.trim() || !createBody.trim()}
+            disabled={
+              isCreateLoading ||
+              !createTitle.trim() ||
+              !createBody.trim() ||
+              !createVersion.trim()
+            }
             onClick={handleCreate}
             showSpinner={isCreateLoading}
           >
@@ -239,10 +258,17 @@ const PromptsPage = () => {
             rows={4}
             count={1}
           />
+          <Input
+            label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта)"
+            value={versionForSave}
+            onChange={(e) => setVersionForSave(e.target.value)}
+            disabled={isUpdateLoading || !selectedPromptId}
+            placeholder="Введите название новой версии"
+          />
           <Button
             className={css.btn}
             disabled={
-              isUpdateLoading || !selectedPromptId || editBody === selectedPrompt?.body
+              isUpdateLoading || !selectedPromptId || !versionForSave.trim()
             }
             onClick={handleUpdate}
             showSpinner={isUpdateLoading}
