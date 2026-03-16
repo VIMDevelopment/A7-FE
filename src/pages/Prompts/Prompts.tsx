@@ -246,6 +246,7 @@ const PromptsPage = () => {
                   value={selectedVersion}
                   onChange={(value) => {
                     setSelectedVersion(value);
+                    setVersionForSave("");
                     const currentVersionBody = promptHistory.find(item => item.promptVersion === value)?.promptBody ?? "";
                     setEditBody(currentVersionBody)
                   }}
@@ -268,9 +269,15 @@ const PromptsPage = () => {
             count={1}
           />
           <Input
-            label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта)"
+            label="Название новой версии (Опционально. При заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
             value={versionForSave}
-            onChange={(e) => setVersionForSave(e.target.value)}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setVersionForSave(newValue);
+              if (newValue.trim() !== "") {
+                setSelectedVersion(null);
+              }
+            }}
             disabled={isUpdateLoading || !selectedPromptId}
             placeholder="Введите название новой версии"
           />
