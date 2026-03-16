@@ -21,7 +21,7 @@ export const parseDate = (v: string, prevDate?: string | null) => {
 export const isBefore = (firstDate: DateOrEmpty, secondDate: DateOrEmpty) =>
   getDate(firstDate ?? "").isBefore(getDate(secondDate ?? ""));
 
-export const formatDate = validDate((v) => format(new Date(v), `dd.MM.yyyy`));
+export const formatDate = validDate((v) => format(new Date(v), `dd.MM.yy`));
 
 export const formatTime = validDate((v) => format(new Date(v), `HH:mm`));
 

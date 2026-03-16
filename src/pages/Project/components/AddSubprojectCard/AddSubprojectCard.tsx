@@ -1,7 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
 import css from "./index.module.css";
-import Modal from "../../../../components/Modal/Modal";
-import Input from "../../../../components/Input/Input";
 import {
   getGetSubprojectsQueryKey,
   usePostSubprojects,
@@ -11,6 +9,8 @@ import { showNotification } from "../../../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 import { formatDate } from "../../../../lib/formatters/date";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 type Props = {
   allSubprojectsNames: string[];
@@ -18,8 +18,6 @@ type Props = {
 
 const AddSubprojectCard: FC<Props> = ({ allSubprojectsNames }) => {
   const { projectId } = useParams();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(`${formatDate(new Date())}`);
 
   const queryClient = useQueryClient();
 
@@ -37,66 +35,41 @@ const AddSubprojectCard: FC<Props> = ({ allSubprojectsNames }) => {
         message: "Папка создана",
         type: "success",
       });
-      setIsModalOpen(false);
       void queryClient.invalidateQueries({
         queryKey: getGetSubprojectsQueryKey({ projectId: projectId ?? "" }),
       });
-      setInputValue(`${formatDate(new Date())}`);
     }
   }, [isSuccess]);
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
   const handleOk = () => {
+    const today = `${formatDate(new Date())}`
+
     const isNameUniq = !allSubprojectsNames.some(
-      (item) => item.toLocaleLowerCase().trim() === inputValue.toLocaleLowerCase().trim()
+      (item) => item.toLocaleLowerCase().trim() === today.toLocaleLowerCase().trim()
     );
 
     if (isNameUniq) {
       createSubroject({
         data: {
           projectId: projectId ?? "",
-          name: inputValue,
+          name: today,
         },
       });
     } else {
       showNotification({
         type: "error",
         message:
-          "Папка с таким названием уже существует. Пожалуйста, введите другое название.",
+          "Папка на сегодняшний день уже создана.",
       });
     }
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setInputValue(`${formatDate(new Date())}`);
   };
 
   return (
     <>
       <div
         className={css.container}
-        onClick={showModal}
-      >{`+\nДобавить\nпапку`}</div>
-
-      <Modal
-        title={"Добавление папки"}
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        okButtonName="Добавить"
-        destroyOnHidden
-        isLoading={isLoading}
-      >
-        <Input
-          label="Введите название"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-      </Modal>
+        onClick={handleOk}
+      >{isLoading ? <Spin size="large" indicator={<LoadingOutlined spin style={{ color: "white", fontSize: "60px" }} />} /> : `+\nДобавить\nпапку`}</div>
     </>
   );
 };

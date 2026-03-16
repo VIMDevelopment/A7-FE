@@ -62,7 +62,6 @@ const ProjectPage = () => {
             key={item.id}
             id={item.id}
             name={item.name}
-            allSubprojectsNames={allSubprojectsNames}
           />
         ))}
         <AddSubprojectCard allSubprojectsNames={allSubprojectsNames} />
