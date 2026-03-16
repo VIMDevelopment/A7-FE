@@ -22,10 +22,12 @@ const PromptsPage = () => {
   const [createTitle, setCreateTitle] = useState("");
   const [createBody, setCreateBody] = useState("");
   const [createVersion, setCreateVersion] = useState("");
+  const [createDescription, setCreateDescription] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
   const [versionForSave, setVersionForSave] = useState("");
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [promptToDelete, setPromptToDelete] = useState<{
     id: string;
     title: string;
@@ -67,6 +69,7 @@ const PromptsPage = () => {
       setSelectedVersion(null);
       setEditBody("");
       setVersionForSave("");
+      setEditDescription("");
       return;
     }
     const history = selectedPrompt.history ?? [];
@@ -74,9 +77,11 @@ const PromptsPage = () => {
       const lastVersion = history[history.length - 1];
       setSelectedVersion(lastVersion.promptVersion);
       setEditBody(lastVersion.promptBody);
+      setEditDescription(lastVersion.description);
     } else {
       setSelectedVersion(null);
       setEditBody(selectedPrompt.body ?? "");
+      setEditDescription("");
     }
     setVersionForSave("");
   }, [selectedPrompt?.id, selectedPrompt?.body, selectedPrompt?.history]);
@@ -86,6 +91,7 @@ const PromptsPage = () => {
     if (!createTitle.trim() || !createBody.trim() || !version) return;
     const title = createTitle.trim();
     const body = createBody.trim();
+    const description = createDescription.trim();
     try {
       const response = await createPrompt({
         data: { title, body },
@@ -101,7 +107,7 @@ const PromptsPage = () => {
               {
                 promptVersion: version,
                 promptBody: body,
-                description: "",
+                description,
                 rate: 0,
               },
             ],
@@ -115,6 +121,7 @@ const PromptsPage = () => {
       setCreateTitle("");
       setCreateBody("");
       setCreateVersion("");
+      setCreateDescription("");
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
@@ -129,19 +136,23 @@ const PromptsPage = () => {
     const newHistory =
       version !== ""
         ? [
-          ...prevHistory,
-          {
-            promptVersion: version,
-            promptBody: editBody,
-            description: "",
-            rate: 0,
-          },
-        ]
+            ...prevHistory,
+            {
+              promptVersion: version,
+              promptBody: editBody,
+              description: editDescription.trim(),
+              rate: 0,
+            },
+          ]
         : prevHistory.map((item) =>
-          item.promptVersion === selectedVersion
-            ? { ...item, promptBody: editBody }
-            : item
-        );
+            item.promptVersion === selectedVersion
+              ? {
+                  ...item,
+                  promptBody: editBody,
+                  description: editDescription.trim(),
+                }
+              : item
+          );
 
     try {
       await updatePrompt({
@@ -247,6 +258,16 @@ const PromptsPage = () => {
             rows={4}
             count={1}
           />
+          <InputTextArea
+            label="Описание первой версии (опционально)"
+            value={createDescription}
+            onChange={(e) => setCreateDescription(e.target.value)}
+            disabled={isCreateLoading}
+            placeholder="Введите описание первой версии"
+            className={css.bodyField}
+            rows={2}
+            count={1}
+          />
           <Button
             className={css.btn}
             disabled={
@@ -290,8 +311,11 @@ const PromptsPage = () => {
                   onChange={(value) => {
                     setSelectedVersion(value);
                     setVersionForSave("");
-                    const currentVersionBody = promptHistory.find(item => item.promptVersion === value)?.promptBody ?? "";
-                    setEditBody(currentVersionBody)
+                    const currentVersion = promptHistory.find(
+                      (item) => item.promptVersion === value
+                    );
+                    setEditBody(currentVersion?.promptBody ?? "");
+                    setEditDescription(currentVersion?.description ?? "");
                   }}
                   options={promptHistory.map((item: PromptResponseHistoryItem) => ({
                     label: item.promptVersion,
@@ -333,7 +357,7 @@ const PromptsPage = () => {
             count={1}
           />
           <Input
-            label="Название новой версии (Опционально. При заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
+            label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
             value={versionForSave}
             onChange={(e) => {
               const newValue = e.target.value;
@@ -344,6 +368,16 @@ const PromptsPage = () => {
             }}
             disabled={isUpdateLoading || !selectedPromptId}
             placeholder="Введите название новой версии"
+          />
+          <InputTextArea
+            label="Описание версии (опционально)"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            disabled={isUpdateLoading || !selectedPromptId}
+            placeholder="Введите описание версии"
+            className={css.bodyField}
+            rows={2}
+            count={1}
           />
           <Button
             className={css.btn}
