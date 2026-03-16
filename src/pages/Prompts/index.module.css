@@ -10,13 +10,42 @@
   text-transform: uppercase;
 }
 
+.tabs {
+  margin-top: 32px;
+  max-width: 800px;
+}
+
+.tabs :global(.ant-tabs-nav) {
+  margin-bottom: 24px;
+}
+
+.tabs :global(.ant-tabs-tab) {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.tabs :global(.ant-tabs-tab-btn) {
+  color: var(--color-text-secondary, var(--color-text)) !important;
+}
+
+.tabs :global(.ant-tabs-tab.ant-tabs-tab-active) .ant-tabs-tab-btn {
+  color: var(--color-text) !important;
+  font-weight: bold !important;
+}
+
+.tabs :global(.ant-tabs-ink-bar) {
+  height: 3px;
+  background: var(--color-text);
+}
+
 .section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   row-gap: 10px;
   max-width: 600px;
-  margin-top: 60px;
+  margin-top: 24px;
 }
 
 .sectionTitle {

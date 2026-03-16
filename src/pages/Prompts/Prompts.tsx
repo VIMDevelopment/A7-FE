@@ -16,6 +16,7 @@ import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import Modal from "../../components/Modal/Modal";
 import { DeleteOutlined } from "@ant-design/icons";
+import { Tabs } from "antd";
 
 const PromptsPage = () => {
   const queryClient = useQueryClient();
@@ -62,7 +63,7 @@ const PromptsPage = () => {
 
   const promptsList = promptsData?.data ?? [];
   const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
-  const promptHistory = selectedPrompt?.history ?? []
+  const promptHistory = selectedPrompt?.history ?? [];
 
   useEffect(() => {
     if (selectedPrompt == null) {
@@ -233,204 +234,234 @@ const PromptsPage = () => {
     <div className={css.container}>
       <div className={css.pageTitle}>Промпты</div>
 
-      <div className={css.section}>
-        <div className={css.sectionTitle}>Создать промпт</div>
-        <div className={css.form}>
-          <Input
-            label="Название промпта"
-            value={createTitle}
-            onChange={(e) => setCreateTitle(e.target.value)}
-            disabled={isCreateLoading}
-            placeholder="Введите название промпта"
-          />
-          <Input
-            label="Название первой версии"
-            value={createVersion}
-            onChange={(e) => setCreateVersion(e.target.value)}
-            disabled={isCreateLoading}
-            placeholder="Введите название первой версии"
-          />
-          <InputTextArea
-            label="Текст промпта"
-            value={createBody}
-            onChange={(e) => setCreateBody(e.target.value)}
-            disabled={isCreateLoading}
-            placeholder="Введите текст промпта"
-            className={css.bodyField}
-            rows={4}
-            count={1}
-          />
-          <InputTextArea
-            label="Описание первой версии (опционально)"
-            value={createDescription}
-            onChange={(e) => setCreateDescription(e.target.value)}
-            disabled={isCreateLoading}
-            placeholder="Введите описание первой версии"
-            className={css.bodyField}
-            rows={2}
-            count={1}
-          />
-          <Button
-            className={css.btn}
-            disabled={
-              isCreateLoading ||
-              !createTitle.trim() ||
-              !createBody.trim() ||
-              !createVersion.trim()
-            }
-            onClick={handleCreate}
-            showSpinner={isCreateLoading}
-          >
-            Создать промпт
-          </Button>
-        </div>
-      </div>
-
-      <div className={css.section}>
-        <div className={css.sectionTitle}>Изменить существующий промпт</div>
-        <div className={css.form}>
-          <div className={css.editPromptRow}>
-            <div className={css.selectPrompt}>
-              <Select
-                label="Промпт"
-                placeholder="Выберите промпт"
-                value={selectedPromptId ?? undefined}
-                onChange={(value) => setSelectedPromptId(value ?? undefined)}
-                options={promptsList.map((p) => ({
-                  label: p.title ?? "",
-                  value: p.id ?? "",
-                }))}
-                disabled={isPromptsLoading}
-                loading={isPromptsLoading}
-              />
-            </div>
-            {selectedPromptId && promptHistory.length > 0 && (
-              <div className={css.selectVersion}>
-                <Select
-                  label="Версия"
-                  placeholder="Версия"
-                  value={selectedVersion}
-                  onChange={(value) => {
-                    setSelectedVersion(value);
-                    setVersionForSave("");
-                    const currentVersion = promptHistory.find(
-                      (item) => item.promptVersion === value
-                    );
-                    setEditBody(currentVersion?.promptBody ?? "");
-                    setEditDescription(currentVersion?.description ?? "");
-                  }}
-                  options={promptHistory.map((item: PromptResponseHistoryItem) => ({
-                    label: item.promptVersion,
-                    value: item.promptVersion,
-                  }))}
-                  optionRender={(option) => (
-                    <div className={css.versionOption}>
-                      <span className={css.optionText}>{option.label ?? option.value}</span>
-                      {promptHistory.length > 1 && (
-                        <DeleteOutlined
-                          className={css.versionOptionDelete}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            if (selectedPromptId && selectedPrompt) {
-                              setVersionToDelete({
-                                promptId: selectedPromptId,
-                                promptTitle: selectedPrompt.title ?? "",
-                                version: String(option.value),
-                              });
-                            }
-                          }}
-                        />
-                      )}
-                    </div>
-                  )}
-                />
+      <Tabs
+        className={css.tabs}
+        defaultActiveKey="create"
+        items={[
+          {
+            key: "create",
+            label: "Добавление",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Добавление нового промпта</div>
+                <div className={css.form}>
+                  <Input
+                    label="Название промпта"
+                    value={createTitle}
+                    onChange={(e) => setCreateTitle(e.target.value)}
+                    disabled={isCreateLoading}
+                    placeholder="Введите название промпта"
+                  />
+                  <Input
+                    label="Название первой версии"
+                    value={createVersion}
+                    onChange={(e) => setCreateVersion(e.target.value)}
+                    disabled={isCreateLoading}
+                    placeholder="Введите название первой версии"
+                  />
+                  <InputTextArea
+                    label="Текст промпта"
+                    value={createBody}
+                    onChange={(e) => setCreateBody(e.target.value)}
+                    disabled={isCreateLoading}
+                    placeholder="Введите текст промпта"
+                    className={css.bodyField}
+                    rows={4}
+                    count={1}
+                  />
+                  <InputTextArea
+                    label="Описание первой версии (опционально)"
+                    value={createDescription}
+                    onChange={(e) => setCreateDescription(e.target.value)}
+                    disabled={isCreateLoading}
+                    placeholder="Введите описание первой версии"
+                    className={css.bodyField}
+                    rows={2}
+                    count={1}
+                  />
+                  <Button
+                    className={css.btn}
+                    disabled={
+                      isCreateLoading ||
+                      !createTitle.trim() ||
+                      !createBody.trim() ||
+                      !createVersion.trim()
+                    }
+                    onClick={handleCreate}
+                    showSpinner={isCreateLoading}
+                  >
+                    Создать промпт
+                  </Button>
+                </div>
               </div>
-            )}
-          </div>
-          <InputTextArea
-            label="Текст промпта"
-            value={editBody}
-            onChange={(e) => setEditBody(e.target.value)}
-            disabled={isUpdateLoading || !selectedPromptId}
-            placeholder="Выберите промпт или введите текст"
-            className={css.bodyField}
-            rows={4}
-            count={1}
-          />
-          <InputTextArea
-            label="Описание версии (опционально)"
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            disabled={isUpdateLoading || !selectedPromptId}
-            placeholder="Введите описание версии"
-            className={css.bodyField}
-            rows={2}
-            count={1}
-          />
-          <Input
-            label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
-            value={versionForSave}
-            onChange={(e) => {
-              const newValue = e.target.value;
-              setVersionForSave(newValue);
-              if (newValue.trim() !== "") {
-                setSelectedVersion(null);
-              }
-            }}
-            disabled={isUpdateLoading || !selectedPromptId}
-            placeholder="Введите название новой версии"
-          />
-          <Button
-            className={css.btn}
-            disabled={
-              isUpdateLoading ||
-              !selectedPromptId || 
-              (!selectedVersion && !versionForSave)
-            }
-            onClick={handleUpdate}
-            showSpinner={isUpdateLoading}
-          >
-            Сохранить
-          </Button>
-        </div>
-      </div>
-
-      <div className={css.section}>
-        <div className={css.sectionTitle}>Удаление промптов</div>
-        <div className={css.form}>
-          <div className={css.deletePromptContainer}>
-            <div className={css.selectPrompt}>
-              <Select
-                label="Промпт"
-                placeholder="Выберите промпт"
-                value={deleteSelectedPromptId}
-                onChange={(value) => setDeleteSelectedPromptId(value ?? undefined)}
-                options={promptsList.map((p) => ({
-                  label: p.title ?? "",
-                  value: p.id ?? "",
-                }))}
-                disabled={isPromptsLoading}
-                loading={isPromptsLoading}
-              />
-            </div>
-            <Button
-              className={`${css.btn} ${css.deleteButton}`}
-              disabled={isPromptsLoading || !deleteSelectedPromptId}
-              onClick={() => {
-                const p = promptsList.find((x) => x.id === deleteSelectedPromptId);
-                if (p)
-                  setPromptToDelete({
-                    id: p.id ?? "",
-                    title: p.title ?? "",
-                  });
-              }}
-            >
-              Удалить
-            </Button>
-          </div>
-        </div>
-      </div>
+            ),
+          },
+          {
+            key: "update",
+            label: "Изменение",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Изменение существующего промпта</div>
+                <div className={css.form}>
+                  <div className={css.editPromptRow}>
+                    <div className={css.selectPrompt}>
+                      <Select
+                        label="Промпт"
+                        placeholder="Выберите промпт"
+                        value={selectedPromptId ?? undefined}
+                        onChange={(value) => setSelectedPromptId(value ?? undefined)}
+                        options={promptsList.map((p) => ({
+                          label: p.title ?? "",
+                          value: p.id ?? "",
+                        }))}
+                        disabled={isPromptsLoading}
+                        loading={isPromptsLoading}
+                      />
+                    </div>
+                    {selectedPromptId && promptHistory.length > 0 && (
+                      <div className={css.selectVersion}>
+                        <Select
+                          label="Версия"
+                          placeholder="Версия"
+                          value={selectedVersion}
+                          onChange={(value) => {
+                            setSelectedVersion(value);
+                            setVersionForSave("");
+                            const currentVersion = promptHistory.find(
+                              (item) => item.promptVersion === value
+                            );
+                            setEditBody(currentVersion?.promptBody ?? "");
+                            setEditDescription(currentVersion?.description ?? "");
+                          }}
+                          options={promptHistory.map(
+                            (item: PromptResponseHistoryItem) => ({
+                              label: item.promptVersion,
+                              value: item.promptVersion,
+                            })
+                          )}
+                          optionRender={(option) => (
+                            <div className={css.versionOption}>
+                              <span className={css.optionText}>
+                                {option.label ?? option.value}
+                              </span>
+                              {promptHistory.length > 1 && (
+                                <DeleteOutlined
+                                  className={css.versionOptionDelete}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    if (selectedPromptId && selectedPrompt) {
+                                      setVersionToDelete({
+                                        promptId: selectedPromptId,
+                                        promptTitle: selectedPrompt.title ?? "",
+                                        version: String(option.value),
+                                      });
+                                    }
+                                  }}
+                                />
+                              )}
+                            </div>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <InputTextArea
+                    label="Текст промпта"
+                    value={editBody}
+                    onChange={(e) => setEditBody(e.target.value)}
+                    disabled={isUpdateLoading || !selectedPromptId}
+                    placeholder="Выберите промпт или введите текст"
+                    className={css.bodyField}
+                    rows={4}
+                    count={1}
+                  />
+                  <InputTextArea
+                    label="Описание версии (опционально)"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    disabled={isUpdateLoading || !selectedPromptId}
+                    placeholder="Введите описание версии"
+                    className={css.bodyField}
+                    rows={2}
+                    count={1}
+                  />
+                  <Input
+                    label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
+                    value={versionForSave}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setVersionForSave(newValue);
+                      if (newValue.trim() !== "") {
+                        setSelectedVersion(null);
+                      }
+                    }}
+                    disabled={isUpdateLoading || !selectedPromptId}
+                    placeholder="Введите название новой версии"
+                  />
+                  <Button
+                    className={css.btn}
+                    disabled={
+                      isUpdateLoading ||
+                      !selectedPromptId ||
+                      (!selectedVersion && !versionForSave)
+                    }
+                    onClick={handleUpdate}
+                    showSpinner={isUpdateLoading}
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "delete",
+            label: "Удаление",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Удаление промпта</div>
+                <div className={css.form}>
+                  <div className={css.deletePromptContainer}>
+                    <div className={css.selectPrompt}>
+                      <Select
+                        label="Промпт"
+                        placeholder="Выберите промпт"
+                        value={deleteSelectedPromptId}
+                        onChange={(value) =>
+                          setDeleteSelectedPromptId(value ?? undefined)
+                        }
+                        options={promptsList.map((p) => ({
+                          label: p.title ?? "",
+                          value: p.id ?? "",
+                        }))}
+                        disabled={isPromptsLoading}
+                        loading={isPromptsLoading}
+                      />
+                    </div>
+                    <Button
+                      className={`${css.btn} ${css.deleteButton}`}
+                      disabled={isPromptsLoading || !deleteSelectedPromptId}
+                      onClick={() => {
+                        const p = promptsList.find(
+                          (x) => x.id === deleteSelectedPromptId
+                        );
+                        if (p)
+                          setPromptToDelete({
+                            id: p.id ?? "",
+                            title: p.title ?? "",
+                          });
+                      }}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+        ]}
+      />
 
       <Modal
         title="Удаление промпта"
