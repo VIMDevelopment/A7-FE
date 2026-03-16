@@ -116,18 +116,27 @@ const PromptsPage = () => {
   };
 
   const handleUpdate = async () => {
+    if (!selectedPromptId || selectedPrompt == null) return;
     const version = versionForSave.trim();
-    if (!selectedPromptId || selectedPrompt == null || !version) return;
     const prevHistory = selectedPrompt.history ?? [];
-    const newHistory = [
-      ...prevHistory,
-      {
-        promptVersion: version,
-        promptBody: editBody,
-        description: "",
-        rate: 0,
-      },
-    ];
+
+    const newHistory =
+      version !== ""
+        ? [
+          ...prevHistory,
+          {
+            promptVersion: version,
+            promptBody: editBody,
+            description: "",
+            rate: 0,
+          },
+        ]
+        : prevHistory.map((item) =>
+          item.promptVersion === selectedVersion
+            ? { ...item, promptBody: editBody }
+            : item
+        );
+
     try {
       await updatePrompt({
         id: selectedPromptId,
@@ -230,23 +239,23 @@ const PromptsPage = () => {
               />
             </div>
             {selectedPromptId && promptHistory.length > 0 && (
-                <div className={css.selectVersion}>
-                  <Select
-                    label="Версия"
-                    placeholder="Версия"
-                    value={selectedVersion}
-                    onChange={(value) => {
-                      setSelectedVersion(value);
-                      const currentVersionBody = promptHistory.find(item => item.promptVersion === value)?.promptBody ?? "";
-                      setEditBody(currentVersionBody)
-                    }}
-                    options={promptHistory.map((item: PromptResponseHistoryItem) => ({
-                      label: item.promptVersion,
-                      value: item.promptVersion,
-                    }))}
-                  />
-                </div>
-              )}
+              <div className={css.selectVersion}>
+                <Select
+                  label="Версия"
+                  placeholder="Версия"
+                  value={selectedVersion}
+                  onChange={(value) => {
+                    setSelectedVersion(value);
+                    const currentVersionBody = promptHistory.find(item => item.promptVersion === value)?.promptBody ?? "";
+                    setEditBody(currentVersionBody)
+                  }}
+                  options={promptHistory.map((item: PromptResponseHistoryItem) => ({
+                    label: item.promptVersion,
+                    value: item.promptVersion,
+                  }))}
+                />
+              </div>
+            )}
           </div>
           <InputTextArea
             label="Текст промпта"
@@ -268,7 +277,8 @@ const PromptsPage = () => {
           <Button
             className={css.btn}
             disabled={
-              isUpdateLoading || !selectedPromptId || !versionForSave.trim()
+              isUpdateLoading ||
+              !selectedPromptId
             }
             onClick={handleUpdate}
             showSpinner={isUpdateLoading}
