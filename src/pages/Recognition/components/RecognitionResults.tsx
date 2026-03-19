@@ -338,6 +338,7 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
                   )}
                   url={photoVersion.original}
                   smallUrl={photoVersion.small}
+                  previewUrl={photoVersion.preview}
                   name={item.fileName}
                   isSelected={selectedPhotoIds.includes(item.id)}
                   albumId={item.albumId}

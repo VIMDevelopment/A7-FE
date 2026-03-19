@@ -24,6 +24,7 @@ type Props = {
   hasImprovedVersion: boolean;
   url: string;
   smallUrl: string;
+  previewUrl: string;
   name: string;
   isSelected: boolean;
   albumId: string;
@@ -37,6 +38,7 @@ const PhotoCard: FC<Props> = ({
   hasImprovedVersion,
   url,
   smallUrl,
+  previewUrl,
   name,
   isSelected,
   albumId,
@@ -218,7 +220,7 @@ const PhotoCard: FC<Props> = ({
             src={smallUrl}
             className={css.img}
             preview={{
-              src: url,
+              src: previewUrl,
             }}
           />
         </div>

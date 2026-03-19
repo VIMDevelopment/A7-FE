@@ -1549,7 +1549,7 @@ export const postDescriptors = (
     }
     
 /**
- * Создает новый промпт для улучшения фотографий. Поле default автоматически устанавливается равным body.
+ * Создаёт промпт; текст в body на русском, перевод в EN через GigaChat сохраняется в body, default и history[0] (ru — исходный русский).
  * @summary Создание нового промпта
  */
 export const postPrompts = (
@@ -1658,7 +1658,7 @@ export const useGetPromptsId = <TData = AsyncReturnType<typeof getPromptsId>, TE
 
 
 /**
- * Обновляет название и/или текст промпта. Поле default не может быть изменено.
+ * Обновляет промпт; body и history[].ru с фронта на русском, английский promptBody/body подставляется после перевода. default не меняется.
  * @summary Обновление промпта
  */
 export const putPromptsId = (

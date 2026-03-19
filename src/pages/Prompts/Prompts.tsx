@@ -107,6 +107,7 @@ const PromptsPage = () => {
               {
                 promptVersion: version,
                 promptBody: body,
+                ru: body,
                 description,
                 rate: 0,
               },
@@ -140,6 +141,7 @@ const PromptsPage = () => {
           {
             promptVersion: version,
             promptBody: editBody,
+            ru: editBody,
             description: editDescription.trim(),
             rate: 0,
           },
@@ -149,6 +151,7 @@ const PromptsPage = () => {
             ? {
               ...item,
               promptBody: editBody,
+              ru: editBody,
               description: editDescription.trim(),
             }
             : item
@@ -204,7 +207,9 @@ const PromptsPage = () => {
     );
     const newBody =
       newHistory.length > 0
-        ? newHistory[newHistory.length - 1].promptBody
+        ? newHistory[newHistory.length - 1].ru ??
+          newHistory[newHistory.length - 1].promptBody ??
+          ""
         : prompt.body ?? "";
     try {
       await updatePrompt({
@@ -330,7 +335,9 @@ const PromptsPage = () => {
                             const currentVersion = promptHistory.find(
                               (item) => item.promptVersion === value
                             );
-                            setEditBody(currentVersion?.promptBody ?? "");
+                            setEditBody(
+                              currentVersion?.ru ?? currentVersion?.promptBody ?? ""
+                            );
                             setEditDescription(currentVersion?.description ?? "");
                           }}
                           options={promptHistory.map(

@@ -10,7 +10,7 @@ import type { UpdatePromptRequestHistoryItem } from './updatePromptRequestHistor
 export interface UpdatePromptRequest {
   /** Название промпта */
   title?: string;
-  /** Текст промпта */
+  /** Текст промпта на русском; будет переведён в EN и записан в body, первая версия history синхронизируется */
   body?: string;
   /** Версии промпта; при передаче массив заменяется целиком */
   history?: UpdatePromptRequestHistoryItem[];

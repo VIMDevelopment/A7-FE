@@ -371,7 +371,6 @@ const AlbumPage = () => {
                 );
               },
             }}
-            items={albumPhotos?.map((item) => getPhotoVersion(item).preview)}
           >
             {albumPhotos?.map((item) => {
               const photoVersion = getPhotoVersion(item);
@@ -386,6 +385,7 @@ const AlbumPage = () => {
                   )}
                   url={photoVersion.original}
                   smallUrl={photoVersion.small}
+                  previewUrl={photoVersion.preview}
                   name={item.fileName}
                   isSelected={selectedOriginalPhotos.includes(item.id)}
                   albumId={albumId ?? ""}

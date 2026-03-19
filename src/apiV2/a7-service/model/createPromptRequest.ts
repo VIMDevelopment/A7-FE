@@ -9,6 +9,6 @@
 export interface CreatePromptRequest {
   /** Название промпта */
   title: string;
-  /** Текст промпта */
+  /** Текст промпта на русском (будет переведён в EN и сохранён в body/default и history[0]) */
   body: string;
 }
