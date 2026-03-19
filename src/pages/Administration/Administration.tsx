@@ -29,6 +29,7 @@ import {
 import Modal from "../../components/Modal/Modal";
 import CameraSetupSlider from "../../components/CameraSetupSlider/CameraSetupSlider";
 import { getCameraSetupSteps } from "./cameraSetupSteps";
+import { Tabs } from "antd";
 
 type UserCreateForm = UserRegisterDto & {
   repeatPassword?: string;
@@ -235,288 +236,316 @@ const AdministrationPage = () => {
     <div className={css.container}>
       <div className={css.pageTitle}>Администрирование</div>
 
-      <div className={css.subTitle}>Привязка фотоаппарата</div>
-      <div className={css.form}>
-        {isCameraSuccess ? (
-          <>
-            <div className={css.notificationText}>
-              Фотоаппарат готов к привязке. Пожалуйста, подключите фотоаппарат по инструкции.
-            </div>
-            <Button
-              className={css.btn}
-              onClick={handleShowInstruction}
-            >
-              Настроить фотоаппарат
-            </Button>
-          </>
-        ) : (
-          <>
-            <Select
-              label="Филиал"
-              onChange={(value) => setSelectedProjectId(value as string)}
-              value={selectedProjectId}
-              placeholder="Выберите из списка"
-              disabled={isCameraLoading || isProjectsLoading}
-              loading={isProjectsLoading}
-              options={getWorkplaceOptions(
-                projectsData?.data.projects ?? [],
-                currentUser?.role,
-                currentUser?.workplace
-              )}
-            />
-            <Button
-              className={css.btn}
-              disabled={isCameraLoading || !selectedProjectId}
-              onClick={handleGenerateCameraData}
-              showSpinner={isCameraLoading}
-            >
-              Сгенерировать данные для привязки
-            </Button>
-          </>
-        )}
-      </div>
+      <Tabs
+        className={css.tabs}
+        defaultActiveKey="camera"
+        items={[
+          {
+            key: "camera",
+            label: "Привязка фотоаппарата",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Привязка фотоаппарата</div>
+                <div className={css.form}>
+                  {isCameraSuccess ? (
+                    <>
+                      <div className={css.notificationText}>
+                        Фотоаппарат готов к привязке. Пожалуйста, подключите фотоаппарат по инструкции.
+                      </div>
+                      <Button
+                        className={css.btn}
+                        onClick={handleShowInstruction}
+                      >
+                        Настроить фотоаппарат
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Select
+                        label="Филиал"
+                        onChange={(value) => setSelectedProjectId(value as string)}
+                        value={selectedProjectId}
+                        placeholder="Выберите из списка"
+                        disabled={isCameraLoading || isProjectsLoading}
+                        loading={isProjectsLoading}
+                        options={getWorkplaceOptions(
+                          projectsData?.data.projects ?? [],
+                          currentUser?.role,
+                          currentUser?.workplace
+                        )}
+                      />
+                      <Button
+                        className={css.btn}
+                        disabled={isCameraLoading || !selectedProjectId}
+                        onClick={handleGenerateCameraData}
+                        showSpinner={isCameraLoading}
+                      >
+                        Сгенерировать данные для привязки
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "create-user",
+            label: "Создание пользователя",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Создание нового пользователя</div>
+                <div className={css.form}>
+                  <Input
+                    label="Имя"
+                    onChange={(e) =>
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    value={createFormState.name}
+                    disabled={isLoadingCreateUser}
+                    placeholder="Введите имя"
+                  />
+                  <Input
+                    label="E-mail"
+                    name="create-user-email"
+                    autoComplete="off"
+                    onChange={(e) =>
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                    value={createFormState.email}
+                    disabled={isLoadingCreateUser}
+                    placeholder="Введите новый E-mail"
+                    type="email"
+                  />
+                  <Input
+                    label="Пароль"
+                    isPasswordInput
+                    name="create-user-password"
+                    autoComplete="new-password"
+                    onChange={(e) => {
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }));
+                      setIsCreatePasswordError(false);
+                    }}
+                    value={createFormState.password}
+                    disabled={isLoading}
+                    placeholder="Введите пароль"
+                    status={isCreatePasswordError ? "error" : ""}
+                  />
+                  <Input
+                    label="Подтвердите пароль"
+                    isPasswordInput
+                    name="create-user-repeat-password"
+                    autoComplete="new-password"
+                    onChange={(e) => {
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        repeatPassword: e.target.value,
+                      }));
+                      setIsCreatePasswordError(false);
+                    }}
+                    value={createFormState.repeatPassword}
+                    disabled={isLoading}
+                    placeholder="Повторно введите пароль"
+                    status={isCreatePasswordError ? "error" : ""}
+                  />
+                  <Select
+                    label="Место работы"
+                    onChange={(value) =>
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        workplace: value,
+                      }))
+                    }
+                    mode="multiple"
+                    value={createFormState.workplace}
+                    placeholder="Выберите из списка"
+                    disabled={isLoadingCreateUser || isProjectsLoading}
+                    loading={isProjectsLoading}
+                    options={getWorkplaceOptions(
+                      projectsData?.data.projects ?? [],
+                      currentUser?.role,
+                      currentUser?.workplace
+                    )}
+                  />
+                  <Select
+                    label="Роль"
+                    onChange={(value) =>
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        role: value,
+                      }))
+                    }
+                    value={createFormState.role}
+                    placeholder="Выберите из списка"
+                    disabled={isLoadingCreateUser}
+                    options={getRolesOptions(currentUser?.role)}
+                  />
+                  <Button
+                    className={css.btn}
+                    disabled={
+                      isLoadingCreateUser ||
+                      isCreatePasswordError ||
+                      !createFormState.name ||
+                      !createFormState.email ||
+                      !createFormState.password ||
+                      !createFormState.role ||
+                      !createFormState.workplace
+                    }
+                    onClick={handleCreateClick}
+                    showSpinner={isLoadingCreateUser}
+                  >
+                    Создать
+                  </Button>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "update-user",
+            label: "Редактирование пользователя",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>
+                  Редактирование существующего пользователя
+                </div>
+                <div className={css.form}>
+                  <Select
+                    label="Выберите пользователя, которого хотите отредактировать"
+                    placeholder="Выберите из списка"
+                    onChange={(value) => {
+                      const selectedUser = data?.data.find((item) => item.id === value);
+                      const projectsIds = projectsData?.data.projects?.map((el) => el.id);
 
-      <div className={css.subTitle}>Создание нового пользователя</div>
-      <div className={css.form}>
-        <Input
-          label="Имя"
-          onChange={(e) =>
-            setCreateFormState((prev) => ({
-              ...prev,
-              name: e.target.value,
-            }))
-          }
-          value={createFormState.name}
-          disabled={isLoadingCreateUser}
-          placeholder="Введите имя"
-        />
-        <Input
-          label="E-mail"
-          name="create-user-email"
-          autoComplete="off"
-          onChange={(e) =>
-            setCreateFormState((prev) => ({
-              ...prev,
-              email: e.target.value,
-            }))
-          }
-          value={createFormState.email}
-          disabled={isLoadingCreateUser}
-          placeholder="Введите новый E-mail"
-          type="email"
-        />
-        <Input
-          label="Пароль"
-          isPasswordInput
-          name="create-user-password"
-          autoComplete="new-password"
-          onChange={(e) => {
-            setCreateFormState((prev) => ({
-              ...prev,
-              password: e.target.value,
-            }));
-            setIsCreatePasswordError(false);
-          }}
-          value={createFormState.password}
-          disabled={isLoading}
-          placeholder="Введите пароль"
-          status={isCreatePasswordError ? "error" : ""}
-        />
-        <Input
-          label="Подтвердите пароль"
-          isPasswordInput
-          name="create-user-repeat-password"
-          autoComplete="new-password"
-          onChange={(e) => {
-            setCreateFormState((prev) => ({
-              ...prev,
-              repeatPassword: e.target.value,
-            }));
-            setIsCreatePasswordError(false);
-          }}
-          value={createFormState.repeatPassword}
-          disabled={isLoading}
-          placeholder="Повторно введите пароль"
-          status={isCreatePasswordError ? "error" : ""}
-        />
-        <Select
-          label="Место работы"
-          onChange={(value) =>
-            setCreateFormState((prev) => ({
-              ...prev,
-              workplace: value,
-            }))
-          }
-          mode="multiple"
-          value={createFormState.workplace}
-          placeholder="Выберите из списка"
-          disabled={isLoadingCreateUser || isProjectsLoading}
-          loading={isProjectsLoading}
-          options={getWorkplaceOptions(
-            projectsData?.data.projects ?? [],
-            currentUser?.role,
-            currentUser?.workplace
-          )}
-        />
-        <Select
-          label="Роль"
-          onChange={(value) =>
-            setCreateFormState((prev) => ({
-              ...prev,
-              role: value,
-            }))
-          }
-          value={createFormState.role}
-          placeholder="Выберите из списка"
-          disabled={isLoadingCreateUser}
-          options={getRolesOptions(currentUser?.role)}
-        />
-        <Button
-          className={css.btn}
-          disabled={
-            isLoadingCreateUser ||
-            isCreatePasswordError ||
-            !createFormState.name ||
-            !createFormState.email ||
-            !createFormState.password ||
-            !createFormState.role ||
-            !createFormState.workplace
-          }
-          onClick={handleCreateClick}
-          showSpinner={isLoadingCreateUser}
-        >
-          Создать
-        </Button>
-      </div>
-
-      <div className={css.subTitle}>
-        Редактирование существующего пользователя
-      </div>
-      <div className={css.form}>
-        <Select
-          label="Выберите пользователя, которого хотите отредактировать"
-          placeholder="Выберите из списка"
-          onChange={(value) => {
-            const selectedUser = data?.data.find((item) => item.id === value);
-            const projectsIds = projectsData?.data.projects?.map((el) => el.id);
-
-            setUpdateFormState({
-              id: selectedUser?.id,
-              name: selectedUser?.name,
-              email: selectedUser?.email,
-              role: selectedUser?.role as UserUpdateDtoRole,
-              workplace: selectedUser?.workplace?.filter((item) =>
-                projectsIds?.includes(item)
-              ),
-            });
-          }}
-          value={updateFormState?.id}
-          options={allUsersDataOptions}
-        />
-        <Input
-          label="Новое имя пользователя"
-          onChange={(e) =>
-            setUpdateFormState((prev) => ({
-              ...prev,
-              name: e.target.value,
-            }))
-          }
-          value={updateFormState?.name}
-          disabled={isLoading || !updateFormState?.id}
-          placeholder="Введите имя"
-        />
-        <Input
-          label="Новый e-mail"
-          name="update-user-email"
-          autoComplete="off"
-          onChange={(e) =>
-            setUpdateFormState((prev) => ({
-              ...prev,
-              email: e.target.value,
-            }))
-          }
-          value={updateFormState?.email}
-          disabled={isLoading || !updateFormState?.id}
-          placeholder="Введите новый E-mail"
-          type="email"
-        />
-        <Input
-          label="Новый пароль"
-          isPasswordInput
-          name="update-user-password"
-          autoComplete="new-password"
-          onChange={(e) => {
-            setUpdateFormState((prev) => ({
-              ...prev,
-              password: e.target.value,
-            }));
-            setIsUpdatePasswordError(false);
-          }}
-          value={updateFormState?.password}
-          disabled={isLoading || !updateFormState?.id}
-          placeholder="Введите пароль"
-          status={isUpdatePasswordError ? "error" : ""}
-        />
-        <Input
-          label="Подтвердите новый пароль"
-          isPasswordInput
-          name="update-user-repeat-password"
-          autoComplete="new-password"
-          onChange={(e) => {
-            setUpdateFormState((prev) => ({
-              ...prev,
-              repeatPassword: e.target.value,
-            }));
-            setIsUpdatePasswordError(false);
-          }}
-          value={updateFormState?.repeatPassword}
-          disabled={isLoading || !updateFormState?.id}
-          placeholder="Повторно введите пароль"
-          status={isUpdatePasswordError ? "error" : ""}
-        />
-        <Select
-          label="Место работы"
-          onChange={(value) =>
-            setUpdateFormState((prev) => ({
-              ...prev,
-              workplace: value,
-            }))
-          }
-          mode="multiple"
-          value={updateFormState?.workplace}
-          placeholder="Выберите из списка"
-          disabled={
-            isLoadingCreateUser || isProjectsLoading || !updateFormState?.id
-          }
-          loading={isProjectsLoading}
-          options={getWorkplaceOptions(
-            projectsData?.data.projects ?? [],
-            currentUser?.role,
-            currentUser?.workplace
-          )}
-        />
-        <Select
-          label="Роль"
-          onChange={(value) =>
-            setUpdateFormState((prev) => ({
-              ...prev,
-              role: value,
-            }))
-          }
-          value={updateFormState?.role}
-          placeholder="Выберите из списка"
-          disabled={isLoading || !updateFormState?.id}
-          options={getRolesOptions(currentUser?.role)}
-        />
-        <Button
-          className={css.btn}
-          disabled={isLoading || isUpdatePasswordError || !updateFormState?.id}
-          onClick={handleUpdateClick}
-          showSpinner={isLoading}
-        >
-          Сохранить
-        </Button>
-      </div>
+                      setUpdateFormState({
+                        id: selectedUser?.id,
+                        name: selectedUser?.name,
+                        email: selectedUser?.email,
+                        role: selectedUser?.role as UserUpdateDtoRole,
+                        workplace: selectedUser?.workplace?.filter((item) =>
+                          projectsIds?.includes(item)
+                        ),
+                      });
+                    }}
+                    value={updateFormState?.id}
+                    options={allUsersDataOptions}
+                  />
+                  <Input
+                    label="Новое имя пользователя"
+                    onChange={(e) =>
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    value={updateFormState?.name}
+                    disabled={isLoading || !updateFormState?.id}
+                    placeholder="Введите имя"
+                  />
+                  <Input
+                    label="Новый e-mail"
+                    name="update-user-email"
+                    autoComplete="off"
+                    onChange={(e) =>
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                    value={updateFormState?.email}
+                    disabled={isLoading || !updateFormState?.id}
+                    placeholder="Введите новый E-mail"
+                    type="email"
+                  />
+                  <Input
+                    label="Новый пароль"
+                    isPasswordInput
+                    name="update-user-password"
+                    autoComplete="new-password"
+                    onChange={(e) => {
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }));
+                      setIsUpdatePasswordError(false);
+                    }}
+                    value={updateFormState?.password}
+                    disabled={isLoading || !updateFormState?.id}
+                    placeholder="Введите пароль"
+                    status={isUpdatePasswordError ? "error" : ""}
+                  />
+                  <Input
+                    label="Подтвердите новый пароль"
+                    isPasswordInput
+                    name="update-user-repeat-password"
+                    autoComplete="new-password"
+                    onChange={(e) => {
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        repeatPassword: e.target.value,
+                      }));
+                      setIsUpdatePasswordError(false);
+                    }}
+                    value={updateFormState?.repeatPassword}
+                    disabled={isLoading || !updateFormState?.id}
+                    placeholder="Повторно введите пароль"
+                    status={isUpdatePasswordError ? "error" : ""}
+                  />
+                  <Select
+                    label="Место работы"
+                    onChange={(value) =>
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        workplace: value,
+                      }))
+                    }
+                    mode="multiple"
+                    value={updateFormState?.workplace}
+                    placeholder="Выберите из списка"
+                    disabled={
+                      isLoadingCreateUser || isProjectsLoading || !updateFormState?.id
+                    }
+                    loading={isProjectsLoading}
+                    options={getWorkplaceOptions(
+                      projectsData?.data.projects ?? [],
+                      currentUser?.role,
+                      currentUser?.workplace
+                    )}
+                  />
+                  <Select
+                    label="Роль"
+                    onChange={(value) =>
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        role: value,
+                      }))
+                    }
+                    value={updateFormState?.role}
+                    placeholder="Выберите из списка"
+                    disabled={isLoading || !updateFormState?.id}
+                    options={getRolesOptions(currentUser?.role)}
+                  />
+                  <Button
+                    className={css.btn}
+                    disabled={isLoading || isUpdatePasswordError || !updateFormState?.id}
+                    onClick={handleUpdateClick}
+                    showSpinner={isLoading}
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+              </div>
+            ),
+          },
+        ]}
+      />
 
       <Modal
         title="Инструкция по настройке Canon R6"
