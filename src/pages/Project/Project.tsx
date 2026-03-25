@@ -11,6 +11,7 @@ import { Link, useParams } from "react-router-dom";
 import { Breadcrumb } from "antd";
 import { PublicRoutes } from "../../routes/routes";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
+import YandexDiskProjectSyncControl from "../../components/YandexDiskProjectSyncControl/YandexDiskProjectSyncControl";
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -37,7 +38,10 @@ const ProjectPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{`Все папки филиала "${projectName}"`}</div>
+      <div className={css.pageTitleRow}>
+        <div className={css.pageTitle}>{`Все папки филиала "${projectName}"`}</div>
+        <YandexDiskProjectSyncControl projectId={projectId ?? ""} />
+      </div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}

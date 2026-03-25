@@ -4,16 +4,25 @@
   row-gap: 30px;
 }
 
-.navMenu {
+.pageTitleRow {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 12px;
 }
 
 .pageTitle {
   font-size: 22px;
   font-weight: 500;
   color: var(--color-text);
+  min-width: 0;
+}
+
+.navMenu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .grid {
@@ -47,7 +56,8 @@
     font-size: 20px;
   }
 
-  .navMenu {
+  .pageTitleRow {
+    flex-wrap: wrap;
     align-items: flex-start;
   }
 }

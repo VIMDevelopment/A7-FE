@@ -12,6 +12,7 @@ import AddAlbumCard from "./components/AddAlbumCard/AddAlbumCard";
 import { Breadcrumb } from "antd";
 import { PublicRoutes } from "../../routes/routes";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
+import YandexDiskProjectSyncControl from "../../components/YandexDiskProjectSyncControl/YandexDiskProjectSyncControl";
 
 const SubprojectPage = () => {
   const { projectId, subprojectId } = useParams();
@@ -49,7 +50,10 @@ const SubprojectPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{`Папка: "${subprojectName}"`}</div>
+      <div className={css.pageTitleRow}>
+        <div className={css.pageTitle}>{`Папка: "${subprojectName}"`}</div>
+        <YandexDiskProjectSyncControl projectId={projectId ?? ""} />
+      </div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}

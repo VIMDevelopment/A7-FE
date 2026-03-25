@@ -3,11 +3,20 @@
   flex-direction: column;
 }
 
+.pageTitleRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
 .pageTitle {
   font-size: 22px;
   font-weight: 500;
   color: var(--color-text);
-  margin-bottom: 30px;
+  min-width: 0;
 }
 
 .grid {
@@ -180,7 +189,8 @@
     font-size: 20px;
   }
 
-  .navMenu {
+  .pageTitleRow {
+    flex-wrap: wrap;
     align-items: flex-start;
   }
 

@@ -1,0 +1,44 @@
+.root {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.button {
+  height: auto;
+  padding: 2px 6px;
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+  opacity: 0.72;
+  background-color: transparent !important
+}
+
+.button:hover:not(:disabled) {
+  color: var(--color-text-secondary) !important;
+  opacity: 1;
+}
+
+.button:disabled {
+  opacity: 0.85;
+}
+
+.label {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.iconIdle {
+  font-size: 20px;
+}
+
+.spinIcon {
+  font-size: 20px;
+  color: var(--color-text-secondary);
+}
+
+.iconSuccess {
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  opacity: 0.9;
+}

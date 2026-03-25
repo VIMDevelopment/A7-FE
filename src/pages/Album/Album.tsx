@@ -38,6 +38,7 @@ import {
 } from "./components/PhotoCard/helpers";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
 import ImprovementModal from "../../components/ImprovementModal/ImprovementModal";
+import YandexDiskProjectSyncControl from "../../components/YandexDiskProjectSyncControl/YandexDiskProjectSyncControl";
 
 const AlbumPage = () => {
   const { projectId, subprojectId, albumId } = useParams();
@@ -344,7 +345,10 @@ const AlbumPage = () => {
 
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{pageTitle}</div>
+      <div className={css.pageTitleRow}>
+        <div className={css.pageTitle}>{pageTitle}</div>
+        <YandexDiskProjectSyncControl projectId={projectId ?? ""} />
+      </div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
