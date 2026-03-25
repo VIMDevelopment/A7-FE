@@ -17,4 +17,6 @@ export interface UpdateAlbumDto {
   coverPhotoId?: string;
   /** Теги альбома */
   tags?: string[];
+  /** Массив photoId из папки "Готовая продукция" */
+  readyProducts?: string[];
 }

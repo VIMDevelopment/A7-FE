@@ -23,6 +23,8 @@ export interface AlbumResponse {
   coverPhotoId?: string;
   /** Теги альбома */
   tags?: string[];
+  /** Массив photoId, помеченных как готовые к продаже */
+  readyProducts?: string[];
   /** Статус обработки альбома */
   processed?: boolean;
   /** Дата создания */

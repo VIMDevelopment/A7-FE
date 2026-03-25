@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { PhotoVersions } from './photoVersions';
+import type { PhotoProcessingEntry } from './photoProcessingEntry';
 
 export interface Photo {
   /** Уникальный идентификатор фото */
@@ -30,6 +31,8 @@ export interface Photo {
   rating?: string;
   /** Относительный путь файла на Яндекс.Диске (для перезаписи при реверте) */
   yadisk?: string | null;
+  /** Журнал успешных обработок для отчётов по затратам */
+  processing?: PhotoProcessingEntry[];
   /** Дата создания */
   createdAt: string;
   /** Дата последнего обновления */

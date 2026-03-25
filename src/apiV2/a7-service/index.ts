@@ -70,6 +70,7 @@ import type {
   DeletePhotoResponse,
   PhotoListResponse,
   SetCoverRequest,
+  GetPhotosProcessingusageParams,
   PostPhotosImprovement200,
   PostPhotosImprovementBody,
   PostPhotosImprovementcustom200,
@@ -94,7 +95,8 @@ import type {
   PutCamerasIdBody,
   YandexDiskConfigResponse,
   CreateOrUpdateYandexDiskConfigDto,
-  YandexDiskDeleteResponse
+  YandexDiskDeleteResponse,
+  PostYandexdiskSyncProjectProjectId200
 } from './model'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1338,6 +1340,49 @@ export const putPhotosIdSetcover = (
     }
     
 /**
+ * Агрегирует записи `processing` (model, at, cost) по фото в выбранной области.
+Ровно один параметр области: `projectId` (филиал), `subprojectId` или `albumId`.
+Период: либо `month=YYYY-MM` (UTC), либо пара `from` и/или `to` (ISO 8601).
+
+ * @summary Отчёт по затратам на обработку фото (журнал Replicate)
+ */
+export const getPhotosProcessingusage = (
+    params?: GetPhotosProcessingusageParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.get(
+      `/photos/processing-usage`,{
+        params,
+    ...options}
+    );
+  }
+
+
+export const getGetPhotosProcessingusageQueryKey = (params?: GetPhotosProcessingusageParams,) => [`/photos/processing-usage`, ...(params ? [params]: [])];
+
+    
+export const useGetPhotosProcessingusage = <TData = AsyncReturnType<typeof getPhotosProcessingusage>, TError = AxiosError<unknown>>(
+ params?: GetPhotosProcessingusageParams, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getPhotosProcessingusage>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetPhotosProcessingusageQueryKey(params);
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getPhotosProcessingusage>> = () => getPhotosProcessingusage(params, axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getPhotosProcessingusage>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
  * Добавляет фотографии в очередь для улучшения через GFPGAN.
 
 После улучшения поле `current` обновляется новыми версиями, а `default` остается неизменным.
@@ -2065,5 +2110,39 @@ export const deleteYandexdiskProjectProjectId = (
         }
 
       return useMutation<AsyncReturnType<typeof deleteYandexdiskProjectProjectId>, TError, {projectId: string}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Читает состояние Яндекс.Диска в рамках структуры проекта и применяет изменения в WANMAX
+(фото default/current + каталоги subproject/album). Мутации `project` из Я.Диска не выполняются.
+
+ * @summary Запустить обратную синхронизацию Яндекс.Диска -> WANMAX
+ */
+export const postYandexdiskSyncProjectProjectId = (
+    projectId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PostYandexdiskSyncProjectProjectId200>> => {
+    return axios.post(
+      `/yandex-disk/sync/project/${projectId}`,undefined,options
+    );
+  }
+
+
+
+    export const usePostYandexdiskSyncProjectProjectId = <TError = AxiosError<void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postYandexdiskSyncProjectProjectId>, TError,{projectId: string}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postYandexdiskSyncProjectProjectId>, {projectId: string}> = (props) => {
+          const {projectId} = props || {};
+
+          return  postYandexdiskSyncProjectProjectId(projectId,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postYandexdiskSyncProjectProjectId>, TError, {projectId: string}, TContext>(mutationFn, mutationOptions)
     }
     

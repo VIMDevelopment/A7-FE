@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import css from "./index.module.css";
 import { Breadcrumb, Progress } from "antd";
-import { useParams, Link } from "react-router-dom";
+import type { BreadcrumbProps } from "antd";
+import { useParams, Link, useMatch } from "react-router-dom";
 import { PublicRoutes } from "../../routes/routes";
 import {
   useDeletePhotosId,
@@ -15,6 +16,7 @@ import {
 import { defaultApiAxiosParams } from "../../api/helpers";
 import UploadBox from "./components/UploadBox/UploadBox";
 import PhotoCard from "./components/PhotoCard/PhotoCard";
+import ReadyProductFolderCard from "./components/ReadyProductFolderCard/ReadyProductFolderCard";
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -40,6 +42,7 @@ import ImprovementModal from "../../components/ImprovementModal/ImprovementModal
 const AlbumPage = () => {
   const { projectId, subprojectId, albumId } = useParams();
   const queryClient = useQueryClient();
+  const isReadyProductView = !!useMatch(PublicRoutes.ALBUM_READY_PRODUCT.static);
 
   const [selectedOriginalPhotos, setSelectedOriginalPhotos] = useState<
     string[]
@@ -84,24 +87,40 @@ const AlbumPage = () => {
   const subprojectName = subprojectData?.data.name ?? "";
   const albumName = albumData?.data.title ?? "";
 
-  const albumPhotos = useMemo(
-    () =>
-      albumPhotosData?.data.sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return dateA - dateB;
-      }),
-    [albumPhotosData]
-  );
+  const readyProductIds = albumData?.data.readyProducts ?? [];
+
+  const sortedAlbumPhotos = useMemo(() => {
+    const data = albumPhotosData?.data ?? [];
+    return [...data].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateA - dateB;
+    });
+  }, [albumPhotosData]);
+
+  const mainAlbumPhotos = useMemo(() => {
+    const readySet = new Set(readyProductIds);
+    return sortedAlbumPhotos.filter((p) => !readySet.has(p.id));
+  }, [sortedAlbumPhotos, readyProductIds]);
+
+  const readyAlbumPhotos = useMemo(() => {
+    const readySet = new Set(readyProductIds);
+    return sortedAlbumPhotos.filter((p) => readySet.has(p.id));
+  }, [sortedAlbumPhotos, readyProductIds]);
+
+  const displayPhotos = isReadyProductView ? readyAlbumPhotos : mainAlbumPhotos;
 
   const improvedPhotos = useMemo(
-    () => albumPhotos?.filter((item) => !!item.current?.original),
-    [albumPhotos]
+    () => sortedAlbumPhotos.filter((item) => !!item.current?.original),
+    [sortedAlbumPhotos]
   );
-
+  
   useEffect(() => {
-    if ((albumPhotos ?? []).length > 0) {
-      const firstPhotoId = albumPhotos?.[0]?.id;
+    if (isReadyProductView) {
+      return;
+    }
+    if (sortedAlbumPhotos.length > 0) {
+      const firstPhotoId = sortedAlbumPhotos[0]?.id;
 
       if (firstPhotoId && albumData?.data.coverPhotoId !== firstPhotoId) {
         setAlbumCover({
@@ -116,7 +135,15 @@ const AlbumPage = () => {
         });
       }
     }
-  }, [albumPhotos, albumData]);
+  }, [
+    isReadyProductView,
+    sortedAlbumPhotos,
+    albumData,
+    albumId,
+    subprojectId,
+    setAlbumCover,
+    queryClient,
+  ]);
 
   const handleDeletePhotosClick = (id?: string) => {
     if (id) {
@@ -128,7 +155,7 @@ const AlbumPage = () => {
   };
 
   const handleDownloadPhotosClick = () => {
-    const preparedFilesData: FileForZip[] = (albumPhotos ?? [])
+    const preparedFilesData: FileForZip[] = displayPhotos
       .filter((item) => selectedOriginalPhotos.includes(item.id))
       .map((item) => ({
         url: getPhotoVersion(item).original,
@@ -220,7 +247,7 @@ const AlbumPage = () => {
   };
 
   const handleSelectAllPhotos = () => {
-    const photosIds = (albumPhotos ?? []).map((item) => item.id);
+    const photosIds = displayPhotos.map((item) => item.id);
     setSelectedOriginalPhotos(photosIds);
   };
 
@@ -230,52 +257,99 @@ const AlbumPage = () => {
 
   const { backButton } = useBreadcrumbsBackButton();
 
+  const breadcrumbItems = useMemo((): NonNullable<
+    BreadcrumbProps["items"]
+  > => {
+    const albumCrumb = isReadyProductView
+      ? {
+          title: (
+            <Link
+              to={PublicRoutes.ALBUM.get({
+                projectId: projectId ?? "",
+                subprojectId: subprojectId ?? "",
+                albumId: albumId ?? "",
+              })}
+            >
+              {`Альбом: "${albumName}"`}
+            </Link>
+          ),
+        }
+      : {
+          title: `Альбом: "${albumName}"`,
+        };
+
+    const tail: NonNullable<BreadcrumbProps["items"]> = isReadyProductView
+      ? [
+          { type: "separator" },
+          { title: "Готовый продукт" },
+        ]
+      : [];
+
+    return [
+      ...backButton,
+      {
+        title: <Link to={PublicRoutes.PROJECTS.static}>Все филиалы</Link>,
+      },
+      {
+        type: "separator" as const,
+      },
+      {
+        title: (
+          <Link to={PublicRoutes.PROJECT.get({ projectId: projectId ?? "" })}>
+            Филиал: "{projectName}"
+          </Link>
+        ),
+      },
+      {
+        type: "separator" as const,
+      },
+      {
+        title: (
+          <Link
+            to={PublicRoutes.SUBPROJECT.get({
+              projectId: projectId ?? "",
+              subprojectId: subprojectId ?? "",
+            })}
+          >
+            Папка: "{subprojectName}"
+          </Link>
+        ),
+      },
+      {
+        type: "separator" as const,
+      },
+      albumCrumb,
+      ...tail,
+    ];
+  }, [
+    backButton,
+    isReadyProductView,
+    albumName,
+    projectId,
+    subprojectId,
+    albumId,
+    projectName,
+    subprojectName,
+  ]);
+
+  const pageTitle = isReadyProductView
+    ? `Альбом: "${albumName}" — Готовый продукт`
+    : `Альбом: "${albumName}"`;
+
+  const readyProductUrl = PublicRoutes.ALBUM_READY_PRODUCT.get({
+    projectId: projectId ?? "",
+    subprojectId: subprojectId ?? "",
+    albumId: albumId ?? "",
+  });
+
   return (
     <div className={css.container}>
-      <div className={css.pageTitle}>{`Альбом: "${albumName}"`}</div>
+      <div className={css.pageTitle}>{pageTitle}</div>
       <div className={css.navMenu}>
         <Breadcrumb
           className={css.breadCrumbs}
           separator=""
-          items={[
-            ...backButton,
-            {
-              title: <Link to={PublicRoutes.PROJECTS.static}>Все филиалы</Link>,
-            },
-            {
-              type: "separator",
-            },
-            {
-              title: (
-                <Link
-                  to={PublicRoutes.PROJECT.get({ projectId: projectId ?? "" })}
-                >
-                  Филиал: "{projectName}"
-                </Link>
-              ),
-            },
-            {
-              type: "separator",
-            },
-            {
-              title: (
-                <Link
-                  to={PublicRoutes.SUBPROJECT.get({
-                    projectId: projectId ?? "",
-                    subprojectId: subprojectId ?? "",
-                  })}
-                >
-                  Папка: "{subprojectName}"
-                </Link>
-              ),
-            },
-            {
-              type: "separator",
-            },
-            {
-              title: `Альбом: "${albumName}"`,
-            },
-          ]}
+          items={breadcrumbItems}
         />
       </div>
       <div className={css.actionsContainer}>
@@ -302,8 +376,8 @@ const AlbumPage = () => {
       </div>
       <div
         className={css.counter}
-      >{`Выбрано фотографий: ${selectedOriginalPhotos.length} из ${albumPhotos?.length}`}</div>
-      {albumPhotos?.length === 0 ? (
+      >{`Выбрано фотографий: ${selectedOriginalPhotos.length} из ${displayPhotos.length}`}</div>
+      {sortedAlbumPhotos.length === 0 ? (
         <UploadBox
           isAlbumLoading={isAlbumPhotosLoading}
           size="big"
@@ -311,29 +385,37 @@ const AlbumPage = () => {
         />
       ) : (
         <div className={css.grid}>
+          {!isReadyProductView && (
+            <ReadyProductFolderCard
+              to={readyProductUrl}
+            />
+          )}
           <Image.PreviewGroup
             preview={{
               toolbarRender: (_, info) => {
-                const currentPhoto = albumPhotos?.[info.current];
-
-                return (
-                  <div className={css.toolbar}>
+                const currentPhoto = displayPhotos[info.current];
+                const toolbarIcons = (
+                  <>
                     {info.icons.flipXIcon}
                     {info.icons.flipYIcon}
                     {info.icons.rotateLeftIcon}
                     {info.icons.rotateRightIcon}
                     {info.icons.zoomOutIcon}
                     {info.icons.zoomInIcon}
+                  </>
+                );
+
+                return (
+                  <div className={css.toolbar}>
+                    {toolbarIcons}
                     <div className={css.customToolbarButtonsContainer}>
                       <PrinterOutlined
                         onClick={() =>
                           handlePrintPhoto(
-                            currentPhoto
-                              ? getPhotoVersion(currentPhoto).original
-                              : "",
+                            getPhotoVersion(currentPhoto).original,
                             makeFileName({
-                              fileName: currentPhoto?.fileName ?? "",
-                              isOriginal: !currentPhoto?.current,
+                              fileName: currentPhoto.fileName,
+                              isOriginal: !currentPhoto.current,
                             })
                           )
                         }
@@ -343,12 +425,10 @@ const AlbumPage = () => {
                         className={css.toolbarBtn}
                         onClick={() =>
                           downloadImageByUrl(
-                            currentPhoto
-                              ? getPhotoVersion(currentPhoto).original
-                              : "",
+                            getPhotoVersion(currentPhoto).original,
                             makeFileName({
-                              fileName: currentPhoto?.fileName ?? "",
-                              isOriginal: !currentPhoto?.current,
+                              fileName: currentPhoto.fileName,
+                              isOriginal: !currentPhoto.current,
                             })
                           )
                         }
@@ -356,13 +436,13 @@ const AlbumPage = () => {
                       <DeleteOutlined
                         className={css.toolbarBtn}
                         onClick={() => {
-                          handleDeletePhotosClick(currentPhoto?.id);
+                          handleDeletePhotosClick(currentPhoto.id);
                         }}
                       />
                       <RocketOutlined
                         className={css.toolbarBtn}
                         onClick={() => {
-                          setImprovementPhotoId(currentPhoto?.id ?? "");
+                          setImprovementPhotoId(currentPhoto.id);
                           setIsImprovePhotoModalOpen(true);
                         }}
                       />
@@ -372,7 +452,7 @@ const AlbumPage = () => {
               },
             }}
           >
-            {albumPhotos?.map((item) => {
+            {displayPhotos.map((item) => {
               const photoVersion = getPhotoVersion(item);
 
               return (
@@ -380,7 +460,7 @@ const AlbumPage = () => {
                   key={item.id}
                   id={item.id}
                   isOriginal={!item.current}
-                  hasImprovedVersion={(improvedPhotos ?? []).some(
+                  hasImprovedVersion={improvedPhotos.some(
                     (el) => item.id === el.id
                   )}
                   url={photoVersion.original}
@@ -394,11 +474,13 @@ const AlbumPage = () => {
               );
             })}
           </Image.PreviewGroup>
-          <UploadBox
-            isAlbumLoading={isAlbumPhotosLoading}
-            size="small"
-            albumId={albumId ?? ""}
-          />
+          {!isReadyProductView && (
+            <UploadBox
+              isAlbumLoading={isAlbumPhotosLoading}
+              size="small"
+              albumId={albumId ?? ""}
+            />
+          )}
         </div>
       )}
 
@@ -417,7 +499,7 @@ const AlbumPage = () => {
       <ImprovementModal
         photoId={improvementPhotoId}
         isOpen={isImprovePhotoModalOpen}
-        hasImprovedVersion={(improvedPhotos ?? []).some(
+        hasImprovedVersion={improvedPhotos.some(
           (item) => item.id === improvementPhotoId
         )}
         onCancel={handleImprovePhotoCancel}
@@ -438,7 +520,7 @@ const AlbumPage = () => {
           <div>{`Вы уверены, что хотите удалить ${
             selectedOriginalPhotos.length === 1
               ? `фото ${
-                  albumPhotos?.find(
+                  sortedAlbumPhotos.find(
                     (item) => item.id === selectedOriginalPhotos[0]
                   )?.fileName ?? ""
                 }`

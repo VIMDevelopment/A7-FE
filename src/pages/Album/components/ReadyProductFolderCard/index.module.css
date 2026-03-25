@@ -1,0 +1,57 @@
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  align-items: center;
+  max-width: 150px;
+  text-decoration: none;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  width: 150px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-modal-background);
+}
+
+.container:hover {
+  opacity: 0.8;
+}
+
+.previewArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 210px;
+  width: 210px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: rgba(200, 200, 200, 0.08);
+}
+
+.previewImg {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.folderIcon {
+  font-size: 72px;
+  color: var(--color-text-secondary);
+}
+
+.name {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-size: 16px;
+  color: var(--color-text);
+  white-space: pre-line;
+  word-break: break-all;
+}

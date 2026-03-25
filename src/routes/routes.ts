@@ -44,6 +44,21 @@ export const PublicRoutes = {
       return `/projects/${projectId}/subproject/${subprojectId}/album/${albumId}`;
     },
   },
+  ALBUM_READY_PRODUCT: {
+    static:
+      "/projects/:projectId/subproject/:subprojectId/album/:albumId/ready-product",
+    get: ({
+      projectId,
+      subprojectId,
+      albumId,
+    }: {
+      projectId: string;
+      subprojectId: string;
+      albumId: string;
+    }) => {
+      return `/projects/${projectId}/subproject/${subprojectId}/album/${albumId}/ready-product`;
+    },
+  },
   REPORTS: {
     static: "/reports",
   },

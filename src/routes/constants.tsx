@@ -86,6 +86,12 @@ export const ROUTES: Routes[] = [
     roles: ALL_ROLES,
     component: <AlbumPage />,
   },
+  {
+    id: "album-ready-product",
+    path: PublicRoutes.ALBUM_READY_PRODUCT.static,
+    roles: ALL_ROLES,
+    component: <AlbumPage />,
+  },
   // {
   //   id: "reports",
   //   path: PublicRoutes.REPORTS.static,
