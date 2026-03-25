@@ -39,7 +39,15 @@ const YandexDiskProjectSyncControl: React.FC<Props> = ({ projectId }) => {
 
   const handleClick = async () => {
     try {
-      await mutateAsync({ projectId });
+      const response = await mutateAsync({ projectId });
+      if((response.data.errors ?? []).length > 0) {
+        response.data.errors?.forEach(item => {
+          showNotification({
+            type: "error",
+            message: item,
+          })
+        })
+      }
       reset();
       setShowSuccess(true);
       if (successTimerRef.current) {
