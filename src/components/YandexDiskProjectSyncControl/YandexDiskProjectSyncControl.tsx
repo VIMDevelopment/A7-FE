@@ -10,14 +10,24 @@ import { usePostYandexdiskSyncProjectProjectId } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import css from "./index.module.css";
+import { useQueryClient } from "react-query";
 
-type Props = { projectId: string };
+type Props = {
+  projectId: string;
+  subprojectId?: string;
+  albumId?: string;
+};
 
 const SUCCESS_DISPLAY_MS = 2200;
 
-const YandexDiskProjectSyncControl: React.FC<Props> = ({ projectId }) => {
+const YandexDiskProjectSyncControl: React.FC<Props> = ({
+  projectId,
+  subprojectId,
+  albumId,
+}) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading, reset } = usePostYandexdiskSyncProjectProjectId(
     {
@@ -48,6 +58,31 @@ const YandexDiskProjectSyncControl: React.FC<Props> = ({ projectId }) => {
           })
         })
       }
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [`/projects/project/${projectId}`],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["/subprojects"],
+        }),
+        ...(subprojectId
+          ? [
+              queryClient.invalidateQueries({
+                queryKey: [`/subprojects/${subprojectId}`],
+              }),
+              queryClient.invalidateQueries({
+                queryKey: [`/albums/subproject/${subprojectId}`],
+              }),
+            ]
+          : []),
+        ...(albumId
+          ? [
+              queryClient.invalidateQueries({
+                queryKey: [`/albums/${albumId}`],
+              }),
+            ]
+          : []),
+      ]);
       reset();
       setShowSuccess(true);
       if (successTimerRef.current) {

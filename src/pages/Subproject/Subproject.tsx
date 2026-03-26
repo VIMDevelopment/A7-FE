@@ -52,7 +52,10 @@ const SubprojectPage = () => {
     <div className={css.container}>
       <div className={css.pageTitleRow}>
         <div className={css.pageTitle}>{`Папка: "${subprojectName}"`}</div>
-        <YandexDiskProjectSyncControl projectId={projectId ?? ""} />
+        <YandexDiskProjectSyncControl
+          projectId={projectId ?? ""}
+          subprojectId={subprojectId ?? ""}
+        />
       </div>
       <div className={css.navMenu}>
         <Breadcrumb

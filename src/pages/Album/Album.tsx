@@ -347,7 +347,11 @@ const AlbumPage = () => {
     <div className={css.container}>
       <div className={css.pageTitleRow}>
         <div className={css.pageTitle}>{pageTitle}</div>
-        <YandexDiskProjectSyncControl projectId={projectId ?? ""} />
+        <YandexDiskProjectSyncControl
+          projectId={projectId ?? ""}
+          subprojectId={subprojectId ?? ""}
+          albumId={albumId ?? ""}
+        />
       </div>
       <div className={css.navMenu}>
         <Breadcrumb
