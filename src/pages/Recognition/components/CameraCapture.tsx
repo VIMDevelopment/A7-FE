@@ -19,6 +19,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   onError,
 }) => {
   const webcamRef = useRef<Webcam>(null);
+  const permissionStreamRef = useRef<MediaStream | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -30,6 +31,14 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   const [faceDetectionError, setFaceDetectionError] = useState<string | null>(
     null
   );
+
+  const stopStream = useCallback((stream: MediaStream | null) => {
+    if (!stream) {
+      return;
+    }
+
+    stream.getTracks().forEach((track) => track.stop());
+  }, []);
 
   // Хук для отправки дескрипторов
   const { mutate: sendDescriptors, isLoading: isSendingDescriptors } =
@@ -71,7 +80,11 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
       setError(null);
 
       // Запрашиваем доступ к медиа-устройствам
-      await navigator.mediaDevices.getUserMedia({ video: true });
+      stopStream(permissionStreamRef.current);
+      const permissionStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      permissionStreamRef.current = permissionStream;
 
       // Получаем список всех устройств
       const deviceList = await navigator.mediaDevices.enumerateDevices();
@@ -98,7 +111,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     } finally {
       setIsLoadingDevices(false);
     }
-  }, [selectedDeviceId, onError]);
+  }, [selectedDeviceId, onError, stopStream]);
 
   // Загрузка устройств и моделей face-api.js при монтировании
   useEffect(() => {
@@ -121,7 +134,16 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
       }
     };
     loadModels();
-  }, [getDevices, onError]);
+    return () => {
+      stopStream(permissionStreamRef.current);
+      permissionStreamRef.current = null;
+
+      const stream = webcamRef.current?.video?.srcObject;
+      if (stream instanceof MediaStream) {
+        stopStream(stream);
+      }
+    };
+  }, [getDevices, onError, stopStream]);
 
   // Обработка фотографирования
   const capturePhoto = useCallback(() => {
