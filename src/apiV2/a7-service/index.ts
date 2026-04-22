@@ -71,6 +71,7 @@ import type {
   PhotoListResponse,
   SetCoverRequest,
   GetPhotosProcessingusageParams,
+  GetPhotosProcessingusageSummaryParams,
   PostPhotosImprovement200,
   PostPhotosImprovementBody,
   PostPhotosImprovementcustom200,
@@ -81,6 +82,7 @@ import type {
   RatingPhotoRequest,
   DescriptorMatchResponse,
   DescriptorMatchRequest,
+  DescriptorMaskMatchRequest,
   PromptResponse,
   PromptErrorResponse,
   CreatePromptRequest,
@@ -96,7 +98,8 @@ import type {
   YandexDiskConfigResponse,
   CreateOrUpdateYandexDiskConfigDto,
   YandexDiskDeleteResponse,
-  PostYandexdiskSyncProjectProjectId200
+  PostYandexdiskSyncProjectProjectId200,
+  PutSettingsUsdrubBody
 } from './model'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1340,7 +1343,8 @@ export const putPhotosIdSetcover = (
     }
     
 /**
- * Агрегирует записи `processing` (model, at, cost) по фото в выбранной области.
+ * Агрегирует записи `processing` (model, at, cost, currency).
+В рублях: currency=RUB без конвертации; иначе cost в USD × курс GET /settings/usd-rub.
 Ровно один параметр области: `projectId` (филиал), `subprojectId` или `albumId`.
 Период: либо `month=YYYY-MM` (UTC), либо пара `from` и/или `to` (ISO 8601).
 
@@ -1374,6 +1378,48 @@ export const useGetPhotosProcessingusage = <TData = AsyncReturnType<typeof getPh
   const queryFn: QueryFunction<AsyncReturnType<typeof getPhotosProcessingusage>> = () => getPhotosProcessingusage(params, axiosOptions);
 
   const query = useQuery<AsyncReturnType<typeof getPhotosProcessingusage>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Суммирует `processing` по проекту: RUB без конвертации, USD × курс из appsettings.
+Четыре целых числа (рубли вверх): всё время; текущий календарный месяц / неделя / день (UTC).
+
+ * @summary Сводка затрат Replicate по проекту (филиалу)
+ */
+export const getPhotosProcessingusageSummary = (
+    params?: GetPhotosProcessingusageSummaryParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.get(
+      `/photos/processing-usage/summary`,{
+        params,
+    ...options}
+    );
+  }
+
+
+export const getGetPhotosProcessingusageSummaryQueryKey = (params?: GetPhotosProcessingusageSummaryParams,) => [`/photos/processing-usage/summary`, ...(params ? [params]: [])];
+
+    
+export const useGetPhotosProcessingusageSummary = <TData = AsyncReturnType<typeof getPhotosProcessingusageSummary>, TError = AxiosError<unknown>>(
+ params?: GetPhotosProcessingusageSummaryParams, options?: { query?:UseQueryOptions<AsyncReturnType<typeof getPhotosProcessingusageSummary>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetPhotosProcessingusageSummaryQueryKey(params);
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getPhotosProcessingusageSummary>> = () => getPhotosProcessingusageSummary(params, axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getPhotosProcessingusageSummary>, TError, TData>(queryKey, queryFn, queryOptions)
 
   return {
     queryKey,
@@ -1591,6 +1637,42 @@ export const postDescriptors = (
         }
 
       return useMutation<AsyncReturnType<typeof postDescriptors>, TError, {data: DescriptorMatchRequest}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Принимает «маску» — массив из 2-10 дескрипторов одного и того же лица в разных ракурсах
+(фас + полупрофили), и возвращает список фотографий с найденным совпадением.
+Скоуп всегда ограничен сегодняшним днём и филиалами авторизованного пользователя.
+
+ * @summary Сравнение маски лица (набора ракурсов) с сохранёнными дескрипторами
+ */
+export const postDescriptorsMask = (
+    descriptorMaskMatchRequest: DescriptorMaskMatchRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DescriptorMatchResponse>> => {
+    return axios.post(
+      `/descriptors/mask`,
+      descriptorMaskMatchRequest,options
+    );
+  }
+
+
+
+    export const usePostDescriptorsMask = <TError = AxiosError<void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postDescriptorsMask>, TError,{data: DescriptorMaskMatchRequest}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postDescriptorsMask>, {data: DescriptorMaskMatchRequest}> = (props) => {
+          const {data} = props || {};
+
+          return  postDescriptorsMask(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postDescriptorsMask>, TError, {data: DescriptorMaskMatchRequest}, TContext>(mutationFn, mutationOptions)
     }
     
 /**
@@ -2144,5 +2226,114 @@ export const postYandexdiskSyncProjectProjectId = (
         }
 
       return useMutation<AsyncReturnType<typeof postYandexdiskSyncProjectProjectId>, TError, {projectId: string}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Возвращает сохранённый в БД курс USD/RUB, дату последнего обновления и источник
+(`manual` — выставлено вручную через PUT, `tinkoff` — подтянуто с Тинькофф C2CTransfers.sell).
+
+ * @summary Текущий курс USD→RUB из БД
+ */
+export const getSettingsUsdrub = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.get(
+      `/settings/usd-rub`,options
+    );
+  }
+
+
+export const getGetSettingsUsdrubQueryKey = () => [`/settings/usd-rub`];
+
+    
+export const useGetSettingsUsdrub = <TData = AsyncReturnType<typeof getSettingsUsdrub>, TError = AxiosError<unknown>>(
+  options?: { query?:UseQueryOptions<AsyncReturnType<typeof getSettingsUsdrub>, TError, TData>, axios?: AxiosRequestConfig}
+
+  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+
+  const {query: queryOptions, axios: axiosOptions} = options || {}
+
+  const queryKey = queryOptions?.queryKey ?? getGetSettingsUsdrubQueryKey();
+
+  
+
+  const queryFn: QueryFunction<AsyncReturnType<typeof getSettingsUsdrub>> = () => getSettingsUsdrub(axiosOptions);
+
+  const query = useQuery<AsyncReturnType<typeof getSettingsUsdrub>, TError, TData>(queryKey, queryFn, queryOptions)
+
+  return {
+    queryKey,
+    ...query
+  }
+}
+
+
+/**
+ * Разовая инициализация; ежедневное обновление делает cron из Тинькофф (C2CTransfers.sell).
+ * @summary Задать или обновить курс USD→RUB вручную
+ */
+export const putSettingsUsdrub = (
+    putSettingsUsdrubBody: PutSettingsUsdrubBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.put(
+      `/settings/usd-rub`,
+      putSettingsUsdrubBody,options
+    );
+  }
+
+
+
+    export const usePutSettingsUsdrub = <TError = AxiosError<unknown>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof putSettingsUsdrub>, TError,{data: PutSettingsUsdrubBody}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof putSettingsUsdrub>, {data: PutSettingsUsdrubBody}> = (props) => {
+          const {data} = props || {};
+
+          return  putSettingsUsdrub(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof putSettingsUsdrub>, TError, {data: PutSettingsUsdrubBody}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Делает тот же запрос к публичному API Тинькофф, что и ночной cron, — берёт курс продажи
+(`payload.rates[].sell` с `category: "C2CTransfers"`, `from=USD`, `to=RUB`).
+Именно по такому курсу банк фактически продаёт валюту клиенту, а не по официальному курсу ЦБ.
+Если API недоступен или ответ некорректен — БД не меняется, ответ 502.
+Автообновление по расписанию остаётся в 01:00 МСК.
+
+ * @summary Подтянуть курс USD/RUB с Тинькофф (C2CTransfers.sell)
+ */
+export const postSettingsUsdrubRefresh = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    return axios.post(
+      `/settings/usd-rub/refresh`,undefined,options
+    );
+  }
+
+
+
+    export const usePostSettingsUsdrubRefresh = <TError = AxiosError<unknown>,
+    TVariables = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postSettingsUsdrubRefresh>, TError,TVariables, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postSettingsUsdrubRefresh>, TVariables> = () => {
+
+          return  postSettingsUsdrubRefresh(axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postSettingsUsdrubRefresh>, TError, TVariables, TContext>(mutationFn, mutationOptions)
     }
     

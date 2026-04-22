@@ -3,8 +3,9 @@ import Webcam from "react-webcam";
 import Button from "../../../components/Button/Button";
 import Select from "../../../components/Select/Select";
 import { extractFaceDescriptors, loadFaceApiModels } from "../../../utils/faceDetection";
-import { usePostDescriptors } from "../../../apiV2/a7-service";
-import type { DescriptorMatchRequest } from "../../../apiV2/a7-service/model/descriptorMatchRequest";
+import { usePostDescriptorsMask } from "../../../apiV2/a7-service";
+import type { DescriptorMaskMatchRequest } from "../../../apiV2/a7-service/model/descriptorMaskMatchRequest";
+import type { DescriptorVector } from "../../../apiV2/a7-service/model/descriptorVector";
 import css from "../index.module.css";
 import { defaultApiAxiosParams } from "../../../api/helpers";
 import { showNotification } from "../../../components/ShowNotification";
@@ -14,6 +15,13 @@ type CameraCaptureProps = {
   onError?: (error: string) => void;
 };
 
+const TOTAL_SHOTS = 3;
+const ANGLE_HINTS = [
+  "Смотрите прямо в камеру (фас)",
+  "Поверните голову влево (полупрофиль)",
+  "Поверните голову вправо (полупрофиль)",
+];
+
 const CameraCapture: React.FC<CameraCaptureProps> = ({
   onRecognitionSuccess,
   onError,
@@ -22,15 +30,19 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   const permissionStreamRef = useRef<MediaStream | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImages, setCapturedImages] = useState<string[]>([]);
+  const [collectedDescriptors, setCollectedDescriptors] = useState<
+    DescriptorVector[]
+  >([]);
   const [isLoadingDevices, setIsLoadingDevices] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSwitchingCamera, setIsSwitchingCamera] = useState(false);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
-  const [faceDetectionError, setFaceDetectionError] = useState<string | null>(
-    null
-  );
+
+  const isAllShotsTaken = capturedImages.length >= TOTAL_SHOTS;
+  const currentHint = ANGLE_HINTS[capturedImages.length] ?? "";
+  const currentStep = Math.min(capturedImages.length + 1, TOTAL_SHOTS);
 
   const stopStream = useCallback((stream: MediaStream | null) => {
     if (!stream) {
@@ -40,14 +52,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     stream.getTracks().forEach((track) => track.stop());
   }, []);
 
-  // Хук для отправки дескрипторов
-  const { mutate: sendDescriptors, isLoading: isSendingDescriptors } =
-    usePostDescriptors({
+  const { mutate: sendMask, isLoading: isSendingDescriptors } =
+    usePostDescriptorsMask({
       axios: defaultApiAxiosParams,
       mutation: {
         onSuccess: async (response) => {
           setError(null);
-          setFaceDetectionError(null);
 
           const matches = response.data.matches;
 
@@ -59,7 +69,6 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
             return;
           }
 
-          // Передаем найденные ID фото в родительский компонент
           onRecognitionSuccess(matches);
         },
         onError: (error) => {
@@ -73,30 +82,25 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
       },
     });
 
-  // Получение списка доступных камер
   const getDevices = useCallback(async () => {
     try {
       setIsLoadingDevices(true);
       setError(null);
 
-      // Запрашиваем доступ к медиа-устройствам
       stopStream(permissionStreamRef.current);
       const permissionStream = await navigator.mediaDevices.getUserMedia({
         video: true,
       });
       permissionStreamRef.current = permissionStream;
 
-      // Получаем список всех устройств
       const deviceList = await navigator.mediaDevices.enumerateDevices();
 
-      // Фильтруем только видео-устройства
       const videoDevices = deviceList.filter(
         (device) => device.kind === "videoinput"
       );
 
       setDevices(videoDevices);
 
-      // Устанавливаем первую доступную камеру по умолчанию
       if (videoDevices.length > 0 && !selectedDeviceId) {
         setSelectedDeviceId(videoDevices[0].deviceId);
       }
@@ -113,10 +117,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     }
   }, [selectedDeviceId, onError, stopStream]);
 
-  // Загрузка устройств и моделей face-api.js при монтировании
   useEffect(() => {
     getDevices();
-    // Загружаем модели face-api.js при первом открытии
     const loadModels = async () => {
       try {
         setIsLoadingModels(true);
@@ -145,70 +147,72 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     };
   }, [getDevices, onError, stopStream]);
 
-  // Обработка фотографирования
-  const capturePhoto = useCallback(() => {
-    if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) {
-        setCapturedImage(imageSrc);
-      }
+  const capturePhoto = useCallback(async () => {
+    if (!webcamRef.current || isProcessingImage || isAllShotsTaken) {
+      return;
     }
-  }, []);
 
-  // Обработка пересъемки
-  const retakePhoto = useCallback(() => {
-    setCapturedImage(null);
-    setFaceDetectionError(null);
-  }, []);
-
-  // Обработка отправки дескрипторов
-  const handleSendDescriptors = useCallback(async () => {
-    if (!capturedImage) {
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (!imageSrc) {
       return;
     }
 
     try {
       setIsProcessingImage(true);
-      setFaceDetectionError(null);
-      setError(null);
 
-      // Извлекаем дескрипторы из изображения
-      const descriptors = await extractFaceDescriptors(capturedImage);
+      const descriptors = await extractFaceDescriptors(imageSrc);
+      const [descriptor] = descriptors;
 
-      // Формируем запрос
-      const request: DescriptorMatchRequest = {
-        descriptors,
-      };
+      if (!descriptor) {
+        throw new Error("Не удалось извлечь дескриптор лица");
+      }
 
-      // Отправляем на сервер
-      sendDescriptors({ data: request });
+      setCapturedImages((prev) => [...prev, imageSrc]);
+      setCollectedDescriptors((prev) => [...prev, descriptor]);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Ошибка при обработке изображения";
-      setFaceDetectionError(errorMessage);
       showNotification({
         message: errorMessage,
         type: "error",
       });
-      onError?.(errorMessage);
       console.error("Ошибка извлечения дескрипторов:", err);
     } finally {
       setIsProcessingImage(false);
     }
-  }, [capturedImage, sendDescriptors, onError]);
+  }, [isProcessingImage, isAllShotsTaken]);
 
-  // Обработка изменения выбранной камеры
+  const removeShot = useCallback((index: number) => {
+    setCapturedImages((prev) => prev.filter((_, i) => i !== index));
+    setCollectedDescriptors((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const retakeAll = useCallback(() => {
+    setCapturedImages([]);
+    setCollectedDescriptors([]);
+  }, []);
+
+  const handleSendDescriptors = useCallback(() => {
+    if (collectedDescriptors.length < TOTAL_SHOTS) {
+      return;
+    }
+
+    const request: DescriptorMaskMatchRequest = {
+      mask: collectedDescriptors,
+    };
+
+    sendMask({ data: request });
+  }, [collectedDescriptors, sendMask]);
+
   const handleDeviceChange = useCallback((deviceId: string) => {
     setIsSwitchingCamera(true);
     setSelectedDeviceId(deviceId);
 
-    // Небольшая задержка для переключения камеры
     setTimeout(() => {
       setIsSwitchingCamera(false);
     }, 500);
   }, []);
 
-  // Обработка ошибок webcam
   const handleUserMediaError = useCallback(
     (err: string | DOMException) => {
       const errorMessage =
@@ -239,7 +243,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
 
   return (
     <>
-      {devices.length > 0 && (
+      {devices.length > 0 && !isAllShotsTaken && (
         <div className={css.selectWrapper}>
           <Select
             label="Выберите камеру"
@@ -255,28 +259,42 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
         </div>
       )}
 
+      {!isAllShotsTaken && (
+        <div className={css.hintWrapper}>
+          <div className={css.hint}>{currentHint}</div>
+          <div className={css.shotCounter}>
+            Снимок {currentStep} из {TOTAL_SHOTS}
+          </div>
+        </div>
+      )}
+
       <div className={css.cameraContainer}>
-        {capturedImage ? (
-          <div className={css.previewContainer}>
-            {(isProcessingImage || isSendingDescriptors) && (
+        {isAllShotsTaken ? (
+          <div className={css.previewGrid}>
+            {(isSendingDescriptors) && (
               <div className={css.loadingOverlay}>
                 <div className={css.loadingText}>
                   Выполняется поиск...
                 </div>
               </div>
             )}
-            <img
-              src={capturedImage}
-              alt="Сфотографированное изображение"
-              className={css.previewImage}
-            />
+            {capturedImages.map((src, idx) => (
+              <img
+                key={idx}
+                src={src}
+                alt={`Снимок ${idx + 1}`}
+                className={css.previewImage}
+              />
+            ))}
           </div>
         ) : (
           <div className={css.webcamWrapper}>
-            {isSwitchingCamera && (
+            {(isSwitchingCamera || isProcessingImage) && (
               <div className={css.loadingOverlay}>
                 <div className={css.loadingText}>
-                  Переключение камеры...
+                  {isProcessingImage
+                    ? "Обработка снимка..."
+                    : "Переключение камеры..."}
                 </div>
               </div>
             )}
@@ -298,7 +316,26 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
         )}
       </div>
 
-      {!capturedImage && (
+      {!isAllShotsTaken && capturedImages.length > 0 && (
+        <div className={css.thumbsRow}>
+          {capturedImages.map((src, idx) => (
+            <div key={idx} className={css.thumb}>
+              <img src={src} alt={`Снимок ${idx + 1}`} />
+              <button
+                type="button"
+                className={css.thumbRemove}
+                onClick={() => removeShot(idx)}
+                aria-label={`Переснять снимок ${idx + 1}`}
+                disabled={isProcessingImage || isSendingDescriptors}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isAllShotsTaken && (
         <div className={css.buttonContainer}>
           <Button
             onClick={capturePhoto}
@@ -306,43 +343,38 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
               isLoadingDevices ||
               isSwitchingCamera ||
               !selectedDeviceId ||
-              isLoadingModels
+              isLoadingModels ||
+              isProcessingImage
             }
             className={css.captureButton}
+            showSpinner={isProcessingImage}
           >
             {isLoadingModels ? "Загрузка моделей..." : "Сфотографировать"}
           </Button>
         </div>
       )}
 
-      {capturedImage && (
-        <>
-          <div className={css.buttonContainer}>
-            <Button
-              onClick={retakePhoto}
-              className={css.retakeButton}
-            >
-              Переснять
-            </Button>
-            <Button
-              onClick={handleSendDescriptors}
-              disabled={
-                isProcessingImage ||
-                isSendingDescriptors ||
-                isLoadingModels ||
-                !!faceDetectionError
-              }
-              className={css.sendButton}
-              showSpinner={isProcessingImage || isSendingDescriptors}
-            >
-              Найти
-            </Button>
-          </div>
-        </>
+      {isAllShotsTaken && (
+        <div className={css.buttonContainer}>
+          <Button
+            onClick={retakeAll}
+            className={css.retakeButton}
+            disabled={isSendingDescriptors}
+          >
+            Переснять всё
+          </Button>
+          <Button
+            onClick={handleSendDescriptors}
+            disabled={isSendingDescriptors || isLoadingModels}
+            className={css.sendButton}
+            showSpinner={isSendingDescriptors}
+          >
+            Найти
+          </Button>
+        </div>
       )}
     </>
   );
 };
 
 export default CameraCapture;
-

@@ -31,6 +31,14 @@ export interface Photo {
   rating?: string;
   /** Относительный путь файла на Яндекс.Диске (для перезаписи при реверте) */
   yadisk?: string | null;
+  /** Относительный путь обработанной current-версии на Яндекс.Диске */
+  yadiskCurrent?: string | null;
+  /** Флаг: фото создано из папки "Готовый продукт" при обратной синхронизации */
+  readyManaged?: boolean;
+  /** Исходный путь файла на Яндекс.Диске внутри папки "Готовый продукт" */
+  readySourcePath?: string | null;
+  /** Отпечаток источника ready-файла для идемпотентного sync */
+  readySourceFingerprint?: string | null;
   /** Журнал успешных обработок для отчётов по затратам */
   processing?: PhotoProcessingEntry[];
   /** Дата создания */

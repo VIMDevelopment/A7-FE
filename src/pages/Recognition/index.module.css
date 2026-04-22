@@ -22,6 +22,124 @@
   width: 100%;
 }
 
+.hintWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.hint {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.shotCounter {
+  font-size: 14px;
+  color: var(--color-text);
+  opacity: 0.7;
+}
+
+.thumbsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.thumb {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: var(--color-modal-background, #1a1a1a);
+  flex-shrink: 0;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbRemove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.thumbRemove:hover:not(:disabled) {
+  background-color: var(--color-error, rgba(200, 40, 40, 0.9));
+}
+
+.thumbRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.previewGrid {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+}
+
+.previewGrid .previewImage {
+  width: calc((100% - 24px) / 3);
+  max-width: 240px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .previewGrid .previewImage {
+    width: calc((100% - 12px) / 2);
+  }
+
+  .thumb {
+    width: 70px;
+    height: 70px;
+  }
+
+  .hint {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .previewGrid .previewImage {
+    width: 100%;
+  }
+
+  .thumb {
+    width: 64px;
+    height: 64px;
+  }
+}
+
 .cameraContainer {
   position: relative;
   width: 100%;
@@ -48,7 +166,7 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  max-height: 70vh;
+  max-height: 50vh;
   object-fit: contain;
 }
 
@@ -142,10 +260,6 @@
     max-height: 60vh;
   }
 
-  .webcam {
-    max-height: 60vh;
-  }
-
   .previewImage {
     max-height: 60vh;
   }
@@ -170,10 +284,6 @@
 @media (max-width: 480px) {
   .cameraContainer {
     min-height: 250px;
-    max-height: 50vh;
-  }
-
-  .webcam {
     max-height: 50vh;
   }
 

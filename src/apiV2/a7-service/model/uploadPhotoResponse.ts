@@ -30,6 +30,14 @@ export interface UploadPhotoResponse {
   rating?: string;
   /** Относительный путь файла на Яндекс.Диске */
   yadisk?: string | null;
+  /** Относительный путь обработанной current-версии на Яндекс.Диске */
+  yadiskCurrent?: string | null;
+  /** Флаг: фото создано из папки "Готовый продукт" при обратной синхронизации */
+  readyManaged?: boolean;
+  /** Исходный путь файла на Яндекс.Диске внутри папки "Готовый продукт" */
+  readySourcePath?: string | null;
+  /** Отпечаток источника ready-файла для идемпотентного sync */
+  readySourceFingerprint?: string | null;
   /** Дата создания */
   createdAt?: string;
   /** Дата обновления */
