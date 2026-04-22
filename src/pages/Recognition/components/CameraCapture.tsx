@@ -9,6 +9,7 @@ import type { DescriptorVector } from "../../../apiV2/a7-service/model/descripto
 import css from "../index.module.css";
 import { defaultApiAxiosParams } from "../../../api/helpers";
 import { showNotification } from "../../../components/ShowNotification";
+import { useProfile } from "../../../auth/auth";
 
 type CameraCaptureProps = {
   onRecognitionSuccess: (photoIds: string[]) => void;
@@ -39,6 +40,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
   const [isSwitchingCamera, setIsSwitchingCamera] = useState(false);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+
+  const { data: user } = useProfile()
 
   const isAllShotsTaken = capturedImages.length >= TOTAL_SHOTS;
   const currentHint = ANGLE_HINTS[capturedImages.length] ?? "";
@@ -199,6 +202,8 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
 
     const request: DescriptorMaskMatchRequest = {
       mask: collectedDescriptors,
+      //TODO: поменять на массив и на бэке и тут
+      projectId: user?.workplace?.[0] ?? ""
     };
 
     sendMask({ data: request });

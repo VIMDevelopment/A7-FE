@@ -10,6 +10,8 @@ import type { DescriptorVector } from './descriptorVector';
 export interface DescriptorMaskMatchRequest {
   /** Маска лица: 2-10 дескрипторов одного человека в разных ракурсах */
   mask: DescriptorVector[];
+  /** Идентификатор филиала (projectId), в котором производится поиск. Должен входить в workplace пользователя, иначе возврат пустого результата. */
+  projectId: string;
   /** Порог схожести (по умолчанию 0.6) */
   threshold?: number;
   /** Максимальное количество результатов */

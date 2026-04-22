@@ -2330,7 +2330,6 @@ export const postSettingsUsdrubRefresh = (
 
 
       const mutationFn: MutationFunction<AsyncReturnType<typeof postSettingsUsdrubRefresh>, TVariables> = () => {
-
           return  postSettingsUsdrubRefresh(axiosOptions)
         }
 
