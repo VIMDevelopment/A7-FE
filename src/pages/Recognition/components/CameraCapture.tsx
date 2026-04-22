@@ -261,16 +261,28 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
             <Webcam
               ref={webcamRef}
               audio={false}
-              mirrored
+              // mirrored=false: иначе react-webcam через ctx.scale(-1,1)
+              // зеркалит САМ скриншот, и на сервер уходит зеркальное лицо.
+              // Эталонные фото с Canon R6 не зеркалены → рассинхрон дескрипторов.
+              // UX-зеркало реализовано чисто CSS'ом через .webcam.
+              mirrored={false}
               videoConstraints={{
                 deviceId: selectedDeviceId
                   ? { exact: selectedDeviceId }
                   : undefined,
+                // Просим максимальное HD-разрешение. Чем больше деталей лица
+                // попадёт в faceRecognitionNet, тем ближе будет query-вектор
+                // к эталонному (эталоны снимают на R6 в 5K JPEG).
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
               }}
-              screenshotFormat="image/jpeg"
+              // PNG без потерь: JPEG-артефакты ощутимо смещают дескриптор
+              // в 128-мерном пространстве, особенно при матче с «чистыми»
+              // эталонами. Размер base64 вырастает, но трафик локален.
+              screenshotFormat="image/png"
+              forceScreenshotSourceSize
               className={css.webcam}
               onUserMediaError={handleUserMediaError}
-              screenshotQuality={1}
             />
           </div>
         )}

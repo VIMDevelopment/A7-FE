@@ -264,6 +264,8 @@ const PromptsPage = () => {
                     disabled={isCreateLoading}
                     placeholder="Введите название первой версии"
                   />
+                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                  {/* @ts-ignore */}
                   <InputTextArea
                     label="Текст промпта"
                     value={createBody}
@@ -272,8 +274,9 @@ const PromptsPage = () => {
                     placeholder="Введите текст промпта"
                     className={css.bodyField}
                     rows={4}
-                    count={1}
                   />
+                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                  {/* @ts-ignore */}
                   <InputTextArea
                     label="Описание первой версии (опционально)"
                     value={createDescription}
@@ -282,7 +285,6 @@ const PromptsPage = () => {
                     placeholder="Введите описание первой версии"
                     className={css.bodyField}
                     rows={2}
-                    count={1}
                   />
                   <Button
                     className={css.btn}
@@ -373,6 +375,8 @@ const PromptsPage = () => {
                       </div>
                     )}
                   </div>
+                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                  {/* @ts-ignore */}
                   <InputTextArea
                     label="Текст промпта"
                     value={editBody}
@@ -381,8 +385,9 @@ const PromptsPage = () => {
                     placeholder="Выберите промпт или введите текст"
                     className={css.bodyField}
                     rows={4}
-                    count={1}
                   />
+                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                  {/* @ts-ignore */}
                   <InputTextArea
                     label="Описание версии (опционально)"
                     value={editDescription}
@@ -391,7 +396,6 @@ const PromptsPage = () => {
                     placeholder="Введите описание версии"
                     className={css.bodyField}
                     rows={2}
-                    count={1}
                   />
                   <Input
                     label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"

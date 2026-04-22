@@ -13,6 +13,7 @@ import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import AuthPage from "./pages/Auth/Auth";
 import { showNotification } from "./components/ShowNotification";
+import { loadFaceApiModels } from "./utils/faceDetection";
 
 const config = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,12 @@ const App = () => {
 
   useEffect(() => {
     void getProfileFx();
+    // Прогреваем модели face-api в фоне сразу при старте приложения.
+    // К моменту, когда пользователь откроет экран распознавания, модели
+    // уже будут в памяти — не будет блокировки кнопки «Загрузка моделей...».
+    void loadFaceApiModels().catch((err) => {
+      console.warn("Не удалось предварительно загрузить модели face-api", err);
+    });
   }, []);
 
   const routes = useMemo(() => {
