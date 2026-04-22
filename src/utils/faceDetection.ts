@@ -1,13 +1,48 @@
 import * as faceapi from "face-api.js";
+// tfjs-core тянется транзитивно face-api.js. В версии 1.7.0 WebGL-backend
+// регистрируется автоматически, но мы явно активируем его и ждём готовности,
+// чтобы гарантированно не оказаться на CPU на старте.
+import * as tf from "@tensorflow/tfjs-core";
 import { DescriptorVector } from "../apiV2/a7-service/model";
-
 
 let modelsLoaded = false;
 let isLoadingModels = false;
+let backendReady = false;
+
+// Порог уверенности детектора лиц. 0.4 даёт ощутимо меньше пропусков по
+// сравнению с дефолтом 0.5 при крупноплановой съёмке с веб-камеры.
+const DETECTOR_MIN_CONFIDENCE = 0.4;
 
 /**
- * Загружает модели face-api.js из папки /weights/
- * Модели загружаются только один раз при первом вызове
+ * Активирует WebGL-backend tfjs. Без этого на некоторых сборках tfjs мог
+ * откатиться на CPU, что на слабых устройствах давало «зависания» детекции.
+ */
+const ensureWebglBackend = async (): Promise<void> => {
+  if (backendReady) {
+    return;
+  }
+
+  try {
+    if (tf.getBackend() !== "webgl") {
+      await tf.setBackend("webgl");
+    }
+    await tf.ready();
+    backendReady = true;
+  } catch (error) {
+    console.warn(
+      "Не удалось активировать WebGL-backend tfjs, используется дефолтный",
+      error
+    );
+    await tf.ready();
+    backendReady = true;
+  }
+};
+
+/**
+ * Загружает модели face-api.js из папки /weights/.
+ * Используем ту же связку, что и на бэке (SsdMobilenetv1 + landmarks68 +
+ * recognition), чтобы 128-мерные дескрипторы с фронта и бэка совпадали
+ * по геометрии выравнивания лица.
  */
 export const loadFaceApiModels = async (): Promise<void> => {
   if (modelsLoaded) {
@@ -15,7 +50,6 @@ export const loadFaceApiModels = async (): Promise<void> => {
   }
 
   if (isLoadingModels) {
-    // Ждем завершения текущей загрузки
     while (isLoadingModels) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -25,11 +59,12 @@ export const loadFaceApiModels = async (): Promise<void> => {
   try {
     isLoadingModels = true;
 
+    await ensureWebglBackend();
+
     const weightsPath = "/weights";
 
-    // Загружаем необходимые модели
     await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(weightsPath),
+      faceapi.nets.ssdMobilenetv1.loadFromUri(weightsPath),
       faceapi.nets.faceLandmark68Net.loadFromUri(weightsPath),
       faceapi.nets.faceRecognitionNet.loadFromUri(weightsPath),
     ]);
@@ -43,9 +78,6 @@ export const loadFaceApiModels = async (): Promise<void> => {
   }
 };
 
-/**
- * Конвертирует base64 строку в HTMLImageElement
- */
 const base64ToImage = (base64: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -56,26 +88,29 @@ const base64ToImage = (base64: string): Promise<HTMLImageElement> => {
 };
 
 /**
- * Извлекает дескрипторы лиц из изображения
- * @param imageSrc - base64 строка изображения или HTMLImageElement
+ * Извлекает дескрипторы лиц из изображения.
+ * @param imageSrc base64-строка изображения или HTMLImageElement
  * @returns Массив дескрипторов (DescriptorVector[])
  * @throws Ошибка, если не найдено лиц или найдено больше одного лица
  */
 export const extractFaceDescriptors = async (
   imageSrc: string | HTMLImageElement
 ): Promise<DescriptorVector[]> => {
-  // Убеждаемся, что модели загружены
   await loadFaceApiModels();
 
-  // Конвертируем base64 в изображение, если необходимо
   const image =
     typeof imageSrc === "string" ? await base64ToImage(imageSrc) : imageSrc;
 
-  // Обнаруживаем все лица на изображении
   const detections = await faceapi
-    .detectAllFaces(image, new faceapi.TinyFaceDetectorOptions())
+    .detectAllFaces(
+      image,
+      // SsdMobilenetv1 совпадает с детектором бэка → одинаковые bbox/landmarks
+      // → совместимые дескрипторы. minConfidence 0.4 терпимее к свету/ракурсу,
+      // чем дефолтный TinyFaceDetector со scoreThreshold 0.5.
+      new faceapi.SsdMobilenetv1Options({ minConfidence: DETECTOR_MIN_CONFIDENCE })
+    )
     .withFaceLandmarks()
-    .withFaceDescriptors(); 
+    .withFaceDescriptors();
 
   if (detections.length === 0) {
     throw new Error("На изображении не найдено лиц");
@@ -87,7 +122,6 @@ export const extractFaceDescriptors = async (
     );
   }
 
-  // Извлекаем дескриптор (массив из 128 чисел)
   const descriptor = detections[0].descriptor;
 
   return [
