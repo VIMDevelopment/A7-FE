@@ -5,10 +5,13 @@
  * API документация для WanmaX Backend - Автоматизированный конвейер обработки фотографий
  * OpenAPI spec version: 1.0.0
  */
+import type { PostPhotosAddlayerBodyOutputResolution } from './postPhotosAddlayerBodyOutputResolution';
 
 export type PostPhotosAddlayerBody = {
   /** ID фотографии */
   photoId: string;
   /** Текст промпта (default или из history) */
   prompt: string;
+  /** Разрешение выходного изображения */
+  outputResolution?: PostPhotosAddlayerBodyOutputResolution;
 };

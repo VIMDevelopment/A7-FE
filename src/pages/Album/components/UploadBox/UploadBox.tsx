@@ -4,6 +4,7 @@ import { showNotification } from "../../../../components/ShowNotification";
 import css from "./index.module.css";
 import { usePostPhotosUpload } from "../../../../apiV2/a7-service";
 import { beforeUpload as oldBeforeUpload, normalizeFile } from "./helpers";
+import { resizeImageBeforeUpload } from "../../../../utils/imageResize/resizeImageBeforeUpload";
 import { ENV } from "../../../../env";
 import { apiGetToken } from "../../../../auth/apiGetToken";
 import { stringify } from "qs";
@@ -70,7 +71,9 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
     uploadingRef.current = true;
 
     while (queue.current.length > 0) {
-      const file = queue.current.shift()!;
+      const original = queue.current.shift()!;
+      const resized = await resizeImageBeforeUpload(original);
+      const file = resized ?? original;
 
       try {
         await upload({
@@ -84,7 +87,7 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
       } catch {
         showNotification({
           type: "error",
-          message: `Ошибка загрузки файла ${file.name}`,
+          message: `Ошибка загрузки файла ${original.name}`,
           duration: 30,
         });
 

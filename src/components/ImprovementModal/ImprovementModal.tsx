@@ -13,7 +13,7 @@ import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import Button from "../Button/Button";
 import Select from "../Select/Select";
-import { Spin, Tooltip } from "antd";
+import { Radio, Spin, Tooltip } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import {
   ReactCompareSlider,
@@ -23,6 +23,9 @@ import cn from "classnames";
 import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
+import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
+
+const DEFAULT_OUTPUT_RESOLUTION: PostPhotosAddlayerBodyOutputResolution = "2K";
 
 type Props = {
   photoId: string;
@@ -43,6 +46,16 @@ const ImprovementModal: FC<Props> = ({
   const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  const [outputResolution, setOutputResolution] =
+    useState<PostPhotosAddlayerBodyOutputResolution>(
+      DEFAULT_OUTPUT_RESOLUTION,
+    );
+
+  useEffect(() => {
+    if (isOpen) {
+      setOutputResolution(DEFAULT_OUTPUT_RESOLUTION);
+    }
+  }, [isOpen]);
 
   const { albumId } = useParams();
   const queryClient = useQueryClient();
@@ -127,6 +140,7 @@ const ImprovementModal: FC<Props> = ({
         data: {
           photoId,
           prompt: bodyForRequest,
+          outputResolution,
         },
       })
         .then(() => {
@@ -312,6 +326,27 @@ const ImprovementModal: FC<Props> = ({
                 </div>
               </div>
             )}
+            <div className={css.resolutionGroup}>
+              <span className={css.resolutionLabel}>Разрешение:</span>
+              <Radio.Group
+                value={outputResolution}
+                onChange={(e) =>
+                  setOutputResolution(
+                    e.target.value as PostPhotosAddlayerBodyOutputResolution,
+                  )
+                }
+                disabled={
+                  improvementInProgress ||
+                  isImprovementLoading ||
+                  isAddlayerLoading ||
+                  isPhotoLoading ||
+                  isRevertLoading
+                }
+              >
+                <Radio value="2K">2K (быстро)</Radio>
+                <Radio value="4K">4K (высокое качество)</Radio>
+              </Radio.Group>
+            </div>
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (
                 <Button
