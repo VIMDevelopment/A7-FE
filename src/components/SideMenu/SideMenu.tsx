@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { UserOutlined, LogoutOutlined, MenuOutlined } from "@ant-design/icons";
 import css from "./index.module.css";
 import { useProfile } from "../../auth/auth";
 import { getMenuItems, getRoleDescription } from "./helpers";
 import SideMenuItem from "./components/SideMenuItem/SideMenuItem";
 import Cookies from "js-cookie";
-import { Tooltip } from "antd";
 import { useMediaQuery } from "react-responsive";
 import cn from "classnames";
 
@@ -14,6 +13,9 @@ const SideMenu = () => {
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
   const [open, setOpen] = useState(false);
+  const [userPopoverOpen, setUserPopoverOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  const avatarRef = useRef<HTMLButtonElement | null>(null);
 
   const handleLogout = () => {
     Cookies.remove("accessToken");
@@ -24,10 +26,11 @@ const SideMenu = () => {
     setOpen((prev) => !prev);
   };
 
-  const menuItems = getMenuItems({
-    isMobileMenu: isMobile,
-    onLogout: handleLogout,
-  });
+  const toggleUserPopover = () => {
+    setUserPopoverOpen((prev) => !prev);
+  };
+
+  const menuItems = getMenuItems();
 
   useEffect(() => {
     if (open && isMobile) {
@@ -46,33 +49,89 @@ const SideMenu = () => {
     };
   }, [open, isMobile]);
 
+  useEffect(() => {
+    if (!userPopoverOpen) return;
+
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(target) &&
+        avatarRef.current &&
+        !avatarRef.current.contains(target)
+      ) {
+        setUserPopoverOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [userPopoverOpen]);
+
+  const userInitial = (user?.name || user?.email || "?").charAt(0).toUpperCase();
+
   return (
     <div className={css.container}>
-      <div className={css.profileContainer}>
-        <div className={css.avatarContainer}>
-          <UserOutlined style={{ fontSize: "30px" }} />
+      <aside className={css.rail}>
+        <div className={css.brand} title="WanmaX">
+          <img src="/images/logo.png" alt="WanmaX" className={css.brandLogo} />
         </div>
-        <div className={css.profileInfoCpntainer}>
-          <div className={css.userInfoContainer}>
-            <div className={css.userName}>{user?.name}</div>
-            <div className={css.userRole}>{getRoleDescription(user?.role)}</div>
-          </div>
-          {!isMobile && (
-            <Tooltip title="Выйти из аккаунта">
-              <LogoutOutlined
-                style={{ color: "white", opacity: "0.5" }}
+
+        {isMobile && (
+          <button
+            type="button"
+            className={css.railBtn}
+            onClick={toggleOpen}
+            aria-label="Меню"
+          >
+            <MenuOutlined style={{ fontSize: 20 }} />
+          </button>
+        )}
+
+        <div className={css.railSpacer} />
+
+        <div className={css.avatarWrapper}>
+          <button
+            ref={avatarRef}
+            type="button"
+            className={css.avatarBtn}
+            onClick={toggleUserPopover}
+            aria-label="Профиль"
+          >
+            {userInitial}
+          </button>
+
+          {userPopoverOpen && (
+            <div ref={popoverRef} className={css.userPopover}>
+              <div className={css.userPopoverHeader}>
+                <div className={css.userPopoverAvatar}>
+                  <UserOutlined style={{ fontSize: 18 }} />
+                </div>
+                <div className={css.userPopoverInfo}>
+                  <div className={css.userPopoverName}>
+                    {user?.name || "—"}
+                  </div>
+                  <div className={css.userPopoverEmail}>
+                    {user?.email || ""}
+                  </div>
+                  <div className={css.userPopoverRole}>
+                    {getRoleDescription(user?.role)}
+                  </div>
+                </div>
+              </div>
+              <div className={css.userPopoverDivider} />
+              <button
+                type="button"
+                className={css.logoutBtn}
                 onClick={handleLogout}
-              />
-            </Tooltip>
-          )}
-          {isMobile && (
-            <MenuOutlined
-              style={{ color: "white", opacity: "0.5", fontSize: "40px" }}
-              onClick={toggleOpen}
-            />
+              >
+                <LogoutOutlined />
+                <span>Выйти</span>
+              </button>
+            </div>
           )}
         </div>
-      </div>
+      </aside>
 
       {isMobile && (
         <div
@@ -81,18 +140,21 @@ const SideMenu = () => {
         />
       )}
 
-      <div className={cn(css.menuItemsContainer, open && css.open)}>
-        {menuItems.map((item, index) => (
-          <SideMenuItem
-            key={`${item.title}${index}`}
-            icon={item.icon}
-            title={item.title}
-            route={item.route}
-            toggleOpen={toggleOpen}
-            customOnClick={item.customOnClick}
-          />
-        ))}
-      </div>
+      <aside className={cn(css.menu, open && css.open)}>
+        <div className={css.menuTitle}>WanmaX</div>
+        <div className={css.menuItemsContainer}>
+          {menuItems.map((item, index) => (
+            <SideMenuItem
+              key={`${item.title}${index}`}
+              icon={item.icon}
+              title={item.title}
+              route={item.route}
+              toggleOpen={toggleOpen}
+              customOnClick={item.customOnClick}
+            />
+          ))}
+        </div>
+      </aside>
     </div>
   );
 };

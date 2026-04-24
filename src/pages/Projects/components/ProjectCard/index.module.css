@@ -2,17 +2,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 150px;
-  height: 100px;
+  width: 180px;
+  height: 110px;
   cursor: pointer;
-  background-color: var(--color-modal-background);
-  border-radius: 10px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   color: var(--color-text);
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 500;
   white-space: pre-line;
   word-break: break-all;
-  padding: 5px;
+  padding: 12px;
   text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.container:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .actionMenuIconContainer {
@@ -22,21 +33,31 @@
 
 .menuIconButton {
   position: relative;
-  left: 126px;
+  left: 152px;
   top: 4px;
   display: flex;
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  background-color: rgba(63, 63, 63, 0.799);
-  height: 20px;
-  width: 20px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  height: 24px;
+  width: 24px;
   cursor: pointer;
   z-index: 1;
 }
 
+.menuIconButton:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .dropdown :global(.ant-dropdown-menu) {
-  background-color: var(--color-common-background);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-sm);
 }
 
 .dropdown :global(.ant-dropdown-menu-title-content) {
@@ -45,7 +66,7 @@
 
 .dropdown
   :global(.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-danger)) {
-  background-color: var(--color-menu-item-hovered-background) !important;
+  background-color: var(--color-bg-hover) !important;
 }
 
 .deleteButton {
@@ -69,6 +90,6 @@
   }
 
   .dropdown :global(.ant-dropdown-menu-title-content) {
-    font-size: 22px;
+    font-size: 16px;
   }
 }

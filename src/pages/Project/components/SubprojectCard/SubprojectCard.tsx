@@ -88,7 +88,6 @@ const SubprojectCard: FC<Props> = ({ id, name }) => {
           >
             <MoreOutlined
               style={{
-                color: "white",
                 fontSize: isMobile ? "30px" : "unset",
               }}
             />

@@ -3,13 +3,39 @@
   align-items: center;
   column-gap: 10px;
   cursor: pointer;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.container:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-primary);
+}
+
+.container.active {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: inherit;
 }
 
 .iconContainer > svg {
-  width: 28px;
+  width: 20px;
+  height: 20px;
+  color: inherit;
 }
 
 .itemTitle {
   font-size: 14px;
-  color: var(--color-text)
+  font-weight: 500;
+  color: inherit;
 }

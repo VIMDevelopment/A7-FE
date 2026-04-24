@@ -1,12 +1,12 @@
 .container {
   display: flex;
   min-height: 100vh;
-  background-color: var(--color-page-background);
+  background-color: var(--color-bg-page);
 }
 
 .pageContainer {
   width: 100%;
-  background-color: var(--color-page-background);
+  background-color: var(--color-bg-page);
 }
 
 @media (max-width: 768px) {

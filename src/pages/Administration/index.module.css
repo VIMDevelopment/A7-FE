@@ -85,21 +85,24 @@
   width: 100%;
   max-width: 100%;
   padding: 15px;
-  background-color: var(--color-modal-background);
-  border-radius: 10px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 14px;
   color: var(--color-text);
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
   margin-top: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .notificationText {
   width: 100%;
   padding: 15px;
-  background-color: var(--color-modal-background);
-  border-radius: 10px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 14px;
   color: var(--color-text);
   margin-top: 10px;

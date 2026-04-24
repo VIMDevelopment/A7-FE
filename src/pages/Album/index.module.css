@@ -66,6 +66,8 @@
   display: flex;
   flex-wrap: wrap;
   column-gap: 20px;
+  row-gap: 10px;
+  margin-top: 20px;
 }
 
 .actionsContainer button {
@@ -83,9 +85,12 @@
 .toolbar {
   display: flex;
   align-items: center;
-  padding: 0px 24px;
-  background-color: rgb(20, 20, 20);
-  border-radius: 100px;
+  padding: 6px 20px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
 }
 
 .customToolbarButtonsContainer {
@@ -104,11 +109,7 @@
 }
 
 .toolbarBtn:hover {
-  svg {
-    path {
-      color: rgba(255, 255, 255, 0.85);
-    }
-  }
+  color: var(--color-primary);
 }
 
 .divider {
@@ -116,16 +117,16 @@
 }
 
 .divider::before {
-  border-block-start: 2px solid white !important;
+  border-block-start: 1px solid var(--color-border) !important;
 }
 .divider::after {
-  border-block-start: 2px solid white !important;
+  border-block-start: 1px solid var(--color-border) !important;
 }
 
 .divider :global(.ant-divider-inner-text) {
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .emptyInfo {
@@ -156,9 +157,10 @@
   align-items: center;
   gap: 8px;
   padding: 16px;
-  background-color: var(--color-modal-background, #1a1a1a);
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   z-index: 1000;
 }
 
@@ -169,7 +171,7 @@
 }
 
 .downloadProgress :global(.ant-progress-text) {
-  color: #b4b4b4 !important;
+  color: var(--color-text-secondary) !important;
 }
 
 .downloadProgress :global(.ant-progress-circle-path) {

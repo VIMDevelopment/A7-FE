@@ -21,10 +21,11 @@
   flex-direction: column;
   row-gap: 20px;
   padding: 24px;
-  background: var(--color-modal-background);
-  border-radius: 8px;
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
   max-width: 500px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .authDescription {
@@ -76,11 +77,11 @@
 }
 
 .modalDescription code {
-  background: var(--color-menu-item-hovered-background);
+  background: var(--color-bg-page);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   font-family: monospace;
   font-size: 12px;
   color: var(--color-text);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border);
 }

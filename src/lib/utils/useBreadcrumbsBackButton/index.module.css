@@ -1,11 +1,17 @@
 .backArrowContainer {
   cursor: pointer;
-  padding: 0px 8px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
   margin-right: 10px;
-  background-color: var(--color-button-background);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
 }
 
 .backArrowContainer:hover {
-  background-color: var(--color-button-hover-background);
+  background-color: var(--color-bg-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }

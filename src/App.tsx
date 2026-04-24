@@ -8,12 +8,30 @@ import {
 import { getProfileFx, useProfile } from "./auth/auth";
 import { useShowPermissions } from "./auth/userData";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ConfigProvider } from "antd";
 import { REDIRECTS, ROUTES } from "./routes/constants";
 import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import AuthPage from "./pages/Auth/Auth";
 import { showNotification } from "./components/ShowNotification";
 import { loadFaceApiModels } from "./utils/faceDetection";
+
+const antdTheme = {
+  token: {
+    colorPrimary: "#8B5CF6",
+    colorLink: "#8B5CF6",
+    colorText: "#1F2328",
+    colorTextSecondary: "#6B7280",
+    colorBorder: "#E5E7EB",
+    colorBgContainer: "#FFFFFF",
+    colorBgElevated: "#FFFFFF",
+    colorError: "#EF4444",
+    borderRadius: 8,
+    fontFamily:
+      'Montserrat, Inter, -apple-system, "Segoe UI", Roboto, sans-serif',
+    fontSize: 14,
+  },
+};
 
 const config = new QueryClient({
   defaultOptions: {
@@ -84,9 +102,11 @@ const App = () => {
 
   if (error) {
     return (
-      <QueryClientProvider client={config}>
-        <AuthPage />
-      </QueryClientProvider>
+      <ConfigProvider theme={antdTheme}>
+        <QueryClientProvider client={config}>
+          <AuthPage />
+        </QueryClientProvider>
+      </ConfigProvider>
     );
   }
 
@@ -95,15 +115,17 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={config}>
-      <Router>
-        <SideMenuWrapper>
-          <PageWrapper>
-            <Routes>{routes}</Routes>
-          </PageWrapper>
-        </SideMenuWrapper>
-      </Router>
-    </QueryClientProvider>
+    <ConfigProvider theme={antdTheme}>
+      <QueryClientProvider client={config}>
+        <Router>
+          <SideMenuWrapper>
+            <PageWrapper>
+              <Routes>{routes}</Routes>
+            </PageWrapper>
+          </SideMenuWrapper>
+        </Router>
+      </QueryClientProvider>
+    </ConfigProvider>
   );
 };
 

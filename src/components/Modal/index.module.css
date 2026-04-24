@@ -2,33 +2,39 @@
   backdrop-filter: blur(4px);
 }
 
-.modal :global(.ant-modal-body) {
-  color: var(--color-text)
+.modal :global(.ant-modal-content) {
+  background-color: var(--color-bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
 }
 
-.modal :global(.ant-modal-content) {
-  background-color: var(--color-modal-background);
+.modal :global(.ant-modal-body) {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.modal :global(.ant-modal-header) {
+  background-color: var(--color-bg-surface);
+  margin-bottom: 12px;
 }
 
 .modal :global(.ant-modal-title) {
-  font-size: 20px;
-  padding-right: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  padding-right: 24px;
   color: var(--color-text);
-  background-color: var(--color-modal-background);
+  background-color: var(--color-bg-surface);
 }
 
 .modal :global(.ant-modal-close) {
   background: none;
-  color: var(--color-text);
-}
-
-.modal :global(.ant-modal-close):hover {
-  background: none;
   color: var(--color-text-secondary);
 }
 
-.modal :global(.ant-modal-title) {
-  font-size: 20px;
+.modal :global(.ant-modal-close):hover {
+  background: var(--color-bg-hover) !important;
+  color: var(--color-text);
 }
 
 .modalFooter {

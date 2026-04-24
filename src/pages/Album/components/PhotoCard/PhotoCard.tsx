@@ -190,7 +190,6 @@ const PhotoCard: FC<Props> = ({
           >
             <RocketOutlined
               style={{
-                color: "white",
                 fontSize: isMobile ? "30px" : "unset",
               }}
             />
@@ -205,7 +204,6 @@ const PhotoCard: FC<Props> = ({
           >
             <MoreOutlined
               style={{
-                color: "white",
                 fontSize: isMobile ? "30px" : "unset",
               }}
             />

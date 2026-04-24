@@ -2,17 +2,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 30px 0px 10px;
+  margin: 30px 0 10px;
 }
 
 .dragger {
   height: 300px;
   width: 80%;
-  border-radius: 40px;
+  border-radius: var(--radius-lg);
   color: var(--color-text);
-  font-size: 16px;
+  font-size: 14px;
   white-space: pre;
   text-align: center;
+  background-color: var(--color-bg-surface);
+  border: 1px dashed var(--color-border-strong);
 }
 
 .smallContainer {
@@ -22,27 +24,34 @@
   min-width: 150px;
   height: 150px;
   cursor: pointer;
-  background-color: var(--color-modal-background);
-  border-radius: 10px;
-  color: var(--color-text);
-  font-size: 16px;
+  background-color: var(--color-bg-surface);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 13px;
   white-space: pre;
   text-align: center;
-  opacity: 0.6;
+}
+
+.smallContainer:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .smallDragger {
   height: 150px;
   min-width: 150px;
-  border-radius: 40px;
+  border-radius: var(--radius-md);
   color: var(--color-text);
-  font-size: 16px;
+  font-size: 13px;
   white-space: pre;
   text-align: center;
+  background-color: var(--color-bg-surface);
+  border: 1px dashed var(--color-border-strong);
 }
 
 .progress :global(.ant-progress-text) {
-  color: #b4b4b4 !important;
+  color: var(--color-text-secondary) !important;
 }
 
 .progress :global(.ant-progress-circle-path) {

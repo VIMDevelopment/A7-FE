@@ -14,7 +14,9 @@ const Button: FC<Props> = ({ className, showSpinner, children, ...props }) => {
   return (
     <AntdButton className={cn(css.button, className)} {...props}>
       {showSpinner ? (
-        <Spin indicator={<LoadingOutlined spin style={{ color: "white" }} />} />
+        <Spin
+          indicator={<LoadingOutlined spin style={{ color: "#ffffff" }} />}
+        />
       ) : (
         <>{children}</>
       )}

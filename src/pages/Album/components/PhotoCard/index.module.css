@@ -12,15 +12,15 @@
   justify-content: center;
   height: 150px;
   width: 150px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  background-color: var(--color-modal-background);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
 }
 
 .orange {
-  background-color: rgba(255, 166, 0, 0.5);
+  background-color: #fff7ed;
+  border-color: #fdba74;
 }
 
 .img {
@@ -33,7 +33,7 @@
   display: flex;
   justify-content: center;
   text-align: center;
-  font-size: 16px;
+  font-size: 13px;
   color: var(--color-text);
   white-space: pre-line;
   word-break: break-all;
@@ -69,11 +69,18 @@
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  background-color: rgba(63, 63, 63, 0.799);
-  height: 20px;
-  width: 20px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  height: 24px;
+  width: 24px;
   cursor: pointer;
   z-index: 1;
+}
+
+.fastImproveButton:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .menuIconButton {
@@ -84,15 +91,25 @@
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  background-color: rgba(63, 63, 63, 0.799);
-  height: 20px;
-  width: 20px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  height: 24px;
+  width: 24px;
   cursor: pointer;
   z-index: 1;
 }
 
+.menuIconButton:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .dropdown :global(.ant-dropdown-menu) {
-  background-color: var(--color-common-background);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-sm);
 }
 
 .dropdown :global(.ant-dropdown-menu-title-content) {
@@ -101,7 +118,7 @@
 
 .dropdown
   :global(.ant-dropdown-menu-item:hover:not(.ant-dropdown-menu-item-danger)) {
-  background-color: var(--color-menu-item-hovered-background) !important;
+  background-color: var(--color-bg-hover) !important;
 }
 
 .deleteButton {
@@ -139,7 +156,7 @@
     max-width: calc(100vw - 40px);
     object-fit: contain;
   }
-  
+
   .fastImproveButton {
     left: calc(100vw - 138px);
     top: 8px;
@@ -155,7 +172,7 @@
   }
 
   .dropdown :global(.ant-dropdown-menu-title-content) {
-    font-size: 22px;
+    font-size: 16px;
   }
 
   .checkbox {

@@ -2,16 +2,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 150px;
-  height: 100px;
+  width: 180px;
+  height: 110px;
   cursor: pointer;
-  background-color: var(--color-modal-background);
-  border-radius: 10px;
-  color: var(--color-text);
-  font-size: 16px;
+  background-color: var(--color-bg-surface);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
   white-space: pre;
   text-align: center;
-  opacity: 0.3;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.container:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {

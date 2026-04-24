@@ -4,29 +4,34 @@
   align-items: center;
   width: 100vw;
   height: 100vh;
-  background-color: var(--color-common-background);
+  background-color: var(--color-bg-page);
+  padding: 20px;
 }
 
 .modal {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 50px 30px;
-  width: 500px;
-  border-radius: 10px;
-  background-color: var(--color-page-background);
+  padding: 40px 32px;
+  width: 420px;
+  max-width: 100%;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
 }
 
 .title {
-  font-size: 22px;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  row-gap: 10px;
+  row-gap: 16px;
   width: 100%;
 }
