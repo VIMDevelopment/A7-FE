@@ -8,16 +8,23 @@ import { usePutUsersUpdate } from "../../apiV2/a7-service";
 import { showNotification } from "../../components/ShowNotification";
 import { UserUpdateDto } from "../../apiV2/a7-service/model";
 import { useEnterPressListener } from "../../lib/utils/useEnterPressListener";
+import {
+  formatFullNameForApi,
+  parseFullNameFromApi,
+} from "../../lib/utils/fullName";
 
-type UserUpdateForm = UserUpdateDto & {
+type UserUpdateForm = Omit<UserUpdateDto, "name"> & {
+  surname?: string;
+  firstName?: string;
   repeatPassword?: string;
 };
 
 const SettingsPage = () => {
   const { data: user } = useProfile();
   const [isPasswordError, setIsPasswordError] = useState(false);
-  const [formState, setFormState] = useState<UserUpdateForm>({
-    name: user?.name,
+  const [formState, setFormState] = useState<UserUpdateForm>(() => {
+    const { surname, firstName } = parseFullNameFromApi(user?.name);
+    return { surname, firstName };
   });
 
   const {
@@ -30,9 +37,11 @@ const SettingsPage = () => {
   });
 
   useEffect(() => {
+    const { surname, firstName } = parseFullNameFromApi(user?.name);
     setFormState((prev) => ({
       ...prev,
-      name: user?.name,
+      surname,
+      firstName,
       email: user?.email,
     }));
   }, [user]);
@@ -58,7 +67,10 @@ const SettingsPage = () => {
       update({
         data: {
           id: user?.id,
-          name: formState.name,
+          name: formatFullNameForApi(
+            formState.surname ?? "",
+            formState.firstName ?? ""
+          ),
           password: formState.password,
           email: formState.email,
         },
@@ -82,16 +94,28 @@ const SettingsPage = () => {
       <div className={css.pageTitle}>Настройки профиля</div>
       <div className={css.form}>
         <Input
-          label="Новое имя пользователя"
+          label="Имя"
           onChange={(e) =>
             setFormState((prev) => ({
               ...prev,
-              name: e.target.value,
+              firstName: e.target.value,
             }))
           }
-          value={formState.name}
+          value={formState.firstName}
           disabled={isLoading}
           placeholder="Введите имя"
+        />
+        <Input
+          label="Фамилия"
+          onChange={(e) =>
+            setFormState((prev) => ({
+              ...prev,
+              surname: e.target.value,
+            }))
+          }
+          value={formState.surname}
+          disabled={isLoading}
+          placeholder="Введите фамилию"
         />
         <Input
           label="Новый пароль"
@@ -139,7 +163,11 @@ const SettingsPage = () => {
           disabled={
             isLoading ||
             isPasswordError ||
-            (!formState.name && !formState.password)
+            (!formatFullNameForApi(
+              formState.surname ?? "",
+              formState.firstName ?? ""
+            ) &&
+              !formState.password)
           }
           onClick={handleUpdateClick}
           showSpinner={isLoading}

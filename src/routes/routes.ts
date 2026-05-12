@@ -71,12 +71,6 @@ export const PublicRoutes = {
   RECOGNITION: {
     static: "/recognition",
   },
-  DISK: {
-    static: "/disk",
-  },
-  DISK_AUTH_CALLBACK: {
-    static: "/disk/auth/callback",
-  },
   PROMPTS: {
     static: "/prompts",
   },

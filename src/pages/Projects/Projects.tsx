@@ -34,8 +34,8 @@ const ProjectsPage = () => {
   const allowedProjects = hasAllowToAllProjects
     ? data?.data.projects ?? []
     : data?.data.projects?.filter((item) =>
-        userData?.workplace?.includes(item.id ?? "")
-      );
+      userData?.workplace?.includes(item.id ?? "")
+    );
 
   const allProjectsNames =
     data?.data.projects?.map((item) => item.name ?? "") ?? [];

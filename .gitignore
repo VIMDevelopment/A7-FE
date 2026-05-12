@@ -13,6 +13,9 @@
 
 # misc
 .DS_Store
+
+# Cursor / Claude локальные worktrees (вложенный .git)
+.claude/
 .env.local
 .env.development.local
 .env.test.local

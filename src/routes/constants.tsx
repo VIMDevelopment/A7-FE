@@ -10,8 +10,6 @@ import { UserRole } from "../apiV2/a7-service/model";
 import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
 import RecognitionPage from "../pages/Recognition/Recognition";
-import DiskPage from "../pages/Disk/Disk";
-import DiskCallbackPage from "../pages/Disk/DiskCallback";
 import PromptsPage from "../pages/Prompts/Prompts";
 
 const ALL_ROLES = [
@@ -115,18 +113,6 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.RECOGNITION.static,
     roles: ALL_ROLES,
     component: <RecognitionPage />,
-  },
-  {
-    id: "disk",
-    path: PublicRoutes.DISK.static,
-    roles: ALL_ROLES,
-    component: <DiskPage />,
-  },
-  {
-    id: "disk-auth-callback",
-    path: PublicRoutes.DISK_AUTH_CALLBACK.static,
-    roles: ALL_ROLES,
-    component: <DiskCallbackPage />,
   },
   // {
   //   id: "statistics",

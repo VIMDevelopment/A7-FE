@@ -30,18 +30,27 @@ import Modal from "../../components/Modal/Modal";
 import CameraSetupSlider from "../../components/CameraSetupSlider/CameraSetupSlider";
 import { getCameraSetupSteps } from "./cameraSetupSteps";
 import { Tabs } from "antd";
+import {
+  formatFullNameForApi,
+  parseFullNameFromApi,
+} from "../../lib/utils/fullName";
 
-type UserCreateForm = UserRegisterDto & {
+type UserCreateForm = Omit<UserRegisterDto, "name"> & {
+  surname: string;
+  firstName: string;
   repeatPassword?: string;
 };
 
-type UserUpdateForm = UserUpdateDto & {
+type UserUpdateForm = Omit<UserUpdateDto, "name"> & {
+  surname?: string;
+  firstName?: string;
   repeatPassword?: string;
 };
 
-const initialCreateUserValues = {
+const initialCreateUserValues: UserCreateForm = {
   email: "",
-  name: "",
+  surname: "",
+  firstName: "",
   password: "",
 };
 
@@ -134,7 +143,10 @@ const AdministrationPage = () => {
     if (validPasswords) {
       createUser({
         data: {
-          name: createFormState.name,
+          name: formatFullNameForApi(
+            createFormState.surname,
+            createFormState.firstName
+          ),
           password: createFormState.password,
           email: createFormState.email,
           role: createFormState.role,
@@ -160,7 +172,10 @@ const AdministrationPage = () => {
       updateUser({
         data: {
           id: updateFormState?.id,
-          name: updateFormState?.name,
+          name: formatFullNameForApi(
+            updateFormState?.surname ?? "",
+            updateFormState?.firstName ?? ""
+          ),
           email: updateFormState?.email,
           password: updateFormState?.password,
           role: updateFormState?.role,
@@ -300,12 +315,24 @@ const AdministrationPage = () => {
                     onChange={(e) =>
                       setCreateFormState((prev) => ({
                         ...prev,
-                        name: e.target.value,
+                        firstName: e.target.value,
                       }))
                     }
-                    value={createFormState.name}
+                    value={createFormState.firstName}
                     disabled={isLoadingCreateUser}
                     placeholder="Введите имя"
+                  />
+                  <Input
+                    label="Фамилия"
+                    onChange={(e) =>
+                      setCreateFormState((prev) => ({
+                        ...prev,
+                        surname: e.target.value,
+                      }))
+                    }
+                    value={createFormState.surname}
+                    disabled={isLoadingCreateUser}
+                    placeholder="Введите фамилию"
                   />
                   <Input
                     label="E-mail"
@@ -393,7 +420,8 @@ const AdministrationPage = () => {
                     disabled={
                       isLoadingCreateUser ||
                       isCreatePasswordError ||
-                      !createFormState.name ||
+                      !createFormState.surname ||
+                      !createFormState.firstName ||
                       !createFormState.email ||
                       !createFormState.password ||
                       !createFormState.role ||
@@ -423,10 +451,14 @@ const AdministrationPage = () => {
                     onChange={(value) => {
                       const selectedUser = data?.data.find((item) => item.id === value);
                       const projectsIds = projectsData?.data.projects?.map((el) => el.id);
+                      const { surname, firstName } = parseFullNameFromApi(
+                        selectedUser?.name
+                      );
 
                       setUpdateFormState({
                         id: selectedUser?.id,
-                        name: selectedUser?.name,
+                        surname,
+                        firstName,
                         email: selectedUser?.email,
                         role: selectedUser?.role as UserUpdateDtoRole,
                         workplace: selectedUser?.workplace?.filter((item) =>
@@ -438,16 +470,28 @@ const AdministrationPage = () => {
                     options={allUsersDataOptions}
                   />
                   <Input
-                    label="Новое имя пользователя"
+                    label="Имя"
                     onChange={(e) =>
                       setUpdateFormState((prev) => ({
                         ...prev,
-                        name: e.target.value,
+                        firstName: e.target.value,
                       }))
                     }
-                    value={updateFormState?.name}
+                    value={updateFormState?.firstName}
                     disabled={isLoading || !updateFormState?.id}
                     placeholder="Введите имя"
+                  />
+                  <Input
+                    label="Фамилия"
+                    onChange={(e) =>
+                      setUpdateFormState((prev) => ({
+                        ...prev,
+                        surname: e.target.value,
+                      }))
+                    }
+                    value={updateFormState?.surname}
+                    disabled={isLoading || !updateFormState?.id}
+                    placeholder="Введите фамилию"
                   />
                   <Input
                     label="Новый e-mail"
