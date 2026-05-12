@@ -162,7 +162,6 @@ const PromptsPage = () => {
         id: selectedPromptId,
         data: {
           title: selectedPrompt.title,
-          body: editBody,
           history: newHistory,
         },
       });
@@ -205,18 +204,11 @@ const PromptsPage = () => {
     const newHistory = prevHistory.filter(
       (item) => item.promptVersion !== versionToDelete.version
     );
-    const newBody =
-      newHistory.length > 0
-        ? newHistory[newHistory.length - 1].ru ??
-          newHistory[newHistory.length - 1].promptBody ??
-          ""
-        : prompt.body ?? "";
     try {
       await updatePrompt({
         id: versionToDelete.promptId,
         data: {
           title: prompt.title,
-          body: newBody,
           history: newHistory,
         },
       });
@@ -226,8 +218,9 @@ const PromptsPage = () => {
       });
       setVersionToDelete(null);
       if (selectedPromptId === versionToDelete.promptId && selectedVersion === versionToDelete.version) {
-        setSelectedVersion(newHistory.length > 0 ? newHistory[newHistory.length - 1].promptVersion : null);
-        setEditBody(newBody);
+        const lastItem = newHistory[newHistory.length - 1];
+        setSelectedVersion(lastItem?.promptVersion ?? null);
+        setEditBody(lastItem?.ru ?? lastItem?.promptBody ?? "");
       }
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     } catch {
