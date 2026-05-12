@@ -181,6 +181,7 @@
   font-weight: 700;
   color: var(--color-text);
   padding: 0 8px;
+  margin-top: 5px;
 }
 
 .menuItemsContainer {

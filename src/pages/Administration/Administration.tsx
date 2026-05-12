@@ -52,6 +52,7 @@ const initialCreateUserValues: UserCreateForm = {
   surname: "",
   firstName: "",
   password: "",
+  workplace: []
 };
 
 const AdministrationPage = () => {
