@@ -1,15 +1,11 @@
 .container {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
   background-color: var(--color-bg-page);
 }
 
 .pageContainer {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
-  overflow-y: auto;
+  width: 100%;
   background-color: var(--color-bg-page);
 }
 
