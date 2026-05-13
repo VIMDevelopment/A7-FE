@@ -1,4 +1,9 @@
-import { BankOutlined, EyeOutlined, FileTextOutlined } from "@ant-design/icons";
+import {
+  BankOutlined,
+  BarChartOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
 import ProjectsIcon from "../../assets/ProjectsIcon";
 import SettingsIcon from "../../assets/SettingsIcon";
 import { PublicRoutes } from "../../routes/routes";
@@ -52,6 +57,11 @@ export const getMenuItems: () => SideMenuItemProps[] = () => [
     icon: <FileTextOutlined style={iconStyle} />,
     title: "Промпты",
     route: PublicRoutes.PROMPTS.static,
+  },
+  {
+    icon: <BarChartOutlined style={iconStyle} />,
+    title: "Статистика",
+    route: PublicRoutes.STATISTICS.static,
   },
   {
     icon: <BankOutlined style={iconStyle} />,

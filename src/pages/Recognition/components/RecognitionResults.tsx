@@ -3,7 +3,7 @@ import Button from "../../../components/Button/Button";
 import {
   useDeletePhotosId,
   getPhotosId,
-  usePostPhotosImprovement,
+  usePostPhotosImprove,
 } from "../../../apiV2/a7-service";
 import type { Photo } from "../../../apiV2/a7-service/model/photo";
 import css from "../index.module.css";
@@ -51,7 +51,7 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
       axios: defaultApiAxiosParams,
     });
 
-  const { mutateAsync: improvePhoto } = usePostPhotosImprovement({
+  const { mutateAsync: improvePhoto } = usePostPhotosImprove({
     axios: defaultApiAxiosParams,
   });
 
@@ -147,6 +147,7 @@ const RecognitionResults: React.FC<RecognitionResultsProps> = ({
     improvePhoto({
       data: {
         photoIds: selectedPhotoIds,
+        prompt: "mock"
       },
     })
       .then(() => {

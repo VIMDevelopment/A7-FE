@@ -10,7 +10,7 @@ import {
   useGetPhotosAlbumAlbumId,
   useGetProjectsProjectId,
   useGetSubprojectsId,
-  usePostPhotosImprovement,
+  usePostPhotosImprove,
   usePutAlbumsCover,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
@@ -54,7 +54,7 @@ const AlbumPage = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
 
-  const { mutateAsync: improvePhoto } = usePostPhotosImprovement({
+  const { mutateAsync: improvePhoto } = usePostPhotosImprove({
     axios: defaultApiAxiosParams,
   });
 
@@ -224,6 +224,7 @@ const AlbumPage = () => {
     improvePhoto({
       data: {
         photoIds: selectedOriginalPhotos,
+        prompt: "mock"
       },
     })
       .then(() => {

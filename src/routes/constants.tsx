@@ -4,7 +4,7 @@ import AdministrationPage from "../pages/Administration/Administration";
 import ProjectsPage from "../pages/Projects/Projects";
 // import ReportsPage from "../pages/Reports/Reports";
 import SettingsPage from "../pages/Settings/Settings";
-// import StatisticsPage from "../pages/Statistics/Statistics";
+import StatisticsPage from "../pages/Statistics/Statistics";
 import AlbumPage from "../pages/Album/Album";
 import { UserRole } from "../apiV2/a7-service/model";
 import ProjectPage from "../pages/Project/Project";
@@ -114,12 +114,12 @@ export const ROUTES: Routes[] = [
     roles: ALL_ROLES,
     component: <RecognitionPage />,
   },
-  // {
-  //   id: "statistics",
-  //   path: PublicRoutes.STATISTICS.static,
-  //   roles: [],
-  //   component: <StatisticsPage />,
-  // },
+  {
+    id: "statistics",
+    path: PublicRoutes.STATISTICS.static,
+    roles: ALL_ROLES,
+    component: <StatisticsPage />,
+  },
 ];
 
 export const REDIRECTS: RedirectRoutes[] = [

@@ -7,7 +7,7 @@ import {
   useGetPrompts,
   usePostPhotosAddlayer,
   usePostPhotosIdRevert,
-  usePostPhotosImprovement,
+  usePostPhotosImprove,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
@@ -77,7 +77,7 @@ const ImprovementModal: FC<Props> = ({
   });
 
   const { isLoading: isImprovementLoading, mutateAsync: improvePhoto } =
-    usePostPhotosImprovement({
+  usePostPhotosImprove({
       axios: defaultApiAxiosParams,
     });
 
@@ -157,6 +157,7 @@ const ImprovementModal: FC<Props> = ({
       improvePhoto({
         data: {
           photoIds: [photoId],
+          prompt: "mock"
         },
       })
         .then(() => {
