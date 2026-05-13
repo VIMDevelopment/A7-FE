@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import css from "./index.module.css";
 import Modal from "../Modal/Modal";
 import {
@@ -13,8 +13,8 @@ import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import Button from "../Button/Button";
 import Select from "../Select/Select";
-import { Radio, Spin, Tooltip } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import { Radio, Result, Spin, Tooltip } from "antd";
+import { CloseCircleFilled, LoadingOutlined } from "@ant-design/icons";
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -23,9 +23,43 @@ import cn from "classnames";
 import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
+import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
 import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
+import type { PostPhotosImproveBody } from "../../apiV2/a7-service/model/postPhotosImproveBody";
+import type { PhotoStatus } from "../../apiV2/a7-service/model/photoStatus";
+import type { PhotoStatusOperation } from "../../apiV2/a7-service/model/photoStatusOperation";
 
 const DEFAULT_OUTPUT_RESOLUTION: PostPhotosAddlayerBodyOutputResolution = "2K";
+const POLLING_INTERVAL_MS = 1500;
+const MAX_ATTEMPTS = 3;
+
+const ERROR_MESSAGES: Record<string, { title: string; hint?: string }> = {
+  E005: {
+    title: "Нейросеть отклонила изображение",
+    hint: "Возможные причины: защита авторских прав или политика безопасности контента. Попробуйте другое фото или другой промпт.",
+  },
+  STALE: {
+    title: "Превышено время ожидания обработки",
+    hint: "Сервис не ответил вовремя. Попробуйте повторить.",
+  },
+  UNKNOWN: {
+    title: "Не удалось обработать фото",
+  },
+};
+
+const OPERATION_PROCESSING_LABELS: Record<
+  Exclude<PhotoStatusOperation, null>,
+  string
+> = {
+  improve: "Идёт улучшение фото",
+  addlayer: "Идёт добавление слоя",
+};
+
+const DEFAULT_PROCESSING_LABEL = "Идёт обработка фото";
+
+type LastRequest =
+  | { kind: "improve"; data: PostPhotosImproveBody }
+  | { kind: "addlayer"; data: PostPhotosAddlayerBody };
 
 type Props = {
   photoId: string;
@@ -42,8 +76,6 @@ const ImprovementModal: FC<Props> = ({
   onOk,
   onCancel,
 }) => {
-  const [improvementInProgress, setImprovementInProgress] = useState(false);
-  const [initialCurrentUrl, setInitialCurrentUrl] = useState("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [outputResolution, setOutputResolution] =
@@ -51,9 +83,19 @@ const ImprovementModal: FC<Props> = ({
       DEFAULT_OUTPUT_RESOLUTION,
     );
 
+  const lastRequestRef = useRef<LastRequest | null>(null);
+  const prevStatusRef = useRef<PhotoStatus | undefined>(undefined);
+
   useEffect(() => {
     if (isOpen) {
       setOutputResolution(DEFAULT_OUTPUT_RESOLUTION);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      prevStatusRef.current = undefined;
+      lastRequestRef.current = null;
     }
   }, [isOpen]);
 
@@ -67,6 +109,9 @@ const ImprovementModal: FC<Props> = ({
   } = useGetPhotosId(photoId, {
     axios: defaultApiAxiosParams,
     query: {
+      enabled: isOpen && !!photoId,
+      refetchInterval: (data) =>
+        data?.data.status === "processing" ? POLLING_INTERVAL_MS : false,
       onError: () => {
         showNotification({
           message: "Произошла ошибка при загрузке фото",
@@ -76,8 +121,17 @@ const ImprovementModal: FC<Props> = ({
     },
   });
 
+  const photo = photoData?.data;
+  const status: PhotoStatus = photo?.status ?? "idle";
+  const isProcessing = status === "processing";
+  const isFailed = status === "failed";
+  const statusAttempt = photo?.statusAttempt ?? null;
+  const statusOperation = photo?.statusOperation ?? null;
+  const statusErrorCode = photo?.statusErrorCode ?? null;
+  const statusErrorMessage = photo?.statusErrorMessage ?? null;
+
   const { isLoading: isImprovementLoading, mutateAsync: improvePhoto } =
-  usePostPhotosImprove({
+    usePostPhotosImprove({
       axios: defaultApiAxiosParams,
     });
 
@@ -109,67 +163,71 @@ const ImprovementModal: FC<Props> = ({
       : selectedPrompt?.body;
 
   useEffect(() => {
-    if (!improvementInProgress) return;
+    if (prevStatusRef.current === "processing" && status === "success") {
+      showNotification({
+        message: "Фото улучшено",
+        type: "success",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
+      });
+    }
+    prevStatusRef.current = status;
+  }, [status, albumId, queryClient]);
 
-    const interval = setInterval(() => {
-      const improvedPhotoUrl = photoData?.data.current?.original;
-      const isOldImprovedPhotoUrl = improvedPhotoUrl === initialCurrentUrl;
-
-      if (!improvedPhotoUrl || isOldImprovedPhotoUrl) {
-        refetchPhoto();
-      } else {
-        clearInterval(interval);
+  const runImprove = (data: PostPhotosImproveBody) => {
+    lastRequestRef.current = { kind: "improve", data };
+    return improvePhoto({ data })
+      .then(() => {
+        void refetchPhoto();
+      })
+      .catch(() => {
         showNotification({
-          message: "Фото улучшено",
-          type: "success",
+          message: "Произошла ошибка при улучшении фото",
+          type: "error",
         });
-        void queryClient.invalidateQueries({
-          queryKey: [`/photos/album/${albumId}`],
-        });
-        setInitialCurrentUrl(photoData.data.current?.original ?? "");
-        setImprovementInProgress(false);
-      }
-    }, 1000);
+      });
+  };
 
-    return () => clearInterval(interval);
-  }, [improvementInProgress, photoData, initialCurrentUrl]);
+  const runAddLayer = (data: PostPhotosAddlayerBody) => {
+    lastRequestRef.current = { kind: "addlayer", data };
+    return addLayerPhoto({ data })
+      .then(() => {
+        void refetchPhoto();
+      })
+      .catch(() => {
+        showNotification({
+          message: "Произошла ошибка при улучшении фото",
+          type: "error",
+        });
+      });
+  };
 
   const handleImprovePhoto = () => {
     if (selectedPromptId && bodyForRequest != null) {
-      addLayerPhoto({
-        data: {
-          photoId,
-          prompt: bodyForRequest,
-          outputResolution,
-        },
-      })
-        .then(() => {
-          setInitialCurrentUrl(photoData?.data.current?.original ?? "");
-          setImprovementInProgress(true);
-        })
-        .catch(() => {
-          showNotification({
-            message: "Произошла ошибка при улучшении фото",
-            type: "error",
-          });
-        });
+      void runAddLayer({
+        photoId,
+        prompt: bodyForRequest,
+        outputResolution,
+      });
     } else {
-      improvePhoto({
-        data: {
-          photoIds: [photoId],
-          prompt: "mock"
-        },
-      })
-        .then(() => {
-          setInitialCurrentUrl(photoData?.data.current?.original ?? "");
-          setImprovementInProgress(true);
-        })
-        .catch(() => {
-          showNotification({
-            message: "Произошла ошибка при улучшении фото",
-            type: "error",
-          });
-        });
+      void runImprove({
+        photoIds: [photoId],
+        prompt: "mock",
+      });
+    }
+  };
+
+  const handleRetryLast = () => {
+    const last = lastRequestRef.current;
+    if (!last) {
+      handleImprovePhoto();
+      return;
+    }
+    if (last.kind === "addlayer") {
+      void runAddLayer(last.data);
+    } else {
+      void runImprove(last.data);
     }
   };
 
@@ -191,8 +249,50 @@ const ImprovementModal: FC<Props> = ({
   };
 
   const originalPhoto = photoData?.data.default.original;
-
   const improvedPhoto = photoData?.data.current?.original;
+
+  const processingLabel =
+    (statusOperation && OPERATION_PROCESSING_LABELS[statusOperation]) ||
+    DEFAULT_PROCESSING_LABEL;
+
+  const getErrorInfo = (): { title: string; hint?: string } => {
+    const code = statusErrorCode ?? "UNKNOWN";
+    const fromDict = ERROR_MESSAGES[code];
+    if (fromDict) {
+      return {
+        title: fromDict.title,
+        hint: fromDict.hint ?? statusErrorMessage ?? undefined,
+      };
+    }
+    return {
+      title: ERROR_MESSAGES.UNKNOWN.title,
+      hint: statusErrorMessage ?? undefined,
+    };
+  };
+
+  const errorInfo = getErrorInfo();
+
+  const allDisabled =
+    isProcessing ||
+    isImprovementLoading ||
+    isAddlayerLoading ||
+    isPhotoLoading ||
+    isRevertLoading;
+
+  const getMainButtonLabel = (): string => {
+    if (isProcessing) {
+      if (statusAttempt && statusAttempt > 1) {
+        return `Повторная попытка (${statusAttempt}/${MAX_ATTEMPTS})…`;
+      }
+      return "Обработка фото…";
+    }
+    if (isFailed) {
+      return hasImprovedVersion ? "Обработать заново" : "Улучшить заново";
+    }
+    return hasImprovedVersion ? "Обработать заново" : "Улучшить фото";
+  };
+
+  const isOverlayActive = isProcessing || isFailed;
 
   return (
     <>
@@ -222,7 +322,7 @@ const ImprovementModal: FC<Props> = ({
               <ReactCompareSlider
                 className={cn(
                   css.sliderInModal,
-                  improvementInProgress && css.filter
+                  isOverlayActive && css.filter,
                 )}
                 itemOne={<ReactCompareSliderImage src={originalPhoto} />}
                 itemTwo={<ReactCompareSliderImage src={improvedPhoto} />}
@@ -233,19 +333,49 @@ const ImprovementModal: FC<Props> = ({
                 src={originalPhoto}
                 className={cn(
                   css.imgInModal,
-                  improvementInProgress && css.filter
+                  isOverlayActive && css.filter,
                 )}
               />
             )}
 
-            {improvementInProgress && (
-              <div className={css.spinnerOverlay}>
+            {isProcessing && (
+              <div className={css.statusOverlay}>
                 <Spin
                   indicator={
                     <LoadingOutlined
                       spin
                       style={{ color: "white", fontSize: 80 }}
                     />
+                  }
+                />
+                <div className={css.statusText}>{processingLabel}…</div>
+                {statusAttempt != null && statusAttempt > 1 && (
+                  <div className={css.statusAttempt}>
+                    Повторная попытка ({statusAttempt} из {MAX_ATTEMPTS})
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isFailed && (
+              <div className={cn(css.statusOverlay, css.errorOverlay)}>
+                <Result
+                  status="error"
+                  icon={
+                    <CloseCircleFilled
+                      style={{ color: "#ff4d4f", fontSize: 64 }}
+                    />
+                  }
+                  title={errorInfo.title}
+                  subTitle={errorInfo.hint ?? null}
+                  extra={
+                    <Button
+                      onClick={handleRetryLast}
+                      disabled={allDisabled}
+                      loading={isImprovementLoading || isAddlayerLoading}
+                    >
+                      Повторить
+                    </Button>
                   }
                 />
               </div>
@@ -272,13 +402,7 @@ const ImprovementModal: FC<Props> = ({
                   label: p.title ?? "",
                   value: p.id ?? "",
                 }))}
-                disabled={
-                  improvementInProgress ||
-                  isImprovementLoading ||
-                  isAddlayerLoading ||
-                  isPhotoLoading ||
-                  isRevertLoading
-                }
+                disabled={allDisabled}
                 loading={isPromptsLoading}
               />
               {selectedPromptId && promptHistory.length > 0 && (
@@ -308,13 +432,7 @@ const ImprovementModal: FC<Props> = ({
                         </Tooltip>
                       );
                     }}
-                    disabled={
-                      improvementInProgress ||
-                      isImprovementLoading ||
-                      isAddlayerLoading ||
-                      isPhotoLoading ||
-                      isRevertLoading
-                    }
+                    disabled={allDisabled}
                   />
                 </div>
               )}
@@ -336,13 +454,7 @@ const ImprovementModal: FC<Props> = ({
                     e.target.value as PostPhotosAddlayerBodyOutputResolution,
                   )
                 }
-                disabled={
-                  improvementInProgress ||
-                  isImprovementLoading ||
-                  isAddlayerLoading ||
-                  isPhotoLoading ||
-                  isRevertLoading
-                }
+                disabled={allDisabled}
               >
                 <Radio value="2K">2K (быстро)</Radio>
                 <Radio value="4K">4K (высокое качество)</Radio>
@@ -352,13 +464,7 @@ const ImprovementModal: FC<Props> = ({
               {hasImprovedVersion && (
                 <Button
                   onClick={handleRevertPhoto}
-                  disabled={
-                    improvementInProgress ||
-                    isImprovementLoading ||
-                    isAddlayerLoading ||
-                    isPhotoLoading ||
-                    isRevertLoading
-                  }
+                  disabled={allDisabled}
                   loading={isRevertLoading}
                 >
                   Вернуть к оригиналу
@@ -367,26 +473,16 @@ const ImprovementModal: FC<Props> = ({
               <Button
                 onClick={handleImprovePhoto}
                 disabled={
-                  improvementInProgress ||
-                  isImprovementLoading ||
-                  isAddlayerLoading ||
-                  isPhotoLoading ||
-                  isRevertLoading ||
-                  !selectedPromptId ||
-                  bodyForRequest == null
+                  allDisabled || !selectedPromptId || bodyForRequest == null
                 }
                 loading={
-                  improvementInProgress ||
+                  isProcessing ||
                   isImprovementLoading ||
                   isAddlayerLoading ||
                   isPhotoLoading
                 }
               >
-                {improvementInProgress
-                  ? "Идёт обработка фото"
-                  : hasImprovedVersion
-                    ? "Обработать заново"
-                    : "Улучшить фото"}
+                {getMainButtonLabel()}
               </Button>
             </div>
           </div>

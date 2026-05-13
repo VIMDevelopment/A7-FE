@@ -55,6 +55,47 @@
   border-radius: inherit;
 }
 
+.statusOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  border-radius: inherit;
+}
+
+.statusText {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.statusAttempt {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.errorOverlay {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.errorOverlay :global(.ant-result) {
+  padding: 24px;
+  max-width: 560px;
+}
+
+.errorOverlay :global(.ant-result-title) {
+  color: #ffffff;
+}
+
+.errorOverlay :global(.ant-result-subtitle) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .bottomContainer {
   display: flex;
   flex-direction: column;
