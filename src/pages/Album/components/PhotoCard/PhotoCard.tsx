@@ -1,8 +1,12 @@
 import React, { FC, useRef, useState } from "react";
 import css from "./index.module.css";
-import { Dropdown, Image, InputRef } from "antd";
+import { Dropdown, Image, InputRef, Spin } from "antd";
 import Checkbox from "antd/es/checkbox/Checkbox";
-import { MoreOutlined, RocketOutlined } from "@ant-design/icons";
+import {
+  LoadingOutlined,
+  MoreOutlined,
+  RocketOutlined,
+} from "@ant-design/icons";
 import { ItemType } from "antd/es/menu/interface";
 import Modal from "../../../../components/Modal/Modal";
 import { useQueryClient } from "react-query";
@@ -17,6 +21,7 @@ import { downloadImageByUrl, handlePrintPhoto, makeFileName } from "./helpers";
 import { useMediaQuery } from "react-responsive";
 import ImprovementModal from "../../../../components/ImprovementModal/ImprovementModal";
 import cn from "classnames";
+import type { PhotoStatus } from "../../../../apiV2/a7-service/model/photoStatus";
 
 type Props = {
   id: string;
@@ -28,6 +33,7 @@ type Props = {
   name: string;
   isSelected: boolean;
   albumId: string;
+  status?: PhotoStatus;
   onSelect: (id: string) => void;
   onDelete?: (id: string) => void;
 };
@@ -42,6 +48,7 @@ const PhotoCard: FC<Props> = ({
   name,
   isSelected,
   albumId,
+  status,
   onSelect,
   onDelete,
 }) => {
@@ -216,11 +223,23 @@ const PhotoCard: FC<Props> = ({
         >
           <Image
             src={smallUrl}
-            className={css.img}
+            className={cn(css.img, status === "processing" && css.dimmed)}
             preview={{
               src: previewUrl,
             }}
           />
+          {status === "processing" && (
+            <div className={css.processingOverlay}>
+              <Spin
+                indicator={
+                  <LoadingOutlined
+                    spin
+                    style={{ color: "white", fontSize: 40 }}
+                  />
+                }
+              />
+            </div>
+          )}
         </div>
         <div className={css.name}>{name}</div>
 

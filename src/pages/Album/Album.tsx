@@ -73,6 +73,10 @@ const AlbumPage = () => {
   const { data: albumPhotosData, isLoading: isAlbumPhotosLoading } =
     useGetPhotosAlbumAlbumId(albumId ?? "", {
       axios: defaultApiAxiosParams,
+      query: {
+        refetchInterval: (data) =>
+          data?.data.some((p) => p.status === "processing") ? 2000 : false,
+      },
     });
 
   const { mutateAsync: setAlbumCover } = usePutAlbumsCover({
@@ -478,6 +482,7 @@ const AlbumPage = () => {
                   name={item.fileName}
                   isSelected={selectedOriginalPhotos.includes(item.id)}
                   albumId={albumId ?? ""}
+                  status={item.status}
                   onSelect={toggleSelectPhoto}
                 />
               );

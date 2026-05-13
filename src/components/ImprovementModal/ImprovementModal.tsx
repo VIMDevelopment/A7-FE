@@ -172,14 +172,26 @@ const ImprovementModal: FC<Props> = ({
         queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
       });
     }
+    if (prevStatusRef.current === "processing" && status === "failed") {
+      void queryClient.invalidateQueries({
+        queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
+      });
+    }
     prevStatusRef.current = status;
   }, [status, albumId, queryClient]);
+
+  const invalidateAlbumList = () => {
+    void queryClient.invalidateQueries({
+      queryKey: getGetPhotosAlbumAlbumIdQueryKey(albumId ?? ""),
+    });
+  };
 
   const runImprove = (data: PostPhotosImproveBody) => {
     lastRequestRef.current = { kind: "improve", data };
     return improvePhoto({ data })
       .then(() => {
         void refetchPhoto();
+        invalidateAlbumList();
       })
       .catch(() => {
         showNotification({
@@ -194,6 +206,7 @@ const ImprovementModal: FC<Props> = ({
     return addLayerPhoto({ data })
       .then(() => {
         void refetchPhoto();
+        invalidateAlbumList();
       })
       .catch(() => {
         showNotification({
