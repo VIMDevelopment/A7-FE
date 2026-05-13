@@ -7,6 +7,8 @@
  */
 import type { PhotoVersions } from './photoVersions';
 import type { PhotoProcessingEntry } from './photoProcessingEntry';
+import type { PhotoStatus } from './photoStatus';
+import type { PhotoStatusOperation } from './photoStatusOperation';
 
 export interface Photo {
   /** Уникальный идентификатор фото */
@@ -41,6 +43,18 @@ export interface Photo {
   readySourceFingerprint?: string | null;
   /** Журнал успешных обработок для отчётов по затратам */
   processing?: PhotoProcessingEntry[];
+  /** Статус обработки фото (improve/addlayer) для polling-индикации */
+  status: PhotoStatus;
+  /** Какая операция запущена / упала последней */
+  statusOperation?: PhotoStatusOperation;
+  /** Номер текущей попытки Bull (1..3) — для индикатора «попытка 2/3» */
+  statusAttempt?: number | null;
+  /** Код причины фейла: E005 — копирайт/safety, STALE — таймаут воркера, UNKNOWN — прочее */
+  statusErrorCode?: string | null;
+  /** Короткое сообщение об ошибке (детальная отладка — в логах/Replicate Dashboard) */
+  statusErrorMessage?: string | null;
+  /** Момент последней смены статуса */
+  statusUpdatedAt?: string;
   /** Дата создания */
   createdAt: string;
   /** Дата последнего обновления */

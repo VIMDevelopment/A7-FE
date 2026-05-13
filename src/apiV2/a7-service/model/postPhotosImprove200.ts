@@ -6,7 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostPhotosImprovement200 = {
+export type PostPhotosImprove200 = {
   message?: string;
+  /** ID фото, реально поставленных в очередь */
   photoIds?: string[];
+  /** ID не найденных в БД фото (тихо пропущены) */
+  skipped?: string[];
 };

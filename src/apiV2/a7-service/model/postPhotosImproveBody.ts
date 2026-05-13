@@ -6,9 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostPhotosImprovementcustomBody = {
-  /** ID фотографии для улучшения */
-  photoid: string;
-  /** Пользовательский промпт для улучшения фотографии */
-  userprompt: string;
+export type PostPhotosImproveBody = {
+  photoIds: string[];
+  /** Готовый финальный текст промпта (фронт собирает сам). */
+  prompt: string;
 };

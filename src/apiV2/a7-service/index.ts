@@ -72,12 +72,10 @@ import type {
   SetCoverRequest,
   GetPhotosProcessingusageParams,
   GetPhotosProcessingusageSummaryParams,
-  PostPhotosImprovement200,
-  PostPhotosImprovementBody,
-  PostPhotosImprovementcustom200,
-  PostPhotosImprovementcustomBody,
   PostPhotosAddlayer200,
   PostPhotosAddlayerBody,
+  PostPhotosImprove200,
+  PostPhotosImproveBody,
   RatingPhotoResponse,
   RatingPhotoRequest,
   DescriptorMatchResponse,
@@ -1429,76 +1427,6 @@ export const useGetPhotosProcessingusageSummary = <TData = AsyncReturnType<typeo
 
 
 /**
- * Добавляет фотографии в очередь для улучшения через GFPGAN.
-
-После улучшения поле `current` обновляется новыми версиями, а `default` остается неизменным.
-Это позволяет откатить изменения, скопировав `default` в `current`.
-
- * @summary Улучшение фотографий
- */
-export const postPhotosImprovement = (
-    postPhotosImprovementBody: PostPhotosImprovementBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PostPhotosImprovement200>> => {
-    return axios.post(
-      `/photos/improvement`,
-      postPhotosImprovementBody,options
-    );
-  }
-
-
-
-    export const usePostPhotosImprovement = <TError = AxiosError<void>,
-    
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovement>, TError,{data: PostPhotosImprovementBody}, TContext>, axios?: AxiosRequestConfig}
-) => {
-      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
-
-      
-
-
-      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovement>, {data: PostPhotosImprovementBody}> = (props) => {
-          const {data} = props || {};
-
-          return  postPhotosImprovement(data,axiosOptions)
-        }
-
-      return useMutation<AsyncReturnType<typeof postPhotosImprovement>, TError, {data: PostPhotosImprovementBody}, TContext>(mutationFn, mutationOptions)
-    }
-    
-/**
- * Улучшение фотографии с использованием пользовательского промпта
- * @summary Кастомное улучшение фотографии
- */
-export const postPhotosImprovementcustom = (
-    postPhotosImprovementcustomBody: PostPhotosImprovementcustomBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PostPhotosImprovementcustom200>> => {
-    return axios.post(
-      `/photos/improvement-custom`,
-      postPhotosImprovementcustomBody,options
-    );
-  }
-
-
-
-    export const usePostPhotosImprovementcustom = <TError = AxiosError<PhotoErrorResponse | void>,
-    
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprovementcustom>, TError,{data: PostPhotosImprovementcustomBody}, TContext>, axios?: AxiosRequestConfig}
-) => {
-      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
-
-      
-
-
-      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprovementcustom>, {data: PostPhotosImprovementcustomBody}> = (props) => {
-          const {data} = props || {};
-
-          return  postPhotosImprovementcustom(data,axiosOptions)
-        }
-
-      return useMutation<AsyncReturnType<typeof postPhotosImprovementcustom>, TError, {data: PostPhotosImprovementcustomBody}, TContext>(mutationFn, mutationOptions)
-    }
-    
-/**
  * Добавляет фото в очередь на обработку через flux-pro с переданным промптом.
 Промпт на фронте берётся из default промпта или из выбранной версии history.
 После обработки обновляется current, default остаётся неизменным.
@@ -1532,6 +1460,53 @@ export const postPhotosAddlayer = (
         }
 
       return useMutation<AsyncReturnType<typeof postPhotosAddlayer>, TError, {data: PostPhotosAddlayerBody}, TContext>(mutationFn, mutationOptions)
+    }
+    
+/**
+ * Ставит каждое из переданных фото в очередь на обработку с готовым промптом.
+
+Как работает:
+1. Принимает массив `photoIds` (1..50) и текст `prompt` (фронт собирает сам).
+2. На каждое фото создаётся отдельная задача → отдельный жизненный цикл статуса.
+3. Фронт следит через polling `GET /photos/:id`:
+   - `status`: `idle` → `processing` → `success` | `failed`
+   - `statusOperation`: `'improve'`
+   - `statusAttempt`: 1..3 (если идут ретраи)
+   - `statusErrorCode`: `E005` — копирайт, `STALE` — таймаут, `UNKNOWN` — прочее
+   - `statusErrorMessage`: короткий человеко-читаемый текст
+   - `statusUpdatedAt`: время последней смены статуса
+4. Не найденные в БД id попадают в `response.skipped`, без падения всего запроса.
+   Если ни одного валидного фото — `404 NO_VALID_PHOTOS`.
+
+ * @summary Пакетное улучшение фото (improve)
+ */
+export const postPhotosImprove = (
+    postPhotosImproveBody: PostPhotosImproveBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PostPhotosImprove200>> => {
+    return axios.post(
+      `/photos/improve`,
+      postPhotosImproveBody,options
+    );
+  }
+
+
+
+    export const usePostPhotosImprove = <TError = AxiosError<void>,
+    
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<AsyncReturnType<typeof postPhotosImprove>, TError,{data: PostPhotosImproveBody}, TContext>, axios?: AxiosRequestConfig}
+) => {
+      const {mutation: mutationOptions, axios: axiosOptions} = options || {}
+
+      
+
+
+      const mutationFn: MutationFunction<AsyncReturnType<typeof postPhotosImprove>, {data: PostPhotosImproveBody}> = (props) => {
+          const {data} = props || {};
+
+          return  postPhotosImprove(data,axiosOptions)
+        }
+
+      return useMutation<AsyncReturnType<typeof postPhotosImprove>, TError, {data: PostPhotosImproveBody}, TContext>(mutationFn, mutationOptions)
     }
     
 /**
@@ -2330,6 +2305,8 @@ export const postSettingsUsdrubRefresh = (
 
 
       const mutationFn: MutationFunction<AsyncReturnType<typeof postSettingsUsdrubRefresh>, TVariables> = () => {
+          ;
+
           return  postSettingsUsdrubRefresh(axiosOptions)
         }
 

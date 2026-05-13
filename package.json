@@ -39,7 +39,8 @@
     "start": "craco start",
     "build": "react-scripts build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate": "curl -fsSL https://api.wanmax.io/api-docs.json -o api-docs.json && orval"
   },
   "browserslist": {
     "production": [
@@ -60,6 +61,7 @@
     "@types/pica": "^9.0.5",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
-    "eslint": "^8.40.0"
+    "eslint": "^8.40.0",
+    "orval": "6.6.2"
   }
 }
