@@ -6,6 +6,38 @@ import { KNOWLEDGE_CATEGORIES, KnowledgeArticle } from "./instructions";
 
 const normalizeSearch = (value: string) => value.trim().toLowerCase();
 
+const highlightText = (text: string, query: string): React.ReactNode => {
+  if (!query) {
+    return text;
+  }
+
+  const lowerText = text.toLowerCase();
+  const parts: React.ReactNode[] = [];
+  let startIndex = 0;
+  let matchIndex = lowerText.indexOf(query, startIndex);
+
+  while (matchIndex !== -1) {
+    if (matchIndex > startIndex) {
+      parts.push(text.slice(startIndex, matchIndex));
+    }
+
+    parts.push(
+      <mark key={`${matchIndex}-${text}`} className={css.highlight}>
+        {text.slice(matchIndex, matchIndex + query.length)}
+      </mark>
+    );
+
+    startIndex = matchIndex + query.length;
+    matchIndex = lowerText.indexOf(query, startIndex);
+  }
+
+  if (startIndex < text.length) {
+    parts.push(text.slice(startIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+};
+
 const articleMatchesQuery = (article: KnowledgeArticle, query: string) => {
   if (!query) {
     return true;
@@ -23,20 +55,21 @@ const articleMatchesQuery = (article: KnowledgeArticle, query: string) => {
   return searchableText.includes(query);
 };
 
-const ArticleContent: React.FC<{ article: KnowledgeArticle }> = ({
-  article,
-}) => (
+const ArticleContent: React.FC<{
+  article: KnowledgeArticle;
+  query: string;
+}> = ({ article, query }) => (
   <div className={css.articleContent}>
     {article.paragraphs?.map((paragraph) => (
       <p key={paragraph} className={css.paragraph}>
-        {paragraph}
+        {highlightText(paragraph, query)}
       </p>
     ))}
 
     {article.steps && article.steps.length > 0 && (
       <ol className={css.steps}>
         {article.steps.map((step) => (
-          <li key={step}>{step}</li>
+          <li key={step}>{highlightText(step, query)}</li>
         ))}
       </ol>
     )}
@@ -46,7 +79,7 @@ const ArticleContent: React.FC<{ article: KnowledgeArticle }> = ({
         <div className={css.tipsTitle}>Полезно знать</div>
         <ul className={css.tipsList}>
           {article.tips.map((tip) => (
-            <li key={tip}>{tip}</li>
+            <li key={tip}>{highlightText(tip, query)}</li>
           ))}
         </ul>
       </div>
@@ -69,6 +102,7 @@ const KnowledgeBasePage = () => {
   }, [search]);
 
   const hasResults = filteredCategories.length > 0;
+  const query = normalizeSearch(search);
 
   return (
     <div className={css.container}>
@@ -99,8 +133,8 @@ const KnowledgeBasePage = () => {
                 className={css.collapse}
                 items={category.articles.map((article) => ({
                   key: article.id,
-                  label: article.title,
-                  children: <ArticleContent article={article} />,
+                  label: highlightText(article.title, query),
+                  children: <ArticleContent article={article} query={query} />,
                 }))}
               />
             </section>

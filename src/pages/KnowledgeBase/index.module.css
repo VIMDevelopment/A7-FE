@@ -117,6 +117,13 @@
   color: var(--color-text-secondary);
 }
 
+.highlight {
+  background-color: #ffe58f;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
 @media (max-width: 768px) {
   .searchWrapper {
     max-width: 100%;
