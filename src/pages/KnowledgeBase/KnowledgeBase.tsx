@@ -1,8 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { Collapse } from "antd";
+import { PictureOutlined } from "@ant-design/icons";
 import css from "./index.module.css";
 import Input from "../../components/Input/Input";
-import { KNOWLEDGE_CATEGORIES, KnowledgeArticle } from "./instructions";
+import {
+  KNOWLEDGE_CATEGORIES,
+  KnowledgeArticle,
+  KnowledgeScreenshot,
+} from "./instructions";
 
 const normalizeSearch = (value: string) => value.trim().toLowerCase();
 
@@ -55,6 +60,33 @@ const articleMatchesQuery = (article: KnowledgeArticle, query: string) => {
   return searchableText.includes(query);
 };
 
+const Screenshot: React.FC<KnowledgeScreenshot> = ({ src, caption }) => {
+  const [hasError, setHasError] = useState(false);
+  const fileName = src.split("/").pop() ?? src;
+
+  return (
+    <figure className={css.screenshot}>
+      {hasError ? (
+        <div className={css.screenshotPlaceholder}>
+          <PictureOutlined className={css.screenshotPlaceholderIcon} />
+          <span>
+            Скрин ещё не загружен: <code>{fileName}</code>
+          </span>
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt={caption}
+          loading="lazy"
+          className={css.screenshotImg}
+          onError={() => setHasError(true)}
+        />
+      )}
+      <figcaption className={css.screenshotCaption}>{caption}</figcaption>
+    </figure>
+  );
+};
+
 const ArticleContent: React.FC<{
   article: KnowledgeArticle;
   query: string;
@@ -65,6 +97,14 @@ const ArticleContent: React.FC<{
         {highlightText(paragraph, query)}
       </p>
     ))}
+
+    {article.screenshots && article.screenshots.length > 0 && (
+      <div className={css.screenshots}>
+        {article.screenshots.map((screenshot) => (
+          <Screenshot key={screenshot.src} {...screenshot} />
+        ))}
+      </div>
+    )}
 
     {article.steps && article.steps.length > 0 && (
       <ol className={css.steps}>
