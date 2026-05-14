@@ -1,0 +1,14 @@
+- generic [ref=e4]:
+  - generic [ref=e5]: Авторизация
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]: E-mail
+      - textbox "Введите E-mail" [ref=e9]
+    - generic [ref=e10]:
+      - generic [ref=e11]: Пароль
+      - generic [ref=e12]:
+        - textbox "Введите пароль" [ref=e13]
+        - img "eye" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+    - button "Войти" [ref=e17] [cursor=pointer]:
+      - generic [ref=e18]: Войти

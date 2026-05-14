@@ -1,0 +1,7 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic "WanmaX" [ref=e6]:
+      - img "WanmaX" [ref=e7]
+    - button "Профиль" [ref=e9] [cursor=pointer]: "?"
+  - complementary [ref=e10]:
+    - generic [ref=e11]: WanmaX

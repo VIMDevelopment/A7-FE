@@ -1,0 +1,138 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - complementary [ref=e5]:
+        - generic "WanmaX" [ref=e6]:
+          - img "WanmaX" [ref=e7]
+        - button "Профиль" [ref=e9] [cursor=pointer]: Г
+      - complementary [ref=e10]:
+        - generic [ref=e11]: WanmaX
+        - generic [ref=e14]:
+          - generic [ref=e15] [cursor=pointer]:
+            - img [ref=e17]
+            - generic [ref=e19]: Файлы
+          - generic [ref=e20] [cursor=pointer]:
+            - img "eye" [ref=e22]:
+              - img [ref=e23]
+            - generic [ref=e25]: Распознавание
+          - generic [ref=e26] [cursor=pointer]:
+            - img [ref=e28]
+            - generic [ref=e30]: Настройки профиля
+          - generic [ref=e31] [cursor=pointer]:
+            - img "file-text" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e36]: Промпты
+          - generic [ref=e37] [cursor=pointer]:
+            - img "bar-chart" [ref=e39]:
+              - img [ref=e40]
+            - generic [ref=e42]: Статистика
+          - generic [ref=e43] [cursor=pointer]:
+            - img "book" [ref=e45]:
+              - img [ref=e46]
+            - generic [ref=e48]: База знаний
+          - generic [ref=e49] [cursor=pointer]:
+            - img "bank" [ref=e51]:
+              - img [ref=e52]
+            - generic [ref=e54]: Администрирование
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]: "Папка: \"30.04.26\""
+        - button "Синхронизировать с Яндекс.Диском" [ref=e59] [cursor=pointer]:
+          - img "cloud-sync" [ref=e60]:
+            - img [ref=e61]
+      - navigation [ref=e65]:
+        - list [ref=e66]:
+          - listitem [ref=e67]:
+            - img "arrow-left" [ref=e70] [cursor=pointer]:
+              - img [ref=e71]
+          - listitem [ref=e73]:
+            - link "Все филиалы" [ref=e75] [cursor=pointer]:
+              - /url: /projects
+          - listitem [ref=e76]: /
+          - listitem [ref=e77]:
+            - 'link "Филиал: \"Scandy Мега Самара\"" [ref=e79] [cursor=pointer]':
+              - /url: /projects/6998220a6bba86a746eb2c0a
+          - listitem [ref=e80]: /
+          - listitem [ref=e81]: "Папка: \"30.04.26\""
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - img "more" [ref=e85] [cursor=pointer]:
+            - img [ref=e86]
+          - generic [ref=e88] [cursor=pointer]: "01"
+        - generic [ref=e90]:
+          - img "more" [ref=e92] [cursor=pointer]:
+            - img [ref=e93]
+          - generic [ref=e95] [cursor=pointer]: "03"
+        - generic [ref=e97]:
+          - img "more" [ref=e99] [cursor=pointer]:
+            - img [ref=e100]
+          - generic [ref=e102] [cursor=pointer]: "06"
+        - generic [ref=e104]:
+          - img "more" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+          - generic [ref=e109] [cursor=pointer]: "07"
+        - generic [ref=e111]:
+          - img "more" [ref=e113] [cursor=pointer]:
+            - img [ref=e114]
+          - generic [ref=e116] [cursor=pointer]: "08"
+        - generic [ref=e122]:
+          - img "more" [ref=e124] [cursor=pointer]:
+            - img [ref=e125]
+          - generic [ref=e127] [cursor=pointer]: "09"
+        - generic [ref=e129]:
+          - img "more" [ref=e131] [cursor=pointer]:
+            - img [ref=e132]
+          - generic [ref=e134] [cursor=pointer]: "10"
+        - generic [ref=e136]:
+          - img "more" [ref=e138] [cursor=pointer]:
+            - img [ref=e139]
+          - generic [ref=e141] [cursor=pointer]: "11"
+        - generic [ref=e143]:
+          - img "more" [ref=e145] [cursor=pointer]:
+            - img [ref=e146]
+          - generic [ref=e148] [cursor=pointer]: "12"
+        - generic [ref=e150]:
+          - img "more" [ref=e152] [cursor=pointer]:
+            - img [ref=e153]
+          - generic [ref=e155] [cursor=pointer]: "13"
+        - generic [ref=e157]:
+          - img "more" [ref=e159] [cursor=pointer]:
+            - img [ref=e160]
+          - generic [ref=e162] [cursor=pointer]: "14"
+        - generic [ref=e164]:
+          - img "more" [ref=e166] [cursor=pointer]:
+            - img [ref=e167]
+          - generic [ref=e169] [cursor=pointer]: "15"
+        - generic [ref=e171]:
+          - img "more" [ref=e173] [cursor=pointer]:
+            - img [ref=e174]
+          - generic [ref=e176] [cursor=pointer]: "16"
+        - generic [ref=e182]:
+          - img "more" [ref=e184] [cursor=pointer]:
+            - img [ref=e185]
+          - generic [ref=e187] [cursor=pointer]: "17"
+        - generic [ref=e193]:
+          - img "more" [ref=e195] [cursor=pointer]:
+            - img [ref=e196]
+          - generic [ref=e198] [cursor=pointer]: "18"
+        - generic [ref=e204]:
+          - img "more" [ref=e206] [cursor=pointer]:
+            - img [ref=e207]
+          - generic [ref=e209] [cursor=pointer]: "19"
+        - generic [ref=e215]:
+          - img "more" [ref=e217] [cursor=pointer]:
+            - img [ref=e218]
+          - generic [ref=e220] [cursor=pointer]: "20"
+        - generic [ref=e226]:
+          - img "more" [ref=e228] [cursor=pointer]:
+            - img [ref=e229]
+          - generic [ref=e231] [cursor=pointer]: "21"
+        - generic [ref=e248] [cursor=pointer]: + Добавить альбом
+  - generic [ref=e270]:
+    - alert [ref=e272]:
+      - img "check-circle" [ref=e273]:
+        - img [ref=e274]
+      - generic [ref=e276]: Альбом удален
+    - generic "Close" [ref=e277] [cursor=pointer]:
+      - img "close" [ref=e278]:
+        - img [ref=e279]

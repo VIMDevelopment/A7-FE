@@ -1,0 +1,113 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic "WanmaX" [ref=e6]:
+        - img "WanmaX" [ref=e7]
+      - button "Профиль" [ref=e9] [cursor=pointer]: Г
+    - complementary [ref=e10]:
+      - generic [ref=e11]: WanmaX
+      - generic [ref=e14]:
+        - generic [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e19]: Файлы
+        - generic [ref=e20] [cursor=pointer]:
+          - img "eye" [ref=e22]:
+            - img [ref=e23]
+          - generic [ref=e25]: Распознавание
+        - generic [ref=e26] [cursor=pointer]:
+          - img [ref=e28]
+          - generic [ref=e30]: Настройки профиля
+        - generic [ref=e31] [cursor=pointer]:
+          - img "file-text" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e36]: Промпты
+        - generic [ref=e37] [cursor=pointer]:
+          - img "bar-chart" [ref=e39]:
+            - img [ref=e40]
+          - generic [ref=e42]: Статистика
+        - generic [ref=e43] [cursor=pointer]:
+          - img "book" [ref=e45]:
+            - img [ref=e46]
+          - generic [ref=e48]: База знаний
+        - generic [ref=e49] [cursor=pointer]:
+          - img "bank" [ref=e51]:
+            - img [ref=e52]
+          - generic [ref=e54]: Администрирование
+  - generic [ref=e143]:
+    - generic [ref=e144]:
+      - generic [ref=e145]: Все папки филиала "Scandy Мега Самара"
+      - button "Синхронизировать с Яндекс.Диском" [ref=e147] [cursor=pointer]:
+        - img "cloud-sync" [ref=e148]:
+          - img [ref=e149]
+    - navigation [ref=e153]:
+      - list [ref=e154]:
+        - listitem [ref=e155]:
+          - img "arrow-left" [ref=e158] [cursor=pointer]:
+            - img [ref=e159]
+        - listitem [ref=e161]:
+          - link "Все филиалы" [ref=e163] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e164]: /
+        - listitem [ref=e165]: "Филиал: \"Scandy Мега Самара\""
+    - generic [ref=e166]:
+      - generic [ref=e167]:
+        - img "more" [ref=e169] [cursor=pointer]:
+          - img [ref=e170]
+        - generic [ref=e172] [cursor=pointer]: 30.04.26
+      - generic [ref=e173]:
+        - img "more" [ref=e175] [cursor=pointer]:
+          - img [ref=e176]
+        - generic [ref=e178] [cursor=pointer]: 01.05.26
+      - generic [ref=e179]:
+        - img "more" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+        - generic [ref=e184] [cursor=pointer]: 02.05.26
+      - generic [ref=e185]:
+        - img "more" [ref=e187] [cursor=pointer]:
+          - img [ref=e188]
+        - generic [ref=e190] [cursor=pointer]: 03.05.26
+      - generic [ref=e191]:
+        - img "more" [ref=e193] [cursor=pointer]:
+          - img [ref=e194]
+        - generic [ref=e196] [cursor=pointer]: 04.05.26
+      - generic [ref=e197]:
+        - img "more" [ref=e199] [cursor=pointer]:
+          - img [ref=e200]
+        - generic [ref=e202] [cursor=pointer]: 05.05.26
+      - generic [ref=e203]:
+        - img "more" [ref=e205] [cursor=pointer]:
+          - img [ref=e206]
+        - generic [ref=e208] [cursor=pointer]: 06.05.26
+      - generic [ref=e209]:
+        - img "more" [ref=e211] [cursor=pointer]:
+          - img [ref=e212]
+        - generic [ref=e214] [cursor=pointer]: 07.05.26
+      - generic [ref=e215]:
+        - img "more" [ref=e217] [cursor=pointer]:
+          - img [ref=e218]
+        - generic [ref=e220] [cursor=pointer]: 08.05.26
+      - generic [ref=e221]:
+        - img "more" [ref=e223] [cursor=pointer]:
+          - img [ref=e224]
+        - generic [ref=e226] [cursor=pointer]: 09.05.26
+      - generic [ref=e227]:
+        - img "more" [ref=e229] [cursor=pointer]:
+          - img [ref=e230]
+        - generic [ref=e232] [cursor=pointer]: 10.05.26
+      - generic [ref=e233]:
+        - img "more" [ref=e235] [cursor=pointer]:
+          - img [ref=e236]
+        - generic [ref=e238] [cursor=pointer]: 11.05.26
+      - generic [ref=e239]:
+        - img "more" [ref=e241] [cursor=pointer]:
+          - img [ref=e242]
+        - generic [ref=e244] [cursor=pointer]: 12.05.26
+      - generic [ref=e245]:
+        - img "more" [ref=e247] [cursor=pointer]:
+          - img [ref=e248]
+        - generic [ref=e250] [cursor=pointer]: 13.05.26
+      - generic [ref=e251]:
+        - img "more" [ref=e253] [cursor=pointer]:
+          - img [ref=e254]
+        - generic [ref=e256] [cursor=pointer]: 14.05.26
+      - generic [ref=e257] [cursor=pointer]: + Добавить папку

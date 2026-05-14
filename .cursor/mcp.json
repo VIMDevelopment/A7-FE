@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "/Users/maksimgavriluk/.nvm/versions/node/v22.20.0/bin/npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {
+        "PATH": "/Users/maksimgavriluk/.nvm/versions/node/v22.20.0/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}

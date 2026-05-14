@@ -1,0 +1,97 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic "WanmaX" [ref=e6]:
+        - img "WanmaX" [ref=e7]
+      - button "Профиль" [ref=e9] [cursor=pointer]: Г
+    - complementary [ref=e10]:
+      - generic [ref=e11]: WanmaX
+      - generic [ref=e14]:
+        - generic [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e19]: Файлы
+        - generic [ref=e20] [cursor=pointer]:
+          - img "eye" [ref=e22]:
+            - img [ref=e23]
+          - generic [ref=e25]: Распознавание
+        - generic [ref=e26] [cursor=pointer]:
+          - img [ref=e28]
+          - generic [ref=e30]: Настройки профиля
+        - generic [ref=e31] [cursor=pointer]:
+          - img "file-text" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e36]: Промпты
+        - generic [ref=e37] [cursor=pointer]:
+          - img "bar-chart" [ref=e39]:
+            - img [ref=e40]
+          - generic [ref=e42]: Статистика
+        - generic [ref=e43] [cursor=pointer]:
+          - img "book" [ref=e45]:
+            - img [ref=e46]
+          - generic [ref=e48]: База знаний
+        - generic [ref=e49] [cursor=pointer]:
+          - img "bank" [ref=e51]:
+            - img [ref=e52]
+          - generic [ref=e54]: Администрирование
+  - generic [ref=e55]:
+    - generic [ref=e56]: Администрирование
+    - generic [ref=e57]:
+      - tablist [ref=e58]:
+        - generic [ref=e60]:
+          - tab "Привязка фотоаппарата" [ref=e62] [cursor=pointer]
+          - tab "Создание пользователя" [ref=e64] [cursor=pointer]
+          - tab "Редактирование пользователя" [active] [selected] [ref=e66] [cursor=pointer]
+      - tabpanel "Редактирование пользователя" [ref=e155]:
+        - generic [ref=e156]:
+          - generic [ref=e157]: Редактирование существующего пользователя
+          - generic [ref=e158]:
+            - generic [ref=e159]:
+              - generic [ref=e160]: Выберите пользователя, которого хотите отредактировать
+              - generic [ref=e161] [cursor=pointer]:
+                - generic [ref=e163]:
+                  - combobox [ref=e165]
+                  - generic: Выберите из списка
+                - generic:
+                  - img:
+                    - img
+            - generic [ref=e166]:
+              - generic [ref=e167]: Имя
+              - textbox "Введите имя" [disabled] [ref=e168]
+            - generic [ref=e169]:
+              - generic [ref=e170]: Фамилия
+              - textbox "Введите фамилию" [disabled] [ref=e171]
+            - generic [ref=e172]:
+              - generic [ref=e173]: Новый e-mail
+              - textbox "Введите новый E-mail" [disabled] [ref=e174]
+            - generic [ref=e175]:
+              - generic [ref=e176]: Новый пароль
+              - generic [ref=e177]:
+                - textbox "Введите пароль" [disabled] [ref=e178]
+                - img "eye" [ref=e179] [cursor=pointer]:
+                  - img [ref=e180]
+            - generic [ref=e182]:
+              - generic [ref=e183]: Подтвердите новый пароль
+              - generic [ref=e184]:
+                - textbox "Повторно введите пароль" [disabled] [ref=e185]
+                - img "eye" [ref=e186] [cursor=pointer]:
+                  - img [ref=e187]
+            - generic [ref=e189]:
+              - generic [ref=e190]: Место работы
+              - generic [ref=e191] [cursor=pointer]:
+                - generic [ref=e193]:
+                  - combobox [disabled] [ref=e197]
+                  - generic: Выберите из списка
+                - generic:
+                  - img:
+                    - img
+            - generic [ref=e198]:
+              - generic [ref=e199]: Роль
+              - generic [ref=e200] [cursor=pointer]:
+                - generic [ref=e202]:
+                  - combobox [disabled] [ref=e204]
+                  - generic: Выберите из списка
+                - generic:
+                  - img:
+                    - img
+            - button "Сохранить" [disabled] [ref=e205]:
+              - generic: Сохранить

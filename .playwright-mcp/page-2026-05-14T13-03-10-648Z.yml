@@ -1,0 +1,59 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic "WanmaX" [ref=e6]:
+        - img "WanmaX" [ref=e7]
+      - button "Профиль" [ref=e9] [cursor=pointer]: Г
+    - complementary [ref=e10]:
+      - generic [ref=e11]: WanmaX
+      - generic [ref=e14]:
+        - generic [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e19]: Файлы
+        - generic [ref=e20] [cursor=pointer]:
+          - img "eye" [ref=e22]:
+            - img [ref=e23]
+          - generic [ref=e25]: Распознавание
+        - generic [ref=e26] [cursor=pointer]:
+          - img [ref=e28]
+          - generic [ref=e30]: Настройки профиля
+        - generic [ref=e31] [cursor=pointer]:
+          - img "file-text" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e36]: Промпты
+        - generic [ref=e37] [cursor=pointer]:
+          - img "bar-chart" [ref=e39]:
+            - img [ref=e40]
+          - generic [ref=e42]: Статистика
+        - generic [ref=e43] [cursor=pointer]:
+          - img "book" [ref=e45]:
+            - img [ref=e46]
+          - generic [ref=e48]: База знаний
+        - generic [ref=e49] [cursor=pointer]:
+          - img "bank" [ref=e51]:
+            - img [ref=e52]
+          - generic [ref=e54]: Администрирование
+  - generic [ref=e55]:
+    - generic [ref=e56]: Администрирование
+    - generic [ref=e57]:
+      - tablist [ref=e58]:
+        - generic [ref=e60]:
+          - tab "Привязка фотоаппарата" [selected] [ref=e62] [cursor=pointer]
+          - tab "Создание пользователя" [ref=e64] [cursor=pointer]
+          - tab "Редактирование пользователя" [ref=e66] [cursor=pointer]
+      - tabpanel "Привязка фотоаппарата" [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e71]: Привязка фотоаппарата
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: Филиал
+              - generic [ref=e75] [cursor=pointer]:
+                - generic: Scandy Мега Самара
+                - generic [ref=e77]:
+                  - combobox [active] [ref=e79]
+                  - generic "Scandy Мега Самара" [ref=e109]
+                - generic:
+                  - img:
+                    - img
+            - button "Сгенерировать данные для привязки" [ref=e80] [cursor=pointer]:
+              - generic [ref=e110]: Сгенерировать данные для привязки

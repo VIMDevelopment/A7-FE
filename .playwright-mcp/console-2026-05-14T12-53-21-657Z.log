@@ -1,0 +1,12 @@
+[     678ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/static/js/bundle.js:151981
+[     797ms] [WARNING] No routes matched location "/"  @ http://localhost:3000/static/js/bundle.js:14876
+[     847ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:3000/static/js/bundle.js:159498
+[     847ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:3000/static/js/bundle.js:159498
+[    1222ms] [WARNING] No routes matched location "/"  @ http://localhost:3000/static/js/bundle.js:14876
+[    1234ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ https://api.wanmax.io/users/info:0
+[    1626ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/:0
+[   61265ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/static/js/bundle.js:151981
+[   61380ms] [WARNING] No routes matched location "/projects"  @ http://localhost:3000/static/js/bundle.js:14876
+[   61390ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:3000/static/js/bundle.js:159498
+[   61390ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:3000/static/js/bundle.js:159498
+[   61532ms] [WARNING] No routes matched location "/projects"  @ http://localhost:3000/static/js/bundle.js:14876

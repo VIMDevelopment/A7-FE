@@ -1,0 +1,83 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - complementary [ref=e5]:
+        - generic "WanmaX" [ref=e6]:
+          - img "WanmaX" [ref=e7]
+        - button "Профиль" [ref=e9] [cursor=pointer]: Г
+      - complementary [ref=e10]:
+        - generic [ref=e11]: WanmaX
+        - generic [ref=e14]:
+          - generic [ref=e15] [cursor=pointer]:
+            - img [ref=e17]
+            - generic [ref=e19]: Файлы
+          - generic [ref=e20] [cursor=pointer]:
+            - img "eye" [ref=e22]:
+              - img [ref=e23]
+            - generic [ref=e25]: Распознавание
+          - generic [ref=e26] [cursor=pointer]:
+            - img [ref=e28]
+            - generic [ref=e30]: Настройки профиля
+          - generic [ref=e31] [cursor=pointer]:
+            - img "file-text" [ref=e33]:
+              - img [ref=e34]
+            - generic [ref=e36]: Промпты
+          - generic [ref=e37] [cursor=pointer]:
+            - img "bar-chart" [ref=e39]:
+              - img [ref=e40]
+            - generic [ref=e42]: Статистика
+          - generic [ref=e43] [cursor=pointer]:
+            - img "book" [ref=e45]:
+              - img [ref=e46]
+            - generic [ref=e48]: База знаний
+          - generic [ref=e49] [cursor=pointer]:
+            - img "bank" [ref=e51]:
+              - img [ref=e52]
+            - generic [ref=e54]: Администрирование
+    - generic [ref=e55]:
+      - generic [ref=e56]: Администрирование
+      - generic [ref=e57]:
+        - tablist [ref=e58]:
+          - generic [ref=e60]:
+            - tab "Привязка фотоаппарата" [selected] [ref=e62] [cursor=pointer]
+            - tab "Создание пользователя" [ref=e64] [cursor=pointer]
+            - tab "Редактирование пользователя" [ref=e66] [cursor=pointer]
+        - tabpanel "Привязка фотоаппарата" [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]: Привязка фотоаппарата
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - generic [ref=e74]: Филиал
+                - generic [ref=e75] [cursor=pointer]:
+                  - generic [ref=e77]:
+                    - combobox [expanded] [active] [ref=e79]:
+                      - listbox:
+                        - option "Scandy Мега Самара": 6998220a6bba86a746eb2c0a
+                        - option "Scandy Вива Самара": 69f5fd91b5046748d8bb4d1e
+                    - generic: Выберите из списка
+                  - generic:
+                    - img:
+                      - img
+              - button "Сгенерировать данные для привязки" [disabled] [ref=e80]:
+                - generic: Сгенерировать данные для привязки
+  - generic [ref=e86]:
+    - generic "Scandy Мега Самара" [ref=e87] [cursor=pointer]:
+      - generic [ref=e88]: Scandy Мега Самара
+    - generic "Scandy Вива Самара" [ref=e89] [cursor=pointer]:
+      - generic [ref=e90]: Scandy Вива Самара
+    - generic "FunCity Академ Екатеринбург" [ref=e91] [cursor=pointer]:
+      - generic [ref=e92]: FunCity Академ Екатеринбург
+    - generic "АстроЛенд Точка Сити Самара" [ref=e93] [cursor=pointer]:
+      - generic [ref=e94]: АстроЛенд Точка Сити Самара
+    - generic "Джанго ДПД Уфа" [ref=e95] [cursor=pointer]:
+      - generic [ref=e96]: Джанго ДПД Уфа
+    - generic "Манго Семья Уфа" [ref=e97] [cursor=pointer]:
+      - generic [ref=e98]: Манго Семья Уфа
+    - generic "Юкси Экватор Уфа" [ref=e99] [cursor=pointer]:
+      - generic [ref=e100]: Юкси Экватор Уфа
+    - generic "Юкси Артерия Уфа" [ref=e101] [cursor=pointer]:
+      - generic [ref=e102]: Юкси Артерия Уфа
+    - generic "FunCity ПМ Санкт-Петербург" [ref=e103] [cursor=pointer]:
+      - generic [ref=e104]: FunCity ПМ Санкт-Петербург
+    - generic "FunCity КТ Санкт-Петербург" [ref=e105] [cursor=pointer]:
+      - generic [ref=e106]: FunCity КТ Санкт-Петербург

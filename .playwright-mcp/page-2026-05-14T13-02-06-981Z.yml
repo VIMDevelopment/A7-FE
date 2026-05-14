@@ -1,0 +1,61 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic "WanmaX" [ref=e6]:
+        - img "WanmaX" [ref=e7]
+      - button "Профиль" [ref=e9] [cursor=pointer]: Г
+    - complementary [ref=e10]:
+      - generic [ref=e11]: WanmaX
+      - generic [ref=e12]:
+        - generic [ref=e13] [cursor=pointer]:
+          - img [ref=e15]
+          - generic [ref=e17]: Файлы
+        - generic [ref=e18] [cursor=pointer]:
+          - img "eye" [ref=e20]:
+            - img [ref=e21]
+          - generic [ref=e23]: Распознавание
+        - generic [ref=e24] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e28]: Настройки профиля
+        - generic [ref=e29] [cursor=pointer]:
+          - img "file-text" [ref=e31]:
+            - img [ref=e32]
+          - generic [ref=e34]: Промпты
+        - generic [ref=e35] [cursor=pointer]:
+          - img "bar-chart" [ref=e37]:
+            - img [ref=e38]
+          - generic [ref=e40]: Статистика
+        - generic [ref=e41] [cursor=pointer]:
+          - img "book" [ref=e43]:
+            - img [ref=e44]
+          - generic [ref=e46]: База знаний
+        - generic [ref=e47] [cursor=pointer]:
+          - img "bank" [ref=e49]:
+            - img [ref=e50]
+          - generic [ref=e52]: Администрирование
+  - generic [ref=e55]:
+    - generic [ref=e56]: Промпты
+    - generic [ref=e57]:
+      - tablist [ref=e58]:
+        - generic [ref=e60]:
+          - tab "Добавление" [selected] [ref=e62] [cursor=pointer]
+          - tab "Изменение" [ref=e64] [cursor=pointer]
+          - tab "Удаление" [ref=e66] [cursor=pointer]
+      - tabpanel [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e71]: Добавление нового промпта
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: Название промпта
+              - textbox "Введите название промпта" [ref=e75]
+            - generic [ref=e76]:
+              - generic [ref=e77]: Название первой версии
+              - textbox "Введите название первой версии" [ref=e78]
+            - generic [ref=e79]:
+              - generic [ref=e80]: Текст промпта
+              - textbox "Введите текст промпта" [ref=e81]
+            - generic [ref=e82]:
+              - generic [ref=e83]: Описание первой версии (опционально)
+              - textbox "Введите описание первой версии" [ref=e84]
+            - button "Создать промпт" [disabled] [ref=e85]:
+              - generic: Создать промпт

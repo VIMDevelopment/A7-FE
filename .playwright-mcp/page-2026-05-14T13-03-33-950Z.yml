@@ -1,0 +1,88 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic "WanmaX" [ref=e6]:
+        - img "WanmaX" [ref=e7]
+      - button "Профиль" [ref=e9] [cursor=pointer]: Г
+    - complementary [ref=e10]:
+      - generic [ref=e11]: WanmaX
+      - generic [ref=e14]:
+        - generic [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e19]: Файлы
+        - generic [ref=e20] [cursor=pointer]:
+          - img "eye" [ref=e22]:
+            - img [ref=e23]
+          - generic [ref=e25]: Распознавание
+        - generic [ref=e26] [cursor=pointer]:
+          - img [ref=e28]
+          - generic [ref=e30]: Настройки профиля
+        - generic [ref=e31] [cursor=pointer]:
+          - img "file-text" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e36]: Промпты
+        - generic [ref=e37] [cursor=pointer]:
+          - img "bar-chart" [ref=e39]:
+            - img [ref=e40]
+          - generic [ref=e42]: Статистика
+        - generic [ref=e43] [cursor=pointer]:
+          - img "book" [ref=e45]:
+            - img [ref=e46]
+          - generic [ref=e48]: База знаний
+        - generic [ref=e49] [cursor=pointer]:
+          - img "bank" [ref=e51]:
+            - img [ref=e52]
+          - generic [ref=e54]: Администрирование
+  - generic [ref=e55]:
+    - generic [ref=e56]: Администрирование
+    - generic [ref=e57]:
+      - tablist [ref=e58]:
+        - generic [ref=e60]:
+          - tab "Привязка фотоаппарата" [ref=e62] [cursor=pointer]
+          - tab "Создание пользователя" [active] [selected] [ref=e64] [cursor=pointer]
+          - tab "Редактирование пользователя" [ref=e66] [cursor=pointer]
+      - tabpanel "Создание пользователя" [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: Создание нового пользователя
+          - generic [ref=e114]:
+            - generic [ref=e115]:
+              - generic [ref=e116]: Имя
+              - textbox "Введите имя" [ref=e117]
+            - generic [ref=e118]:
+              - generic [ref=e119]: Фамилия
+              - textbox "Введите фамилию" [ref=e120]
+            - generic [ref=e121]:
+              - generic [ref=e122]: E-mail
+              - textbox "Введите новый E-mail" [ref=e123]
+            - generic [ref=e124]:
+              - generic [ref=e125]: Пароль
+              - generic [ref=e126]:
+                - textbox "Введите пароль" [ref=e127]
+                - img "eye" [ref=e128] [cursor=pointer]:
+                  - img [ref=e129]
+            - generic [ref=e131]:
+              - generic [ref=e132]: Подтвердите пароль
+              - generic [ref=e133]:
+                - textbox "Повторно введите пароль" [ref=e134]
+                - img "eye" [ref=e135] [cursor=pointer]:
+                  - img [ref=e136]
+            - generic [ref=e138]:
+              - generic [ref=e139]: Место работы
+              - generic [ref=e140] [cursor=pointer]:
+                - generic [ref=e142]:
+                  - combobox [ref=e146]
+                  - generic: Выберите из списка
+                - generic:
+                  - img:
+                    - img
+            - generic [ref=e147]:
+              - generic [ref=e148]: Роль
+              - generic [ref=e149] [cursor=pointer]:
+                - generic [ref=e151]:
+                  - combobox [ref=e153]
+                  - generic: Выберите из списка
+                - generic:
+                  - img:
+                    - img
+            - button "Создать" [disabled] [ref=e154]:
+              - generic: Создать

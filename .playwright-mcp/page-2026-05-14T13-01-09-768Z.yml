@@ -1,0 +1,75 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic "WanmaX" [ref=e6]:
+        - img "WanmaX" [ref=e7]
+      - button "Профиль" [ref=e9] [cursor=pointer]: Г
+    - complementary [ref=e10]:
+      - generic [ref=e11]: WanmaX
+      - generic [ref=e14]:
+        - generic [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e19]: Файлы
+        - generic [ref=e20] [cursor=pointer]:
+          - img "eye" [ref=e22]:
+            - img [ref=e23]
+          - generic [ref=e25]: Распознавание
+        - generic [ref=e26] [cursor=pointer]:
+          - img [ref=e28]
+          - generic [ref=e30]: Настройки профиля
+        - generic [ref=e31] [cursor=pointer]:
+          - img "file-text" [ref=e33]:
+            - img [ref=e34]
+          - generic [ref=e36]: Промпты
+        - generic [ref=e37] [cursor=pointer]:
+          - img "bar-chart" [ref=e39]:
+            - img [ref=e40]
+          - generic [ref=e42]: Статистика
+        - generic [ref=e43] [cursor=pointer]:
+          - img "book" [ref=e45]:
+            - img [ref=e46]
+          - generic [ref=e48]: База знаний
+        - generic [ref=e49] [cursor=pointer]:
+          - img "bank" [ref=e51]:
+            - img [ref=e52]
+          - generic [ref=e54]: Администрирование
+  - generic [ref=e441]:
+    - generic [ref=e442]:
+      - generic [ref=e443]: "Альбом: \"01\" — Готовый продукт"
+      - button "Синхронизировать с Яндекс.Диском" [ref=e445] [cursor=pointer]:
+        - img "cloud-sync" [ref=e446]:
+          - img [ref=e447]
+    - navigation [ref=e451]:
+      - list [ref=e452]:
+        - listitem [ref=e453]:
+          - img "arrow-left" [ref=e456] [cursor=pointer]:
+            - img [ref=e457]
+        - listitem [ref=e459]:
+          - link "Все филиалы" [ref=e461] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e462]: /
+        - listitem [ref=e463]:
+          - 'link "Филиал: \"Scandy Мега Самара\"" [ref=e465] [cursor=pointer]':
+            - /url: /projects/6998220a6bba86a746eb2c0a
+        - listitem [ref=e466]: /
+        - listitem [ref=e467]:
+          - 'link "Папка: \"30.04.26\"" [ref=e469] [cursor=pointer]':
+            - /url: /projects/6998220a6bba86a746eb2c0a/subproject/69f28d71b5046748d8bb2489
+        - listitem [ref=e470]: /
+        - listitem [ref=e471]:
+          - 'link "Альбом: \"01\"" [ref=e685] [cursor=pointer]':
+            - /url: /projects/6998220a6bba86a746eb2c0a/subproject/69f28d71b5046748d8bb2489/album/69f33b8bb5046748d8bb2492
+        - listitem [ref=e686]: /
+        - listitem [ref=e687]: Готовый продукт
+    - generic [ref=e472]:
+      - button "Выбрать все" [ref=e473] [cursor=pointer]:
+        - generic [ref=e474]: Выбрать все
+      - button "Отменить выбор" [ref=e475] [cursor=pointer]:
+        - generic [ref=e476]: Отменить выбор
+      - button "Улучшить выбранные" [ref=e477] [cursor=pointer]:
+        - generic [ref=e563]: Улучшить выбранные
+      - button "Скачать выбранные" [ref=e478] [cursor=pointer]:
+        - generic [ref=e564]: Скачать выбранные
+      - button "Удалить выбранные" [ref=e479] [cursor=pointer]:
+        - generic [ref=e565]: Удалить выбранные
+    - generic [ref=e480]: "Выбрано фотографий: 2 из 0"
