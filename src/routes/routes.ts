@@ -74,4 +74,7 @@ export const PublicRoutes = {
   PROMPTS: {
     static: "/prompts",
   },
+  KNOWLEDGE_BASE: {
+    static: "/knowledge-base",
+  },
 };

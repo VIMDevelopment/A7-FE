@@ -1,6 +1,7 @@
 import {
   BankOutlined,
   BarChartOutlined,
+  BookOutlined,
   EyeOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
@@ -62,6 +63,11 @@ export const getMenuItems: () => SideMenuItemProps[] = () => [
     icon: <BarChartOutlined style={iconStyle} />,
     title: "Статистика",
     route: PublicRoutes.STATISTICS.static,
+  },
+  {
+    icon: <BookOutlined style={iconStyle} />,
+    title: "База знаний",
+    route: PublicRoutes.KNOWLEDGE_BASE.static,
   },
   {
     icon: <BankOutlined style={iconStyle} />,

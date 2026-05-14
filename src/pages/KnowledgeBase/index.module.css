@@ -1,0 +1,124 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.searchWrapper {
+  max-width: 480px;
+  width: 100%;
+}
+
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categoryTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.collapse {
+  background: transparent;
+}
+
+.collapse :global(.ant-collapse-item) {
+  margin-bottom: 8px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.collapse :global(.ant-collapse-header) {
+  color: var(--color-text) !important;
+  font-weight: 500;
+}
+
+.collapse :global(.ant-collapse-content) {
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-surface);
+}
+
+.articleContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paragraph {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.tips {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-muted, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--color-border);
+}
+
+.tipsTitle {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tipsList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.emptyState {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .searchWrapper {
+    max-width: 100%;
+  }
+}

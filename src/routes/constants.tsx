@@ -11,6 +11,7 @@ import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
 import RecognitionPage from "../pages/Recognition/Recognition";
 import PromptsPage from "../pages/Prompts/Prompts";
+import KnowledgeBasePage from "../pages/KnowledgeBase/KnowledgeBase";
 
 const ALL_ROLES = [
   UserRole.admin,
@@ -119,6 +120,12 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.STATISTICS.static,
     roles: ALL_ROLES,
     component: <StatisticsPage />,
+  },
+  {
+    id: "knowledge-base",
+    path: PublicRoutes.KNOWLEDGE_BASE.static,
+    roles: ALL_ROLES,
+    component: <KnowledgeBasePage />,
   },
 ];
 
