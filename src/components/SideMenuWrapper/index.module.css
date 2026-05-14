@@ -6,6 +6,7 @@
 
 .pageContainer {
   width: 100%;
+  min-width: 0;
   background-color: var(--color-bg-page);
 }
 
