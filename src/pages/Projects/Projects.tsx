@@ -6,7 +6,7 @@ import { defaultApiAxiosParams } from "../../api/helpers";
 import ProjectCard from "./components/ProjectCard/ProjectCard";
 import { useProfile } from "../../auth/auth";
 import { useShowPermissions } from "../../auth/userData";
-import { UserRole } from "../../apiV2/a7-service/model";
+import { UserRolesItem } from "../../apiV2/a7-service/model";
 
 const ProjectsPage = () => {
   const { data } = useGetProjects({
@@ -18,17 +18,17 @@ const ProjectsPage = () => {
   const { hasPrivileges } = useShowPermissions();
 
   const hasAllowToAllProjects = hasPrivileges([
-    UserRole.admin,
-    UserRole.owner,
-    UserRole.agency,
-    UserRole.cluster,
+    UserRolesItem.admin,
+    UserRolesItem.owner,
+    UserRolesItem.agency,
+    UserRolesItem.cluster,
   ]);
 
   const canMakeNewProject = hasPrivileges([
-    UserRole.admin,
-    UserRole.owner,
-    UserRole.agency,
-    UserRole.cluster,
+    UserRolesItem.admin,
+    UserRolesItem.owner,
+    UserRolesItem.agency,
+    UserRolesItem.cluster,
   ]);
 
   const allowedProjects = hasAllowToAllProjects

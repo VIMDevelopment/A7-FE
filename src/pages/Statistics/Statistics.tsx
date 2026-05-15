@@ -9,16 +9,17 @@ import {
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { useProfile } from "../../auth/auth";
 import { useShowPermissions } from "../../auth/userData";
-import { UserRole } from "../../apiV2/a7-service/model";
+import { UserRolesItem } from "../../apiV2/a7-service/model";
 import Select from "../../components/Select/Select";
 import Button from "../../components/Button/Button";
 
-type Period = "allTime" | "lastMonth" | "lastWeek" | "lastDay";
+type Period = "allTime" | "lastMonth" | "lastWeek" | "yesterday" | "lastDay";
 
 type ProcessingUsageSummary = {
   allTime: number;
   lastMonth: number;
   lastWeek: number;
+  yesterday: number;
   lastDay: number;
 };
 
@@ -26,6 +27,7 @@ const PERIODS: { id: Period; label: string }[] = [
   { id: "allTime", label: "Всё время" },
   { id: "lastMonth", label: "Последние 30 дней" },
   { id: "lastWeek", label: "Последние 7 дней" },
+  { id: "yesterday", label: "Вчера" },
   { id: "lastDay", label: "Сегодня" },
 ];
 
@@ -43,10 +45,10 @@ const StatisticsPage = () => {
   const { hasPrivileges } = useShowPermissions();
 
   const hasAllowToAllProjects = hasPrivileges([
-    UserRole.admin,
-    UserRole.owner,
-    UserRole.agency,
-    UserRole.cluster,
+    UserRolesItem.admin,
+    UserRolesItem.owner,
+    UserRolesItem.agency,
+    UserRolesItem.cluster,
   ]);
 
   const availableProjects = useMemo(() => {

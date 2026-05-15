@@ -1,68 +1,72 @@
-import { ProjectPreviewDto, UserRole } from "../../apiV2/a7-service/model";
+import { ProjectPreviewDto, UserRolesItem } from "../../apiV2/a7-service/model";
 import { getRoleDescription } from "../../components/SideMenu/helpers";
 
-export const getRolePriority = (role?: UserRole) => {
-  switch (role) {
-    case UserRole.admin:
-    case UserRole.owner:
-      return "5";
-
-    case UserRole.agency:
-      return "4";
-
-    case UserRole.cluster:
-      return "3";
-
-    case UserRole.supervisor:
-      return "2";
-
-    case UserRole.maker:
-      return "1";
-
-    default:
-      return "";
-  }
-};
-
-const allRolesOptions = [
-  {
-    key: UserRole.owner,
-    value: UserRole.owner,
-    label: getRoleDescription(UserRole.owner),
-  },
-  {
-    key: UserRole.agency,
-    value: UserRole.agency,
-    label: getRoleDescription(UserRole.agency),
-  },
-  {
-    key: UserRole.cluster,
-    value: UserRole.cluster,
-    label: getRoleDescription(UserRole.cluster),
-  },
-  {
-    key: UserRole.supervisor,
-    value: UserRole.supervisor,
-    label: getRoleDescription(UserRole.supervisor),
-  },
-  {
-    key: UserRole.maker,
-    value: UserRole.maker,
-    label: getRoleDescription(UserRole.maker),
-  },
+const HIERARCHICAL_ROLES: UserRolesItem[] = [
+  UserRolesItem.admin,
+  UserRolesItem.owner,
+  UserRolesItem.agency,
+  UserRolesItem.cluster,
+  UserRolesItem.supervisor,
+  UserRolesItem.maker,
 ];
 
-export const getRolesOptions = (currentUserRole?: UserRole) => {
-  const currentRoleLevel = getRolePriority(currentUserRole);
+const CAPABILITY_ROLES: UserRolesItem[] = [
+  UserRolesItem.prompt,
+  UserRolesItem.remote,
+];
 
-  return allRolesOptions.filter(
-    (item) => getRolePriority(item.value) < currentRoleLevel
+const CAPABILITY_MANAGERS: UserRolesItem[] = [
+  UserRolesItem.admin,
+  UserRolesItem.owner,
+];
+
+const ROLE_PRIORITY: Record<UserRolesItem, number> = {
+  admin: 5,
+  owner: 5,
+  agency: 4,
+  cluster: 3,
+  supervisor: 2,
+  maker: 1,
+  prompt: 0,
+  remote: 0,
+};
+
+/** Возвращает максимальный иерархический уровень из массива ролей. */
+export const getEffectiveLevel = (roles?: UserRolesItem[]): number => {
+  if (!roles?.length) return 0;
+  return Math.max(
+    0,
+    ...roles
+      .filter((r) => HIERARCHICAL_ROLES.includes(r))
+      .map((r) => ROLE_PRIORITY[r] ?? 0)
   );
+};
+
+/** Опции для мульти-селекта ролей при создании/редактировании пользователя. */
+export const getRolesOptions = (currentUserRoles?: UserRolesItem[]) => {
+  const currentLevel = getEffectiveLevel(currentUserRoles);
+  const canManageCapabilities = (currentUserRoles ?? []).some((r) =>
+    CAPABILITY_MANAGERS.includes(r)
+  );
+
+  const hierarchical = HIERARCHICAL_ROLES.filter(
+    (r) => (ROLE_PRIORITY[r] ?? 0) < currentLevel
+  ).map((r) => ({ key: r, value: r, label: getRoleDescription(r) }));
+
+  const capabilities = canManageCapabilities
+    ? CAPABILITY_ROLES.map((r) => ({
+        key: r,
+        value: r,
+        label: getRoleDescription(r),
+      }))
+    : [];
+
+  return [...hierarchical, ...capabilities];
 };
 
 export const getWorkplaceOptions = (
   projects: ProjectPreviewDto[],
-  userRole?: UserRole,
+  userRoles?: UserRolesItem[],
   userWorkplace?: string[]
 ) =>
   projects.map((item) => ({
@@ -70,6 +74,6 @@ export const getWorkplaceOptions = (
     value: item.id,
     label: item.name,
     disabled:
-      userRole === UserRole.supervisor &&
+      (userRoles ?? []).includes(UserRolesItem.supervisor) &&
       !userWorkplace?.includes(item.id ?? ""),
   }));

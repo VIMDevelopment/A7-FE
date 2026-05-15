@@ -4,9 +4,8 @@ import Input from "../../components/Input/Input";
 import {
   PostCameras201,
   UserRegisterDto,
-  UserRole,
+  UserRolesItem,
   UserUpdateDto,
-  UserUpdateDtoRole,
 } from "../../apiV2/a7-service/model";
 import Button from "../../components/Button/Button";
 import {
@@ -22,7 +21,7 @@ import Select from "../../components/Select/Select";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
 import {
-  getRolePriority,
+  getEffectiveLevel,
   getRolesOptions,
   getWorkplaceOptions,
 } from "./helpers";
@@ -150,7 +149,7 @@ const AdministrationPage = () => {
           ),
           password: createFormState.password,
           email: createFormState.email,
-          role: createFormState.role,
+          roles: createFormState.roles,
           workplace: createFormState.workplace,
         },
       });
@@ -179,7 +178,7 @@ const AdministrationPage = () => {
           ),
           email: updateFormState?.email,
           password: updateFormState?.password,
-          role: updateFormState?.role,
+          roles: updateFormState?.roles,
           workplace: updateFormState?.workplace,
         },
       });
@@ -222,21 +221,22 @@ const AdministrationPage = () => {
     )
     : [];
 
-  const currentUserLevel = getRolePriority(currentUser?.role);
+  const currentUserLevel = getEffectiveLevel(currentUser?.roles);
 
-  const isSupervisor = currentUser?.role === UserRole.supervisor;
+  const isSupervisor = (currentUser?.roles ?? []).includes(
+    UserRolesItem.supervisor
+  );
 
   const allUsersDataOptions = data?.data
     .filter((item) => {
       const defaultFilter =
         item.id !== currentUser?.id &&
-        item.role &&
-        getRolePriority(item.role as UserRole) < currentUserLevel;
+        getEffectiveLevel(item.roles) < currentUserLevel;
 
       if (isSupervisor) {
         return (
           defaultFilter &&
-          currentUser.workplace?.some((el) => item.workplace?.includes(el))
+          currentUser?.workplace?.some((el) => item.workplace?.includes(el))
         );
       }
 
@@ -286,7 +286,7 @@ const AdministrationPage = () => {
                         loading={isProjectsLoading}
                         options={getWorkplaceOptions(
                           projectsData?.data.projects ?? [],
-                          currentUser?.role,
+                          currentUser?.roles,
                           currentUser?.workplace
                         )}
                       />
@@ -399,22 +399,23 @@ const AdministrationPage = () => {
                     loading={isProjectsLoading}
                     options={getWorkplaceOptions(
                       projectsData?.data.projects ?? [],
-                      currentUser?.role,
+                      currentUser?.roles,
                       currentUser?.workplace
                     )}
                   />
                   <Select
                     label="Роль"
+                    mode="multiple"
                     onChange={(value) =>
                       setCreateFormState((prev) => ({
                         ...prev,
-                        role: value,
+                        roles: value as UserRolesItem[],
                       }))
                     }
-                    value={createFormState.role}
-                    placeholder="Выберите из списка"
+                    value={createFormState.roles}
+                    placeholder="Выберите одну или несколько ролей"
                     disabled={isLoadingCreateUser}
-                    options={getRolesOptions(currentUser?.role)}
+                    options={getRolesOptions(currentUser?.roles)}
                   />
                   <Button
                     className={css.btn}
@@ -425,7 +426,7 @@ const AdministrationPage = () => {
                       !createFormState.firstName ||
                       !createFormState.email ||
                       !createFormState.password ||
-                      !createFormState.role ||
+                      !createFormState.roles?.length ||
                       !createFormState.workplace
                     }
                     onClick={handleCreateClick}
@@ -461,7 +462,7 @@ const AdministrationPage = () => {
                         surname,
                         firstName,
                         email: selectedUser?.email,
-                        role: selectedUser?.role as UserUpdateDtoRole,
+                        roles: selectedUser?.roles ?? [],
                         workplace: selectedUser?.workplace?.filter((item) =>
                           projectsIds?.includes(item)
                         ),
@@ -560,22 +561,23 @@ const AdministrationPage = () => {
                     loading={isProjectsLoading}
                     options={getWorkplaceOptions(
                       projectsData?.data.projects ?? [],
-                      currentUser?.role,
+                      currentUser?.roles,
                       currentUser?.workplace
                     )}
                   />
                   <Select
                     label="Роль"
+                    mode="multiple"
                     onChange={(value) =>
                       setUpdateFormState((prev) => ({
                         ...prev,
-                        role: value,
+                        roles: value as UserRolesItem[],
                       }))
                     }
-                    value={updateFormState?.role}
-                    placeholder="Выберите из списка"
+                    value={updateFormState?.roles}
+                    placeholder="Выберите одну или несколько ролей"
                     disabled={isLoading || !updateFormState?.id}
-                    options={getRolesOptions(currentUser?.role)}
+                    options={getRolesOptions(currentUser?.roles)}
                   />
                   <Button
                     className={css.btn}

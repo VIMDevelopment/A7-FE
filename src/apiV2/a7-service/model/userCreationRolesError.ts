@@ -5,17 +5,17 @@
  * API документация для WanmaX Backend - Автоматизированный конвейер обработки фотографий
  * OpenAPI spec version: 1.0.0
  */
-import type { UserCreationRolesErrorCurrentRole } from './userCreationRolesErrorCurrentRole';
-import type { UserCreationRolesErrorTargetRole } from './userCreationRolesErrorTargetRole';
+import type { UserCreationRolesErrorCurrentRolesItem } from './userCreationRolesErrorCurrentRolesItem';
+import type { UserCreationRolesErrorTargetRolesItem } from './userCreationRolesErrorTargetRolesItem';
 import type { UserCreationRolesErrorAllowedRolesItem } from './userCreationRolesErrorAllowedRolesItem';
 
 export interface UserCreationRolesError {
   /** Сообщение об ошибке прав доступа */
   error: string;
-  /** Текущая роль пользователя */
-  currentRole: UserCreationRolesErrorCurrentRole;
-  /** Целевая роль для создания */
-  targetRole: UserCreationRolesErrorTargetRole;
-  /** Роли, которые может создавать текущий пользователь */
+  /** Роли текущего пользователя */
+  currentRoles: UserCreationRolesErrorCurrentRolesItem[];
+  /** Целевые роли для создания */
+  targetRoles: UserCreationRolesErrorTargetRolesItem[];
+  /** Роли, которые может назначать текущий пользователь */
   allowedRoles: UserCreationRolesErrorAllowedRolesItem[];
 }

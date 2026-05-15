@@ -5,14 +5,16 @@
  * API документация для WanmaX Backend - Автоматизированный конвейер обработки фотографий
  * OpenAPI spec version: 1.0.0
  */
+import type { UserDeleteErrorCurrentRolesItem } from './userDeleteErrorCurrentRolesItem';
+import type { UserDeleteErrorTargetRolesItem } from './userDeleteErrorTargetRolesItem';
 
 export interface UserDeleteError {
   /** Описание ошибки */
   error?: string;
   /** ID пользователя */
   userId?: string;
-  /** Роль текущего пользователя */
-  currentRole?: string;
-  /** Роль пользователя для удаления */
-  targetRole?: string;
+  /** Роли текущего пользователя */
+  currentRoles?: UserDeleteErrorCurrentRolesItem[];
+  /** Роли пользователя для удаления */
+  targetRoles?: UserDeleteErrorTargetRolesItem[];
 }

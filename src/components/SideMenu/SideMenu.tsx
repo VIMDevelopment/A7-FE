@@ -115,7 +115,10 @@ const SideMenu = () => {
                     {user?.email || ""}
                   </div>
                   <div className={css.userPopoverRole}>
-                    {getRoleDescription(user?.role)}
+                    {(user?.roles ?? [])
+                      .map(getRoleDescription)
+                      .filter(Boolean)
+                      .join(", ") || "—"}
                   </div>
                 </div>
               </div>

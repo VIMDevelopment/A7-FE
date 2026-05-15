@@ -17,7 +17,7 @@ import { useQueryClient } from "react-query";
 import Input from "../../../../components/Input/Input";
 import { useMediaQuery } from "react-responsive";
 import { useShowPermissions } from "../../../../auth/userData";
-import { UserRole } from "../../../../apiV2/a7-service/model";
+import { UserRolesItem } from "../../../../apiV2/a7-service/model";
 
 type Props = {
   id?: string;
@@ -49,10 +49,10 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   });
 
   const canEditProject = hasPrivileges([
-    UserRole.admin,
-    UserRole.owner,
-    UserRole.agency,
-    UserRole.cluster,
+    UserRolesItem.admin,
+    UserRolesItem.owner,
+    UserRolesItem.agency,
+    UserRolesItem.cluster,
   ]);
 
   const allProjectsNames =

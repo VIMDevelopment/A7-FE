@@ -1386,7 +1386,7 @@ export const useGetPhotosProcessingusage = <TData = AsyncReturnType<typeof getPh
 
 /**
  * Суммирует `processing` по проекту: RUB без конвертации, USD × курс из appsettings.
-Четыре целых числа (рубли вверх): всё время; текущий календарный месяц / неделя / день (UTC).
+Пять целых чисел (рубли вверх): всё время; предыдущие календарные сутки UTC (yesterday); текущий календарный месяц / неделя / день (UTC).
 
  * @summary Сводка затрат Replicate по проекту (филиалу)
  */

@@ -6,7 +6,7 @@ import ProjectsPage from "../pages/Projects/Projects";
 import SettingsPage from "../pages/Settings/Settings";
 import StatisticsPage from "../pages/Statistics/Statistics";
 import AlbumPage from "../pages/Album/Album";
-import { UserRole } from "../apiV2/a7-service/model";
+import { UserRolesItem } from "../apiV2/a7-service/model";
 import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
 import RecognitionPage from "../pages/Recognition/Recognition";
@@ -14,12 +14,12 @@ import PromptsPage from "../pages/Prompts/Prompts";
 import KnowledgeBasePage from "../pages/KnowledgeBase/KnowledgeBase";
 
 const ALL_ROLES = [
-  UserRole.admin,
-  UserRole.owner,
-  UserRole.agency,
-  UserRole.cluster,
-  UserRole.supervisor,
-  UserRole.maker,
+  UserRolesItem.admin,
+  UserRolesItem.owner,
+  UserRolesItem.agency,
+  UserRolesItem.cluster,
+  UserRolesItem.supervisor,
+  UserRolesItem.maker,
 ];
 
 export type Routes = {
@@ -34,7 +34,7 @@ export type Routes = {
   /**
    * Массив ролей необходимый для доступа к странице
    */
-  roles: UserRole[];
+  roles: UserRolesItem[];
   /**
    * Компонент страницы
    */
@@ -44,7 +44,7 @@ export type Routes = {
 export type RedirectRoutes = {
   id: string;
   path: string;
-  roles: UserRole[];
+  roles: UserRolesItem[];
 };
 
 // TODO: доделать ролевые доступы для назначений
@@ -53,11 +53,11 @@ export const ROUTES: Routes[] = [
     id: "administration",
     path: PublicRoutes.ADMINISTRATION.static,
     roles: [
-      UserRole.admin,
-      UserRole.owner,
-      UserRole.agency,
-      UserRole.cluster,
-      UserRole.supervisor,
+      UserRolesItem.admin,
+      UserRolesItem.owner,
+      UserRolesItem.agency,
+      UserRolesItem.cluster,
+      UserRolesItem.supervisor,
     ],
     component: <AdministrationPage />,
   },
@@ -133,6 +133,6 @@ export const REDIRECTS: RedirectRoutes[] = [
   {
     id: "projects",
     path: PublicRoutes.PROJECTS.static,
-    roles: [UserRole.admin],
+    roles: [UserRolesItem.admin],
   },
 ];

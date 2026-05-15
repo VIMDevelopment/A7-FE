@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type UserUpdateRolesErrorAllowedRolesItem = 'admin' | 'owner' | 'agency' | 'cluster' | 'supervisor' | 'maker';
+export type UserUpdateRolesErrorAllowedRolesItem = 'admin' | 'owner' | 'agency' | 'cluster' | 'supervisor' | 'maker' | 'prompt' | 'remote';
 
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -17,4 +17,6 @@ export const UserUpdateRolesErrorAllowedRolesItem = {
   cluster: 'cluster' as UserUpdateRolesErrorAllowedRolesItem,
   supervisor: 'supervisor' as UserUpdateRolesErrorAllowedRolesItem,
   maker: 'maker' as UserUpdateRolesErrorAllowedRolesItem,
+  prompt: 'prompt' as UserUpdateRolesErrorAllowedRolesItem,
+  remote: 'remote' as UserUpdateRolesErrorAllowedRolesItem,
 };

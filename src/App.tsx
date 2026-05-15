@@ -93,12 +93,12 @@ const App = () => {
   const isHaveUserRoles = useMemo(() => {
     const acceptedRoles = new Set(ROUTES.flatMap((elem) => elem.roles));
 
-    const isHaveUserRoles = (data?.role ? [data.role] : []).some((role) =>
+    const isHaveUserRoles = (data?.roles ?? []).some((role) =>
       acceptedRoles.has(role)
     );
 
     return isHaveUserRoles;
-  }, [data?.role]);
+  }, [data?.roles]);
 
   if (error) {
     return (

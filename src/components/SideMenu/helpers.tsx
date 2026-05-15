@@ -9,27 +9,33 @@ import ProjectsIcon from "../../assets/ProjectsIcon";
 import SettingsIcon from "../../assets/SettingsIcon";
 import { PublicRoutes } from "../../routes/routes";
 import { SideMenuItemProps } from "./components/SideMenuItem/SideMenuItem";
-import { UserRole } from "../../apiV2/a7-service/model";
+import { UserRolesItem } from "../../apiV2/a7-service/model";
 
-export const getRoleDescription = (role?: UserRole) => {
+export const getRoleDescription = (role?: UserRolesItem) => {
   switch (role) {
-    case UserRole.admin:
+    case UserRolesItem.admin:
       return "Суперадмин";
 
-    case UserRole.owner:
+    case UserRolesItem.owner:
       return "Владелец";
 
-    case UserRole.agency:
+    case UserRolesItem.agency:
       return "Директор";
 
-    case UserRole.cluster:
+    case UserRolesItem.cluster:
       return "Региональный руководитель";
 
-    case UserRole.supervisor:
+    case UserRolesItem.supervisor:
       return "Руководитель филиала";
 
-    case UserRole.maker:
+    case UserRolesItem.maker:
       return "Мейкер";
+
+    case UserRolesItem.prompt:
+      return "Промпт-инженер";
+
+    case UserRolesItem.remote:
+      return "Удалённый сотрудник";
 
     default:
       return "";

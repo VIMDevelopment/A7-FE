@@ -5,7 +5,7 @@
  * API документация для WanmaX Backend - Автоматизированный конвейер обработки фотографий
  * OpenAPI spec version: 1.0.0
  */
-import type { UserRegisterDtoRole } from './userRegisterDtoRole';
+import type { UserRegisterDtoRolesItem } from './userRegisterDtoRolesItem';
 
 export interface UserRegisterDto {
   /** Email пользователя */
@@ -14,8 +14,8 @@ export interface UserRegisterDto {
   name: string;
   /** Пароль пользователя */
   password: string;
-  /** Роль пользователя */
-  role?: UserRegisterDtoRole;
+  /** Массив ролей. По умолчанию ["maker"]. Capability-роли (prompt, remote) могут выдавать только admin/owner. */
+  roles?: UserRegisterDtoRolesItem[];
   /** Массив идентификаторов проектов, в которых участвует пользователь */
   workplace?: string[];
 }

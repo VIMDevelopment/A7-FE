@@ -5,6 +5,7 @@
  * API документация для WanmaX Backend - Автоматизированный конвейер обработки фотографий
  * OpenAPI spec version: 1.0.0
  */
+import type { UserResponseRolesItem } from './userResponseRolesItem';
 
 export interface UserResponse {
   /** Уникальный идентификатор пользователя */
@@ -13,8 +14,8 @@ export interface UserResponse {
   email?: string;
   /** Имя пользователя */
   name?: string;
-  /** Роль пользователя */
-  role?: string;
+  /** Массив ролей пользователя */
+  roles?: UserResponseRolesItem[];
   /** Активен ли пользователь */
   isActive?: boolean;
   /** Массив идентификаторов проектов, в которых участвует пользователь */

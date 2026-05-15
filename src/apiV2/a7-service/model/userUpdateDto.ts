@@ -5,7 +5,7 @@
  * API документация для WanmaX Backend - Автоматизированный конвейер обработки фотографий
  * OpenAPI spec version: 1.0.0
  */
-import type { UserUpdateDtoRole } from './userUpdateDtoRole';
+import type { UserUpdateDtoRolesItem } from './userUpdateDtoRolesItem';
 
 export interface UserUpdateDto {
   /** ID пользователя для обновления */
@@ -16,8 +16,8 @@ export interface UserUpdateDto {
   name?: string;
   /** Новый пароль пользователя */
   password?: string;
-  /** Новая роль пользователя */
-  role?: UserUpdateDtoRole;
+  /** Новый набор ролей пользователя. Capability-роли (prompt, remote) могут выдавать только admin/owner. */
+  roles?: UserUpdateDtoRolesItem[];
   /** Массив идентификаторов проектов, в которых участвует пользователь */
   workplace?: string[];
   /** Статус активности пользователя */
