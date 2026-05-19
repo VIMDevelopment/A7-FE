@@ -306,6 +306,7 @@ const PromptsPage = () => {
                   <div className={css.editPromptRow}>
                     <div className={css.selectPrompt}>
                       <Select
+                        searchable
                         label="Промпт"
                         placeholder="Выберите промпт"
                         value={selectedPromptId ?? undefined}
@@ -429,6 +430,7 @@ const PromptsPage = () => {
                   <div className={css.deletePromptContainer}>
                     <div className={css.selectPrompt}>
                       <Select
+                        searchable
                         label="Промпт"
                         placeholder="Выберите промпт"
                         value={deleteSelectedPromptId}

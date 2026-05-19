@@ -398,6 +398,7 @@ const ImprovementModal: FC<Props> = ({
           <div className={css.bottomContainer}>
             <div className={css.promptSelectContainer}>
               <Select
+                searchable
                 label="Промпт"
                 placeholder="Выберите промпт"
                 value={selectedPromptId}

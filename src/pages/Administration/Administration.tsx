@@ -501,6 +501,7 @@ const AdministrationPage = () => {
                 </div>
                 <div className={css.form}>
                   <Select
+                    searchable
                     label="Выберите пользователя, которого хотите отредактировать"
                     placeholder="Выберите из списка"
                     onChange={(value) => {
@@ -652,6 +653,7 @@ const AdministrationPage = () => {
                 <div className={css.sectionTitle}>Удаление пользователя</div>
                 <div className={css.form}>
                   <Select
+                    searchable
                     label="Выберите пользователя, которого хотите удалить"
                     placeholder="Выберите из списка"
                     onChange={(value) => setDeleteSelectedUserId(value as string)}
