@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import cn from "classnames";
 import css from "./index.module.css";
 import Input from "../../components/Input/Input";
 import {
@@ -9,6 +10,7 @@ import {
 } from "../../apiV2/a7-service/model";
 import Button from "../../components/Button/Button";
 import {
+  useDeleteUsersDelete,
   useGetProjects,
   useGetUsersAll,
   usePostCameras,
@@ -64,6 +66,12 @@ const AdministrationPage = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [cameraData, setCameraData] = useState<PostCameras201 | undefined>();
   const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
+  const [deleteSelectedUserId, setDeleteSelectedUserId] = useState<string>();
+  const [userToDelete, setUserToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
 
   const { data: currentUser } = useProfile();
   const queryClient = useQueryClient();
@@ -98,6 +106,13 @@ const AdministrationPage = () => {
     data: cameraResponse,
     mutate: createCamera,
   } = usePostCameras({
+    axios: defaultApiAxiosParams,
+  });
+
+  const {
+    isLoading: isDeleteLoading,
+    mutateAsync: deleteUser,
+  } = useDeleteUsersDelete({
     axios: defaultApiAxiosParams,
   });
 
@@ -210,6 +225,44 @@ const AdministrationPage = () => {
 
   const handleCloseInstruction = () => {
     setIsInstructionModalOpen(false);
+  };
+
+  const handleOpenDeleteModal = () => {
+    const selectedUser = data?.data.find(
+      (item) => item.id === deleteSelectedUserId
+    );
+    if (!selectedUser?.id || !selectedUser.name) return;
+
+    setUserToDelete({ id: selectedUser.id, name: selectedUser.name });
+    setDeleteConfirmName("");
+  };
+
+  const handleCloseDeleteModal = () => {
+    setUserToDelete(null);
+    setDeleteConfirmName("");
+  };
+
+  const isDeleteConfirmValid =
+    userToDelete !== null &&
+    deleteConfirmName.trim() === userToDelete.name.trim();
+
+  const handleDeleteOk = async () => {
+    if (!userToDelete || !isDeleteConfirmValid) return;
+
+    try {
+      await deleteUser({ data: { id: userToDelete.id } });
+      showNotification({
+        type: "success",
+        message: "Пользователь удалён",
+      });
+      handleCloseDeleteModal();
+      setDeleteSelectedUserId(undefined);
+      void queryClient.invalidateQueries({
+        queryKey: `/users/all`,
+      });
+    } catch {
+      // ошибка показывается через глобальный onError в QueryClient
+    }
   };
 
   const cameraSetupSteps = cameraData
@@ -385,7 +438,7 @@ const AdministrationPage = () => {
                     status={isCreatePasswordError ? "error" : ""}
                   />
                   <Select
-                    label="Место работы"
+                    label="Место работы / доступные филиалы"
                     onChange={(value) =>
                       setCreateFormState((prev) => ({
                         ...prev,
@@ -545,7 +598,7 @@ const AdministrationPage = () => {
                     status={isUpdatePasswordError ? "error" : ""}
                   />
                   <Select
-                    label="Место работы"
+                    label="Место работы / доступные филиалы"
                     onChange={(value) =>
                       setUpdateFormState((prev) => ({
                         ...prev,
@@ -591,6 +644,31 @@ const AdministrationPage = () => {
               </div>
             ),
           },
+          {
+            key: "delete-user",
+            label: "Удаление пользователя",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Удаление пользователя</div>
+                <div className={css.form}>
+                  <Select
+                    label="Выберите пользователя, которого хотите удалить"
+                    placeholder="Выберите из списка"
+                    onChange={(value) => setDeleteSelectedUserId(value as string)}
+                    value={deleteSelectedUserId}
+                    options={allUsersDataOptions}
+                  />
+                  <Button
+                    className={cn(css.btn, css.deleteButton)}
+                    disabled={!deleteSelectedUserId || isDeleteLoading}
+                    onClick={handleOpenDeleteModal}
+                  >
+                    Удалить
+                  </Button>
+                </div>
+              </div>
+            ),
+          },
         ]}
       />
 
@@ -604,6 +682,41 @@ const AdministrationPage = () => {
       >
         {cameraSetupSteps.length > 0 && (
           <CameraSetupSlider steps={cameraSetupSteps} />
+        )}
+      </Modal>
+
+      <Modal
+        title="Удаление пользователя"
+        open={userToDelete !== null}
+        onOk={handleDeleteOk}
+        onCancel={handleCloseDeleteModal}
+        okButtonName="Удалить"
+        destroyOnClose
+        isLoading={isDeleteLoading}
+        okButtonDisabled={!isDeleteConfirmValid}
+        customOkButtonClassName={css.deleteButton}
+      >
+        {userToDelete && (
+          <div className={css.deleteModalContent}>
+            <p className={css.deleteModalText}>
+              Вы уверены, что хотите удалить пользователя «{userToDelete.name}»?
+              Это действие необратимо.
+            </p>
+            <p className={css.deleteModalHint}>
+              Для подтверждения введите ФИО пользователя точно так, как в списке:{" "}
+              <strong>{userToDelete.name}</strong>
+            </p>
+            <Input
+              label="ФИО пользователя"
+              value={deleteConfirmName}
+              onChange={(e) => setDeleteConfirmName(e.target.value)}
+              disabled={isDeleteLoading}
+              placeholder="Введите ФИО пользователя"
+              status={
+                deleteConfirmName && !isDeleteConfirmValid ? "error" : ""
+              }
+            />
+          </div>
         )}
       </Modal>
     </div>

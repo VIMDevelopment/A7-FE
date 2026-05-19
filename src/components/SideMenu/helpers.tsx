@@ -29,7 +29,7 @@ export const getRoleDescription = (role?: UserRolesItem) => {
       return "Руководитель филиала";
 
     case UserRolesItem.maker:
-      return "Мейкер";
+      return "Фотограф / Мейкер";
 
     case UserRolesItem.prompt:
       return "Промпт-инженер";

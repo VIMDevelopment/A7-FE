@@ -114,6 +114,32 @@
   line-height: 1.5;
 }
 
+.deleteButton {
+  background: var(--color-error);
+}
+
+.deleteButton:not(:disabled):hover {
+  background: var(--color-error-btn-hovered) !important;
+}
+
+.deleteModalContent {
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.deleteModalText,
+.deleteModalHint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.deleteModalHint {
+  color: var(--color-text-secondary, var(--color-text));
+}
+
 @media (max-width: 768px) {
   .subTitle {
     margin-top: 40px;

@@ -13,8 +13,15 @@
 
 .select {
   min-height: 44px;
-  height: 44px;
   width: 100%;
+}
+
+.select:not(:global(.ant-select-multiple)) {
+  height: 44px;
+}
+
+.select:global(.ant-select-multiple) {
+  height: auto;
 }
 
 .select :global(.ant-select-selector) {
@@ -26,14 +33,25 @@
   color: var(--color-text);
 }
 
+.select:global(.ant-select-multiple) :global(.ant-select-selector) {
+  min-height: 44px;
+  height: auto !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
 .select:global(.ant-select-focused) :global(.ant-select-selector),
 .select :global(.ant-select-selector):hover {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px var(--color-primary-soft) !important;
 }
 
-.select :global(.ant-select-selection-wrap) {
+.select:not(:global(.ant-select-multiple)) :global(.ant-select-selection-wrap) {
   height: 100%;
+}
+
+.select:global(.ant-select-multiple) :global(.ant-select-selection-wrap) {
+  height: auto;
 }
 
 .root:global(.ant-select-dropdown) {

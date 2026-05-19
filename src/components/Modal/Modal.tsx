@@ -9,6 +9,7 @@ type Props = {
   okButtonName?: string;
   cancelButtonName?: string;
   isLoading?: boolean;
+  okButtonDisabled?: boolean;
   customOkButtonClassName?: string;
   withFooter?: boolean;
   blur?: boolean;
@@ -20,6 +21,7 @@ const Modal: FC<Props> = ({
   okButtonName,
   cancelButtonName,
   isLoading,
+  okButtonDisabled,
   children,
   customOkButtonClassName,
   withFooter = true,
@@ -28,7 +30,7 @@ const Modal: FC<Props> = ({
   ...props
 }) => {
   useEnterPressListener(() => {
-    if (!props.open) return;
+    if (!props.open || okButtonDisabled) return;
     const activeTag = (document.activeElement as HTMLElement).tagName;
     if (activeTag === "TEXTAREA" || activeTag === "BUTTON") return;
     props.onOk?.({} as any);
@@ -44,6 +46,7 @@ const Modal: FC<Props> = ({
             okButtonName={okButtonName}
             cancelButtonName={cancelButtonName}
             isLoading={isLoading}
+            okButtonDisabled={okButtonDisabled}
             onOk={props.onOk}
             onCancel={props.onCancel}
             customOkButtonClassName={customOkButtonClassName}
@@ -62,6 +65,7 @@ type FooterProps = {
   okButtonName?: string;
   cancelButtonName?: string;
   isLoading?: boolean;
+  okButtonDisabled?: boolean;
   customOkButtonClassName?: string;
 } & Pick<ModalProps, "onOk" | "onCancel">;
 
@@ -69,6 +73,7 @@ const ModalFooter: FC<FooterProps> = ({
   okButtonName,
   cancelButtonName,
   isLoading,
+  okButtonDisabled,
   customOkButtonClassName,
   onOk,
   onCancel,
@@ -80,6 +85,7 @@ const ModalFooter: FC<FooterProps> = ({
     <Button
       className={cn(css.footerBtn, customOkButtonClassName)}
       showSpinner={isLoading}
+      disabled={isLoading || okButtonDisabled}
       onClick={onOk}
     >
       {okButtonName || "Сохранить"}
