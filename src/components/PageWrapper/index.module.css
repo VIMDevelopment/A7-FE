@@ -6,6 +6,31 @@
   min-height: 100vh;
 }
 
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  animation: pageEnter 0.28s ease-out both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageContent {
+    animation: none;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 20px;
