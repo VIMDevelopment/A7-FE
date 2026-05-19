@@ -1,41 +1,39 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Skeleton } from "antd";
-import cn from "classnames";
+import { DatePicker, Skeleton } from "antd";
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
 import css from "./index.module.css";
-import {
-  useGetProjects,
-  useGetPhotosProcessingusageSummary,
-} from "../../apiV2/a7-service";
+import { useGetProjects, useGetPhotosProcessingusage } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
 import { useProfile } from "../../auth/auth";
 import { useShowPermissions } from "../../auth/userData";
 import { UserRolesItem } from "../../apiV2/a7-service/model";
 import Select from "../../components/Select/Select";
-import Button from "../../components/Button/Button";
+import { formatUTCDate } from "../../lib/formatters/date";
 
-type Period = "allTime" | "lastMonth" | "lastWeek" | "yesterday" | "lastDay";
+const { RangePicker } = DatePicker;
 
-type ProcessingUsageSummary = {
-  allTime: number;
-  lastMonth: number;
-  lastWeek: number;
-  yesterday: number;
-  lastDay: number;
+dayjs.locale("ru");
+
+type ProcessingUsageReport = {
+  totalRub: number;
+  runCount: number;
+  photoCount: number;
 };
-
-const PERIODS: { id: Period; label: string }[] = [
-  { id: "allTime", label: "Всё время" },
-  { id: "lastMonth", label: "Последние 30 дней" },
-  { id: "lastWeek", label: "Последние 7 дней" },
-  { id: "yesterday", label: "Вчера" },
-  { id: "lastDay", label: "Сегодня" },
-];
 
 const rubFormatter = new Intl.NumberFormat("ru-RU", {
   style: "currency",
   currency: "RUB",
   maximumFractionDigits: 0,
 });
+
+const intFormatter = new Intl.NumberFormat("ru-RU");
+
+const getDefaultDateRange = (): [Dayjs, Dayjs] => {
+  const today = dayjs().startOf("day");
+  return [today, today];
+};
 
 const StatisticsPage = () => {
   const { data: projectsData } = useGetProjects({
@@ -60,7 +58,7 @@ const StatisticsPage = () => {
   }, [projectsData, hasAllowToAllProjects, user?.workplace]);
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
-  const [period, setPeriod] = useState<Period>("allTime");
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(getDefaultDateRange);
 
   useEffect(() => {
     if (!selectedProjectId && availableProjects.length > 0) {
@@ -68,17 +66,24 @@ const StatisticsPage = () => {
     }
   }, [availableProjects, selectedProjectId]);
 
-  const { data: summaryResponse, isLoading: isSummaryLoading } =
-    useGetPhotosProcessingusageSummary(
-      { projectId: selectedProjectId },
-      {
-        axios: defaultApiAxiosParams,
-        query: { enabled: !!selectedProjectId },
-      }
-    );
+  const usageParams = useMemo(() => {
+    if (!selectedProjectId) return undefined;
+    return {
+      projectId: selectedProjectId,
+      from: `${formatUTCDate(dateRange[0])}T00:00:00.000Z`,
+      to: `${formatUTCDate(dateRange[1])}T23:59:59.999Z`,
+    };
+  }, [selectedProjectId, dateRange]);
 
-  const summary = summaryResponse?.data as ProcessingUsageSummary | undefined;
-  const value = summary?.[period] ?? 0;
+  const { data: usageResponse, isLoading } = useGetPhotosProcessingusage(
+    usageParams,
+    {
+      axios: defaultApiAxiosParams,
+      query: { enabled: !!usageParams },
+    }
+  );
+
+  const report = usageResponse?.data as ProcessingUsageReport | undefined;
 
   const projectOptions = useMemo(
     () =>
@@ -91,6 +96,9 @@ const StatisticsPage = () => {
 
   const hasNoProjects = availableProjects.length === 0;
 
+  const disableFutureDate = (current: Dayjs) =>
+    !!current && current.isAfter(dayjs(), "day");
+
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>Статистика</div>
@@ -99,42 +107,64 @@ const StatisticsPage = () => {
         <div className={css.emptyState}>Нет доступных филиалов</div>
       ) : (
         <div className={css.content}>
-          <div className={css.selectWrapper}>
-            <Select
-              label="Филиал"
-              placeholder="Выберите филиал"
-              value={selectedProjectId || undefined}
-              onChange={(val) => setSelectedProjectId(val ?? "")}
-              options={projectOptions}
-            />
-          </div>
-
-          <div className={css.periodSwitcher}>
-            {PERIODS.map((item) => (
-              <Button
-                key={item.id}
-                className={cn(
-                  css.periodButton,
-                  period === item.id && css.periodButtonActive
-                )}
-                onClick={() => setPeriod(item.id)}
-              >
-                {item.label}
-              </Button>
-            ))}
+          <div className={css.filters}>
+            <div className={css.selectWrapper}>
+              <Select
+                label="Филиал"
+                placeholder="Выберите филиал"
+                value={selectedProjectId || undefined}
+                onChange={(val) => setSelectedProjectId(val ?? "")}
+                options={projectOptions}
+              />
+            </div>
+            <div className={css.dateRangeWrapper}>
+              <div className={css.dateRangeLabel}>Период</div>
+              <RangePicker
+                className={css.rangePicker}
+                value={dateRange}
+                onChange={(values) => {
+                  if (values?.[0] && values[1]) {
+                    setDateRange([values[0], values[1]]);
+                  }
+                }}
+                format="DD.MM.YYYY"
+                allowClear={false}
+                disabledDate={disableFutureDate}
+              />
+            </div>
           </div>
 
           <div className={css.card}>
             <div className={css.cardLabel}>Затраты на ИИ</div>
-            {isSummaryLoading ? (
+            {isLoading ? (
               <Skeleton.Input
                 active
                 size="large"
                 style={{ width: 220, height: 40 }}
               />
             ) : (
-              <div className={css.cardValue}>{rubFormatter.format(value)}</div>
+              <div className={css.cardValue}>
+                {rubFormatter.format(report?.totalRub ?? 0)}
+              </div>
             )}
+          </div>
+
+          <div className={css.metricsGrid}>
+            {[
+              { label: "Запусков обработки", value: report?.runCount ?? 0 },
+              { label: "Фотографий", value: report?.photoCount ?? 0 },
+            ].map((item) => (
+              <div key={item.label} className={css.metricCard}>
+                <div className={css.cardLabel}>{item.label}</div>
+                {isLoading ? (
+                  <Skeleton.Input active size="small" style={{ width: 80 }} />
+                ) : (
+                  <div className={css.metricValue}>
+                    {intFormatter.format(item.value)}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

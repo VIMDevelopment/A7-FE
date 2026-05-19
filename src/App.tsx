@@ -9,6 +9,7 @@ import { getProfileFx, useProfile } from "./auth/auth";
 import { useShowPermissions } from "./auth/userData";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ConfigProvider } from "antd";
+import ruRU from "antd/locale/ru_RU";
 import { REDIRECTS, ROUTES } from "./routes/constants";
 import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
@@ -102,7 +103,7 @@ const App = () => {
 
   if (error) {
     return (
-      <ConfigProvider theme={antdTheme}>
+      <ConfigProvider theme={antdTheme} locale={ruRU}>
         <QueryClientProvider client={config}>
           <AuthPage />
         </QueryClientProvider>
@@ -115,7 +116,7 @@ const App = () => {
   }
 
   return (
-    <ConfigProvider theme={antdTheme}>
+    <ConfigProvider theme={antdTheme} locale={ruRU}>
       <QueryClientProvider client={config}>
         <Router>
           <SideMenuWrapper>
