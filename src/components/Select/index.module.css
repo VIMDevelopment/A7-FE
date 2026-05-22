@@ -51,7 +51,7 @@
 }
 
 .select:global(.ant-select-multiple) :global(.ant-select-selection-wrap) {
-  height: auto;
+  height: 100%;
 }
 
 .root:global(.ant-select-dropdown) {

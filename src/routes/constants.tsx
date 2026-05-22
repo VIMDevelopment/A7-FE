@@ -20,6 +20,8 @@ const ALL_ROLES = [
   UserRolesItem.cluster,
   UserRolesItem.supervisor,
   UserRolesItem.maker,
+  UserRolesItem.prompt,
+  UserRolesItem.remote,
 ];
 
 export type Routes = {

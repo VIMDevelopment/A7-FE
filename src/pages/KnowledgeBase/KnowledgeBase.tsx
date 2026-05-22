@@ -8,6 +8,8 @@ import {
   KnowledgeArticle,
   KnowledgeScreenshot,
 } from "./instructions";
+import { useShowPermissions } from "../../auth/userData";
+import { ROUTES } from "../../routes/constants";
 
 const normalizeSearch = (value: string) => value.trim().toLowerCase();
 
@@ -129,17 +131,29 @@ const ArticleContent: React.FC<{
 
 const KnowledgeBasePage = () => {
   const [search, setSearch] = useState("");
+  const { hasPrivileges, getRoutePrivileges } = useShowPermissions();
+
+  const accessibleCategories = useMemo(() => {
+    return KNOWLEDGE_CATEGORIES.filter((category) => {
+      if (!category.routePath) return true;
+      const route = ROUTES.find((item) => item.path === category.routePath);
+      if (!route) return true;
+      return hasPrivileges(getRoutePrivileges(route));
+    });
+  }, [hasPrivileges, getRoutePrivileges]);
 
   const filteredCategories = useMemo(() => {
     const query = normalizeSearch(search);
 
-    return KNOWLEDGE_CATEGORIES.map((category) => ({
-      ...category,
-      articles: category.articles.filter((article) =>
-        articleMatchesQuery(article, query)
-      ),
-    })).filter((category) => category.articles.length > 0);
-  }, [search]);
+    return accessibleCategories
+      .map((category) => ({
+        ...category,
+        articles: category.articles.filter((article) =>
+          articleMatchesQuery(article, query)
+        ),
+      }))
+      .filter((category) => category.articles.length > 0);
+  }, [accessibleCategories, search]);
 
   const hasResults = filteredCategories.length > 0;
   const query = normalizeSearch(search);
