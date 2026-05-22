@@ -446,6 +446,7 @@ const AdministrationPage = () => {
                       }))
                     }
                     mode="multiple"
+                    showSelectAll
                     value={createFormState.workplace}
                     placeholder="Выберите из списка"
                     disabled={isLoadingCreateUser || isProjectsLoading}
@@ -607,6 +608,7 @@ const AdministrationPage = () => {
                       }))
                     }
                     mode="multiple"
+                    showSelectAll
                     value={updateFormState?.workplace}
                     placeholder="Выберите из списка"
                     disabled={
