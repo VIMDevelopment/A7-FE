@@ -38,12 +38,6 @@ export const POLICY_META = {
   ],
 };
 
-export const POLICY_SIGNATURE = {
-  role: "Индивидуальный предприниматель",
-  signatureLine: "Михеев Е.В.",
-  date: "«01» июня 2026 г.",
-};
-
 export const POLICY_SECTIONS: PolicySection[] = [
   {
     id: "general",

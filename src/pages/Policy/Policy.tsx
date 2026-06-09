@@ -4,7 +4,6 @@ import css from "./index.module.css";
 import {
   POLICY_META,
   POLICY_SECTIONS,
-  POLICY_SIGNATURE,
   PolicyBlock,
 } from "./policyContent";
 
@@ -94,14 +93,6 @@ const PolicyPage = () => {
               {section.blocks.map(renderBlock)}
             </section>
           ))}
-
-          <div className={css.signature}>
-            <p className={css.paragraph}>{POLICY_SIGNATURE.role}</p>
-            <p className={css.signatureLine}>
-              {POLICY_SIGNATURE.signatureLine}
-            </p>
-            <p className={css.paragraph}>{POLICY_SIGNATURE.date}</p>
-          </div>
         </article>
       </main>
     </div>
