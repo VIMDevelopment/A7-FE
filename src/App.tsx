@@ -11,9 +11,11 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ConfigProvider } from "antd";
 import ruRU from "antd/locale/ru_RU";
 import { REDIRECTS, ROUTES } from "./routes/constants";
+import { PublicRoutes } from "./routes/routes";
 import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import AuthPage from "./pages/Auth/Auth";
+import PolicyPage from "./pages/Policy/Policy";
 import { showNotification } from "./components/ShowNotification";
 import { loadFaceApiModels } from "./utils/faceDetection";
 
@@ -57,7 +59,7 @@ const config = new QueryClient({
   },
 });
 
-const App = () => {
+const AppShell = () => {
   const { data, error } = useProfile();
   const { getRoutePrivileges, hasPrivileges } = useShowPermissions();
 
@@ -102,13 +104,7 @@ const App = () => {
   }, [data?.roles]);
 
   if (error) {
-    return (
-      <ConfigProvider theme={antdTheme} locale={ruRU}>
-        <QueryClientProvider client={config}>
-          <AuthPage />
-        </QueryClientProvider>
-      </ConfigProvider>
-    );
+    return <AuthPage />;
   }
 
   if (data && !isHaveUserRoles) {
@@ -116,14 +112,23 @@ const App = () => {
   }
 
   return (
+    <SideMenuWrapper>
+      <PageWrapper>
+        <Routes>{routes}</Routes>
+      </PageWrapper>
+    </SideMenuWrapper>
+  );
+};
+
+const App = () => {
+  return (
     <ConfigProvider theme={antdTheme} locale={ruRU}>
       <QueryClientProvider client={config}>
         <Router>
-          <SideMenuWrapper>
-            <PageWrapper>
-              <Routes>{routes}</Routes>
-            </PageWrapper>
-          </SideMenuWrapper>
+          <Routes>
+            <Route path={PublicRoutes.POLICY.static} element={<PolicyPage />} />
+            <Route path="*" element={<AppShell />} />
+          </Routes>
         </Router>
       </QueryClientProvider>
     </ConfigProvider>
