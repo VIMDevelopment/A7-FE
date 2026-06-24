@@ -16,6 +16,7 @@ import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import AuthPage from "./pages/Auth/Auth";
 import PolicyPage from "./pages/Policy/Policy";
+import NoAccessPage from "./pages/NoAccess/NoAccess";
 import { showNotification } from "./components/ShowNotification";
 import { loadFaceApiModels } from "./utils/faceDetection";
 
@@ -104,11 +105,11 @@ const AppShell = () => {
   }, [data?.roles]);
 
   if (error) {
-    return <AuthPage />;
+    return <Navigate to={PublicRoutes.LOGIN.static} replace />;
   }
 
   if (data && !isHaveUserRoles) {
-    return <>У вас нет прав доступа</>;
+    return <Navigate to={PublicRoutes.NO_ACCESS.static} replace />;
   }
 
   return (
@@ -126,6 +127,8 @@ const App = () => {
       <QueryClientProvider client={config}>
         <Router>
           <Routes>
+            <Route path={PublicRoutes.LOGIN.static} element={<AuthPage />} />
+            <Route path={PublicRoutes.NO_ACCESS.static} element={<NoAccessPage />} />
             <Route path={PublicRoutes.POLICY.static} element={<PolicyPage />} />
             <Route path="*" element={<AppShell />} />
           </Routes>

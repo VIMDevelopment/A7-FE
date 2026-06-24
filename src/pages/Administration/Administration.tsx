@@ -4,7 +4,6 @@ import css from "./index.module.css";
 import Input from "../../components/Input/Input";
 import {
   PostCameras201,
-  UserRegisterDto,
   UserRolesItem,
   UserUpdateDto,
 } from "../../apiV2/a7-service/model";
@@ -14,7 +13,6 @@ import {
   useGetProjects,
   useGetUsersAll,
   usePostCameras,
-  usePostUsersRegister,
   usePutUsersUpdate,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
@@ -35,12 +33,7 @@ import {
   formatFullNameForApi,
   parseFullNameFromApi,
 } from "../../lib/utils/fullName";
-
-type UserCreateForm = Omit<UserRegisterDto, "name"> & {
-  surname: string;
-  firstName: string;
-  repeatPassword?: string;
-};
+import PendingUsersTab from "./PendingUsersTab";
 
 type UserUpdateForm = Omit<UserUpdateDto, "name"> & {
   surname?: string;
@@ -48,20 +41,8 @@ type UserUpdateForm = Omit<UserUpdateDto, "name"> & {
   repeatPassword?: string;
 };
 
-const initialCreateUserValues: UserCreateForm = {
-  email: "",
-  surname: "",
-  firstName: "",
-  password: "",
-  workplace: []
-};
-
 const AdministrationPage = () => {
-  const [isCreatePasswordError, setIsCreatePasswordError] = useState(false);
   const [isUpdatePasswordError, setIsUpdatePasswordError] = useState(false);
-  const [createFormState, setCreateFormState] = useState<UserCreateForm>(
-    initialCreateUserValues
-  );
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [cameraData, setCameraData] = useState<PostCameras201 | undefined>();
@@ -77,14 +58,6 @@ const AdministrationPage = () => {
   const queryClient = useQueryClient();
 
   const { data: projectsData, isLoading: isProjectsLoading } = useGetProjects({
-    axios: defaultApiAxiosParams,
-  });
-
-  const {
-    isLoading: isLoadingCreateUser,
-    isSuccess: isUserSuccessfulyCreated,
-    mutate: createUser,
-  } = usePostUsersRegister({
     axios: defaultApiAxiosParams,
   });
 
@@ -117,19 +90,6 @@ const AdministrationPage = () => {
   });
 
   useEffect(() => {
-    if (isUserSuccessfulyCreated) {
-      showNotification({
-        type: "success",
-        message: "Пользователь создан",
-      });
-      void queryClient.invalidateQueries({
-        queryKey: `/users/all`,
-      });
-      setCreateFormState(initialCreateUserValues);
-    }
-  }, [isUserSuccessfulyCreated]);
-
-  useEffect(() => {
     if (isSuccess) {
       showNotification({
         type: "success",
@@ -151,34 +111,6 @@ const AdministrationPage = () => {
       });
     }
   }, [isCameraSuccess, cameraResponse]);
-
-  const handleCreateClick = () => {
-    const validPasswords =
-      createFormState.password === createFormState.repeatPassword;
-    if (validPasswords) {
-      createUser({
-        data: {
-          name: formatFullNameForApi(
-            createFormState.surname,
-            createFormState.firstName
-          ),
-          password: createFormState.password,
-          email: createFormState.email,
-          roles: createFormState.roles,
-          workplace: createFormState.workplace,
-        },
-      });
-      setIsCreatePasswordError(false);
-    } else {
-      setIsCreatePasswordError(true);
-      showNotification({
-        type: "error",
-        message: "Пароли не совпадают",
-        description:
-          "Для создания нового пользователя нужно ввести одинаковые пароли в оба поля",
-      });
-    }
-  };
 
   const handleUpdateClick = () => {
     const validPasswords =
@@ -358,139 +290,9 @@ const AdministrationPage = () => {
             ),
           },
           {
-            key: "create-user",
-            label: "Создание пользователя",
-            children: (
-              <div className={css.section}>
-                <div className={css.sectionTitle}>Создание нового пользователя</div>
-                <div className={css.form}>
-                  <Input
-                    label="Имя"
-                    onChange={(e) =>
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        firstName: e.target.value,
-                      }))
-                    }
-                    value={createFormState.firstName}
-                    disabled={isLoadingCreateUser}
-                    placeholder="Введите имя"
-                  />
-                  <Input
-                    label="Фамилия"
-                    onChange={(e) =>
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        surname: e.target.value,
-                      }))
-                    }
-                    value={createFormState.surname}
-                    disabled={isLoadingCreateUser}
-                    placeholder="Введите фамилию"
-                  />
-                  <Input
-                    label="E-mail"
-                    name="create-user-email"
-                    autoComplete="off"
-                    onChange={(e) =>
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    value={createFormState.email}
-                    disabled={isLoadingCreateUser}
-                    placeholder="Введите новый E-mail"
-                    type="email"
-                  />
-                  <Input
-                    label="Пароль"
-                    isPasswordInput
-                    name="create-user-password"
-                    autoComplete="new-password"
-                    onChange={(e) => {
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        password: e.target.value,
-                      }));
-                      setIsCreatePasswordError(false);
-                    }}
-                    value={createFormState.password}
-                    disabled={isLoading}
-                    placeholder="Введите пароль"
-                    status={isCreatePasswordError ? "error" : ""}
-                  />
-                  <Input
-                    label="Подтвердите пароль"
-                    isPasswordInput
-                    name="create-user-repeat-password"
-                    autoComplete="new-password"
-                    onChange={(e) => {
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        repeatPassword: e.target.value,
-                      }));
-                      setIsCreatePasswordError(false);
-                    }}
-                    value={createFormState.repeatPassword}
-                    disabled={isLoading}
-                    placeholder="Повторно введите пароль"
-                    status={isCreatePasswordError ? "error" : ""}
-                  />
-                  <Select
-                    label="Место работы / доступные филиалы"
-                    onChange={(value) =>
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        workplace: value,
-                      }))
-                    }
-                    mode="multiple"
-                    showSelectAll
-                    value={createFormState.workplace}
-                    placeholder="Выберите из списка"
-                    disabled={isLoadingCreateUser || isProjectsLoading}
-                    loading={isProjectsLoading}
-                    options={getWorkplaceOptions(
-                      projectsData?.data.projects ?? [],
-                      currentUser?.roles,
-                      currentUser?.workplace
-                    )}
-                  />
-                  <Select
-                    label="Роль"
-                    mode="multiple"
-                    onChange={(value) =>
-                      setCreateFormState((prev) => ({
-                        ...prev,
-                        roles: value as UserRolesItem[],
-                      }))
-                    }
-                    value={createFormState.roles}
-                    placeholder="Выберите одну или несколько ролей"
-                    disabled={isLoadingCreateUser}
-                    options={getRolesOptions(currentUser?.roles)}
-                  />
-                  <Button
-                    className={css.btn}
-                    disabled={
-                      isLoadingCreateUser ||
-                      isCreatePasswordError ||
-                      !createFormState.surname ||
-                      !createFormState.firstName ||
-                      !createFormState.email ||
-                      !createFormState.password ||
-                      !createFormState.roles?.length ||
-                      !createFormState.workplace
-                    }
-                    onClick={handleCreateClick}
-                    showSpinner={isLoadingCreateUser}
-                  >
-                    Создать
-                  </Button>
-                </div>
-              </div>
-            ),
+            key: "pending-users",
+            label: "Ожидают доступа",
+            children: <PendingUsersTab />,
           },
           {
             key: "update-user",
@@ -612,7 +414,7 @@ const AdministrationPage = () => {
                     value={updateFormState?.workplace}
                     placeholder="Выберите из списка"
                     disabled={
-                      isLoadingCreateUser || isProjectsLoading || !updateFormState?.id
+                      isLoading || isProjectsLoading || !updateFormState?.id
                     }
                     loading={isProjectsLoading}
                     options={getWorkplaceOptions(

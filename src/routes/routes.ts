@@ -80,4 +80,10 @@ export const PublicRoutes = {
   POLICY: {
     static: "/policy",
   },
+  LOGIN: {
+    static: "/login",
+  },
+  NO_ACCESS: {
+    static: "/no-access",
+  },
 };
