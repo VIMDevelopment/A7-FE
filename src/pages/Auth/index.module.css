@@ -68,3 +68,9 @@
   width: 100%;
   row-gap: 4px;
 }
+
+.forgotRow {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}

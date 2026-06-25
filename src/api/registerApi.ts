@@ -31,6 +31,16 @@ export type ResendCodeDto = {
   email: string;
 };
 
+export type ForgotPasswordDto = {
+  email: string;
+};
+
+export type ResetPasswordDto = {
+  email: string;
+  code: string;
+  newPassword: string;
+};
+
 export type GrantAccessDto = {
   roles: UserRolesItem[];
   workplace?: string[];
@@ -94,6 +104,22 @@ export const usePostUsersResendCode = <TError = ApiError>(
 ) =>
   useMutation<{ data: { ok: boolean } }, TError, ResendCodeDto>(
     (data) => post<ResendCodeDto, { ok: boolean }>("/users/resend-code", data),
+    options
+  );
+
+export const usePostUsersForgotPassword = <TError = ApiError>(
+  options?: UseMutationOptions<{ data: { ok: boolean } }, TError, ForgotPasswordDto>
+) =>
+  useMutation<{ data: { ok: boolean } }, TError, ForgotPasswordDto>(
+    (data) => post<ForgotPasswordDto, { ok: boolean }>("/users/forgot-password", data),
+    options
+  );
+
+export const usePostUsersResetPassword = <TError = ApiError>(
+  options?: UseMutationOptions<{ data: { ok: boolean } }, TError, ResetPasswordDto>
+) =>
+  useMutation<{ data: { ok: boolean } }, TError, ResetPasswordDto>(
+    (data) => post<ResetPasswordDto, { ok: boolean }>("/users/reset-password", data),
     options
   );
 

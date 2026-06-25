@@ -11,9 +11,10 @@ import css from "./index.module.css";
 
 type Props = {
   isActive: boolean;
+  onForgotPassword: () => void;
 };
 
-const LoginTab: React.FC<Props> = ({ isActive }) => {
+const LoginTab: React.FC<Props> = ({ isActive, onForgotPassword }) => {
   const [formState, setFormState] = useState<UserLoginDto>({
     email: "",
     password: "",
@@ -66,6 +67,11 @@ const LoginTab: React.FC<Props> = ({ isActive }) => {
       >
         Войти
       </Button>
+      <div className={css.forgotRow}>
+        <Button type="link" onClick={onForgotPassword} disabled={isLoading}>
+          Забыли пароль?
+        </Button>
+      </div>
     </div>
   );
 };
