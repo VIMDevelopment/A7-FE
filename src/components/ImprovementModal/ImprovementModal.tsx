@@ -14,7 +14,12 @@ import { showNotification } from "../ShowNotification";
 import Button from "../Button/Button";
 import Select from "../Select/Select";
 import { Radio, Result, Spin, Tooltip } from "antd";
-import { CloseCircleFilled, LoadingOutlined } from "@ant-design/icons";
+import {
+  CloseCircleFilled,
+  LoadingOutlined,
+  StarFilled,
+  StarOutlined,
+} from "@ant-design/icons";
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -22,6 +27,13 @@ import {
 import cn from "classnames";
 import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
+import { useProfile } from "../../auth/auth";
+import {
+  useGetFavoritePrompts,
+  usePostFavoritePrompt,
+  useDeleteFavoritePrompt,
+  getFavoritePromptsKey,
+} from "../../api/favoritesApi";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
 import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
 import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
@@ -99,8 +111,20 @@ const ImprovementModal: FC<Props> = ({
     }
   }, [isOpen]);
 
-  const { albumId } = useParams();
+  const { albumId, projectId } = useParams();
   const queryClient = useQueryClient();
+
+  // Филиал избранного: из URL альбома (projectId) либо fallback на первый филиал юзера
+  // (нужно для контекстов без projectId в роуте, напр. Recognition).
+  const { data: profile } = useProfile();
+  const branchId = projectId ?? profile?.workplace?.[0];
+
+  const { data: favoritesData } = useGetFavoritePrompts(branchId, {
+    enabled: isOpen && !!branchId,
+  });
+
+  const { mutate: addFavorite } = usePostFavoritePrompt();
+  const { mutate: removeFavorite } = useDeleteFavoritePrompt();
 
   const {
     data: photoData,
@@ -150,6 +174,40 @@ const ImprovementModal: FC<Props> = ({
   });
 
   const promptsList = promptsData?.data ?? [];
+
+  // Избранное филиала: множество id + отсортированный список (избранные сверху по title,
+  // затем остальные в исходном порядке бэкенда — createdAt desc).
+  const favoriteIdSet = new Set(favoritesData?.data.promptIds ?? []);
+  const sortedPrompts = [
+    ...promptsList
+      .filter((p) => favoriteIdSet.has(p.id ?? ""))
+      .sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "")),
+    ...promptsList.filter((p) => !favoriteIdSet.has(p.id ?? "")),
+  ];
+
+  const toggleFavorite = (
+    promptId: string,
+    e: React.MouseEvent<HTMLSpanElement>
+  ) => {
+    // Не даём клику по звезде выбрать пункт и закрыть дропдаун.
+    e.stopPropagation();
+    e.preventDefault();
+    if (!branchId || !promptId) return;
+    const variables = { projectId: branchId, promptId };
+    const onSuccess = () =>
+      queryClient.invalidateQueries(getFavoritePromptsKey(branchId));
+    const onError = () =>
+      showNotification({
+        message: "Не удалось обновить избранное",
+        type: "error",
+      });
+    if (favoriteIdSet.has(promptId)) {
+      removeFavorite(variables, { onSuccess, onError });
+    } else {
+      addFavorite(variables, { onSuccess, onError });
+    }
+  };
+
   const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
   const promptHistory = selectedPrompt?.history ?? [];
   const selectedHistoryItem =
@@ -412,10 +470,38 @@ const ImprovementModal: FC<Props> = ({
                       : null
                   );
                 }}
-                options={promptsList.map((p) => ({
+                options={sortedPrompts.map((p) => ({
                   label: p.title ?? "",
                   value: p.id ?? "",
                 }))}
+                optionRender={(option) => {
+                  const id = String(option.value ?? "");
+                  const isFav = favoriteIdSet.has(id);
+                  return (
+                    <div className={css.promptOption}>
+                      <span className={css.promptOptionLabel}>
+                        {String(option.label ?? "")}
+                      </span>
+                      {branchId && (
+                        <span
+                          className={cn(
+                            css.promptStar,
+                            isFav && css.promptStarActive
+                          )}
+                          onMouseDown={(e) => {
+                            // preventDefault сохраняет фокус инпута (иначе дропдаун
+                            // закроется), stopPropagation не даёт выбрать пункт.
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          onClick={(e) => toggleFavorite(id, e)}
+                        >
+                          {isFav ? <StarFilled /> : <StarOutlined />}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }}
                 disabled={allDisabled}
                 loading={isPromptsLoading}
               />

@@ -183,3 +183,35 @@
   justify-content: flex-start;
   cursor: pointer;
 }
+
+/* Пункт выпадашки промптов: название слева, звезда-избранное справа */
+.promptOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.promptOptionLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promptStar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.promptStar:hover {
+  color: #faad14;
+}
+
+.promptStarActive {
+  color: #faad14;
+}
