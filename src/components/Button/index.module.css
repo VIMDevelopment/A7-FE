@@ -30,3 +30,21 @@
   box-shadow: none !important;
   border-color: unset !important;
 }
+
+.button:global(.ant-btn-link) {
+  height: auto;
+  width: auto;
+  padding: 0;
+  background-color: transparent;
+  color: var(--color-primary);
+}
+
+.button:global(.ant-btn-link):not(:disabled):hover {
+  background-color: transparent !important;
+  color: var(--color-primary-hover) !important;
+}
+
+.button:global(.ant-btn-link):disabled {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
