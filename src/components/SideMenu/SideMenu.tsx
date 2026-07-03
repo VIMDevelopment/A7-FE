@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { UserOutlined, LogoutOutlined, MenuOutlined } from "@ant-design/icons";
 import css from "./index.module.css";
 import { useProfile } from "../../auth/auth";
+import { PublicRoutes } from "../../routes/routes";
 import { getMenuItems, getRoleDescription } from "./helpers";
 import SideMenuItem from "./components/SideMenuItem/SideMenuItem";
 import Cookies from "js-cookie";
@@ -73,9 +75,14 @@ const SideMenu = () => {
   return (
     <div className={css.container}>
       <aside className={css.rail}>
-        <div className={css.brand} title="WanmaX">
+        <Link
+          to={PublicRoutes.PROJECTS.static}
+          className={css.brand}
+          title="WanmaX"
+          aria-label="На главную"
+        >
           <img src="/images/logo.png" alt="WanmaX" className={css.brandLogo} />
-        </div>
+        </Link>
 
         {isMobile && (
           <button

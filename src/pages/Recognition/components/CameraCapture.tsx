@@ -248,11 +248,12 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
 
   return (
     <>
-      {devices.length > 0 && !isAllShotsTaken && (
+      {!isAllShotsTaken && (
         <div className={css.selectWrapper}>
           <Select
             label="Выберите камеру"
-            value={selectedDeviceId}
+            value={selectedDeviceId || undefined}
+            placeholder={isLoadingDevices ? "Загрузка камер..." : "Выберите камеру"}
             onChange={handleDeviceChange}
             disabled={isLoadingDevices || isSwitchingCamera}
             options={devices.map((device) => ({

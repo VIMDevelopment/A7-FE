@@ -29,6 +29,7 @@
   justify-content: center;
   margin-bottom: 16px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .brandLogo {
