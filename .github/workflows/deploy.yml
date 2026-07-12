@@ -1,0 +1,22 @@
+name: Deploy (Dokploy)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  trigger-dokploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VDS_HOST }}
+          username: ${{ secrets.VDS_USERNAME }}
+          key: ${{ secrets.VDS_SSH_KEY }}
+          script: |
+            curl -sf -X POST http://127.0.0.1:3000/api/application.deploy \
+              -H "x-api-key: $(cat /root/.dok-key)" \
+              -H 'Content-Type: application/json' \
+              -d '{"applicationId":"OhBHpl5MKAVED3AqCdmV8"}'
