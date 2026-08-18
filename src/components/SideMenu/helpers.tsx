@@ -2,6 +2,7 @@ import {
   BankOutlined,
   BarChartOutlined,
   BookOutlined,
+  ExperimentOutlined,
   EyeOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
@@ -79,5 +80,11 @@ export const getMenuItems: () => SideMenuItemProps[] = () => [
     icon: <BankOutlined style={iconStyle} />,
     title: "Администрирование",
     route: PublicRoutes.ADMINISTRATION.static,
+  },
+  {
+    // R-11: пункт скрывается для ролей без доступа через roles роута (SideMenuItem)
+    icon: <ExperimentOutlined style={iconStyle} />,
+    title: "Model Explorer",
+    route: PublicRoutes.MODEL_EXPLORER.static,
   },
 ];
