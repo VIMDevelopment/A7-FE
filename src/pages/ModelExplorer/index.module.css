@@ -1,0 +1,245 @@
+.page {
+  padding: 24px;
+  max-width: 1280px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.pageSubtitle {
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.readOnlyBanner {
+  margin-bottom: 20px;
+}
+
+.newRunCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.newRunGrid {
+  display: grid;
+  grid-template-columns: minmax(220px, 340px) 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .newRunGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.uploadCol {
+  min-height: 200px;
+}
+
+.dragger {
+  border-radius: 12px;
+}
+
+.previewWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewImg {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+  max-height: 280px;
+  background: #f3f4f6;
+}
+
+.formCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.resolutionSelect {
+  max-width: 260px;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.referenceRow {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.referenceCell {
+  width: 220px;
+}
+
+.referenceThumb {
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #8b5cf6;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.runView {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.runHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.runMeta {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.chainTitle {
+  font-weight: 600;
+}
+
+.chainModels {
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.chainError {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.stepsRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.stepCell {
+  width: 96px;
+  text-align: center;
+}
+
+.stepThumb {
+  width: 96px !important;
+  height: 72px !important;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.stepPlaceholder {
+  width: 96px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.stepCaption {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+  word-break: break-word;
+}
+
+.stepPrice {
+  color: #1f2328;
+}
+
+.stepError {
+  color: #ef4444;
+  cursor: help;
+}
+
+.factPrice {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.historyThumb {
+  width: 64px !important;
+  height: 48px !important;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.historyRow {
+  cursor: pointer;
+}
+
+.compareLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.compareContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.compareSlider {
+  max-height: 70vh;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.compareSlider :global(img) {
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.confirmList {
+  margin: 8px 0 0 18px;
+  color: #6b7280;
+  font-size: 13px;
+}
