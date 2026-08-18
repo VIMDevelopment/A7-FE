@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useRef, useState } from "react";
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Image, Select, Table, Tag, Upload } from "antd";
 import type { UploadFile } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
@@ -48,12 +48,21 @@ const ModelExplorerPage: FC = () => {
   const previewUrlRef = useRef<string | null>(null);
 
   const { data: runsData } = useExplorerRuns();
+  // Ключ списка ["/explorer/runs"] префиксно накрывает и ключ прогона ["/explorer/runs", id]:
+  // инвалидация без exact перезапрашивала сам прогон → его onSuccess снова инвалидировал
+  // список → бесконечная петля запросов. Обновляем список только на переходе
+  // running → завершён и строго exact.
+  const prevRunStatusRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    prevRunStatusRef.current = undefined;
+  }, [activeRunId]);
   const { data: runData } = useExplorerRun(activeRunId ?? undefined, {
     refetchInterval: (data) => (data?.run.status === "running" ? 3000 : false),
     onSuccess: (data) => {
-      if (data.run.status !== "running") {
-        void queryClient.invalidateQueries(explorerRunsKey);
+      if (prevRunStatusRef.current === "running" && data.run.status !== "running") {
+        void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
       }
+      prevRunStatusRef.current = data.run.status;
     },
   });
 
@@ -74,7 +83,7 @@ const ModelExplorerPage: FC = () => {
     onSuccess: ({ run }) => {
       setConfirmOpen(false);
       setActiveRunId(run.id);
-      void queryClient.invalidateQueries(explorerRunsKey);
+      void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
     },
   });
 
