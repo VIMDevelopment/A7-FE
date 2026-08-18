@@ -6,7 +6,6 @@ import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
 import { showNotification } from "../../components/ShowNotification";
 import Button from "../../components/Button/Button";
-import TextArea from "../../components/TextArea/Input";
 import Modal from "../../components/Modal/Modal";
 import {
   ExplorerReference,
@@ -20,6 +19,7 @@ import {
 } from "../../api/explorerApi";
 import { canRunExplorer } from "./access";
 import RunView from "./components/RunView";
+import PromptPicker from "./components/PromptPicker";
 import css from "./index.module.css";
 
 const usd = (value?: number) =>
@@ -178,14 +178,12 @@ const ModelExplorerPage: FC = () => {
               )}
             </div>
             <div className={css.formCol}>
-              <label className={css.label}>Промпт (один на прогон, для генеративных шагов)</label>
-              <TextArea
-                value={prompt}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                  setPrompt(e.target.value);
-                }}
-                rows={4}
-                placeholder="Например: улучши свет и фон, сохрани лица без изменений"
+              <label className={css.label}>
+                Промпт (один на прогон, из общего справочника — как в модалке улучшения)
+              </label>
+              <PromptPicker
+                disabled={createReference.isLoading || startRun.isLoading}
+                onPromptBodyChange={(body) => setPrompt(body ?? "")}
               />
               <label className={css.label}>Целевое разрешение</label>
               <Select
