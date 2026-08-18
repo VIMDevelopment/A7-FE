@@ -57,6 +57,8 @@ export type ExplorerChain = {
   status: "pending" | "running" | "done" | "failed";
   steps: ExplorerStep[];
   factUsd?: number;
+  /** потрачено в неудачных попытках до перезапуска (R-13.6) */
+  wastedUsd?: number;
   error?: string;
 };
 
@@ -160,6 +162,21 @@ export const useCreateReference = (
       );
       return data;
     },
+    options
+  );
+
+export type RetryChainArgs = { runId: string; chainId: string };
+
+/** Перезапуск одной упавшей цепочки (R-13.6). Исполняется на BE фоном — прогон дальше поллится. */
+export const useRetryChain = (
+  options?: UseMutationOptions<{ ok: boolean }, unknown, RetryChainArgs>
+) =>
+  useMutation<{ ok: boolean }, unknown, RetryChainArgs>(
+    ({ runId, chainId }) =>
+      post<Record<string, never>, { ok: boolean }>(
+        `/explorer/runs/${runId}/chains/${chainId}/retry`,
+        {}
+      ).then((r) => r.data),
     options
   );
 

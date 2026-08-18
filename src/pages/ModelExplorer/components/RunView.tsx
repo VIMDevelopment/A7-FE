@@ -1,9 +1,22 @@
 import React, { FC, useState } from "react";
 import { Image, Spin, Table, Tag, Tooltip } from "antd";
-import { LoadingOutlined, SwapOutlined } from "@ant-design/icons";
-import { ExplorerChain, ExplorerRun, ExplorerStep } from "../../../api/explorerApi";
+import {
+  EyeOutlined,
+  LoadingOutlined,
+  RedoOutlined,
+  SwapOutlined,
+} from "@ant-design/icons";
+import { useQueryClient } from "react-query";
+import {
+  ExplorerChain,
+  ExplorerRun,
+  ExplorerStep,
+  explorerRunKey,
+  useRetryChain,
+} from "../../../api/explorerApi";
 import Button from "../../../components/Button/Button";
-import CompareModal from "./CompareModal";
+import { showNotification } from "../../../components/ShowNotification";
+import ChainCarouselModal from "./ChainCarouselModal";
 import css from "../index.module.css";
 
 const usd = (value?: number) =>
@@ -27,15 +40,31 @@ const STEP_STATUS_COLOR: Record<ExplorerStep["status"], string> = {
 /** Короткое имя модели без владельца: bytedance/seedream-4 → seedream-4. */
 const shortModel = (model: string) => model.split("/")[1] ?? model;
 
-type Props = { run: ExplorerRun };
+type CarouselState = { chain: ExplorerChain; initialSlide: number } | null;
+
+type Props = {
+  run: ExplorerRun;
+  /** админ: доступны платные действия (перезапуск упавшей цепочки) */
+  canRun: boolean;
+};
 
 /**
- * R-13.3: таблица прогона — по строке на цепочку: исходник → каждый промежуточный
- * шаг → конечный результат → цены → имена моделей. R-14: сравнение с эталоном слайдером,
- * промежуточные шаги открываются в полном размере (antd Image preview).
+ * R-13.3: таблица прогона — по строке на цепочку. R-14: карусель шагов в большом
+ * масштабе (последний кадр — слайдер с эталоном). R-13.6: перезапуск упавшей цепочки.
  */
-const RunView: FC<Props> = ({ run }) => {
-  const [compare, setCompare] = useState<{ title: string; resultUrl: string } | null>(null);
+const RunView: FC<Props> = ({ run, canRun }) => {
+  const [carousel, setCarousel] = useState<CarouselState>(null);
+  const queryClient = useQueryClient();
+
+  const retryChain = useRetryChain({
+    onSuccess: () => {
+      showNotification({ type: "success", message: "Цепочка перезапущена" });
+      void queryClient.invalidateQueries(explorerRunKey(run.id));
+    },
+  });
+
+  const chainEstimate = (chain: ExplorerChain) =>
+    chain.steps.reduce((sum, s) => sum + s.estimateUsd, 0);
 
   const columns = [
     {
@@ -65,11 +94,7 @@ const RunView: FC<Props> = ({ run }) => {
           {chain.steps.map((step, i) => (
             <div className={css.stepCell} key={`${chain.chainId}-${i}`}>
               {step.status === "done" && step.imageUrl ? (
-                <Image
-                  src={step.imageUrl}
-                  alt={step.model}
-                  className={css.stepThumb}
-                />
+                <Image src={step.imageUrl} alt={step.model} className={css.stepThumb} />
               ) : step.status === "running" ? (
                 <div className={css.stepPlaceholder}>
                   <Spin indicator={<LoadingOutlined spin />} />
@@ -102,36 +127,52 @@ const RunView: FC<Props> = ({ run }) => {
     {
       title: "Цена",
       key: "price",
-      width: 130,
-      render: (_: unknown, chain: ExplorerChain) => {
-        const estimate = chain.steps.reduce((sum, s) => sum + s.estimateUsd, 0);
-        return (
-          <div>
-            <div>оценка {usd(estimate)}</div>
-            <div className={css.factPrice}>факт {usd(chain.factUsd)}</div>
-          </div>
-        );
-      },
+      width: 140,
+      render: (_: unknown, chain: ExplorerChain) => (
+        <div>
+          <div>оценка {usd(chainEstimate(chain))}</div>
+          <div className={css.factPrice}>факт {usd(chain.factUsd)}</div>
+          {chain.wastedUsd ? (
+            <Tooltip title="Потрачено в неудачных попытках до перезапуска — входит в факт прогона">
+              <div className={css.wastedPrice}>+ неудачные {usd(chain.wastedUsd)}</div>
+            </Tooltip>
+          ) : null}
+        </div>
+      ),
     },
     {
-      title: "Сравнение",
-      key: "compare",
-      width: 150,
+      title: "Действия",
+      key: "actions",
+      width: 190,
       render: (_: unknown, chain: ExplorerChain) => {
-        const finalStep = [...chain.steps].reverse().find((s) => s.status === "done");
-        if (chain.status !== "done" || !finalStep?.imageUrl) {
-          return <Tag color={STEP_STATUS_COLOR[chain.status === "failed" ? "failed" : "pending"]}>
-            {chain.status === "failed" ? "цепочка упала" : "ждём результат"}
-          </Tag>;
-        }
+        const doneSteps = chain.steps.filter((s) => s.status === "done" && s.imageUrl);
         return (
-          <Button
-            onClick={() =>
-              setCompare({ title: chain.title, resultUrl: finalStep.imageUrl! })
-            }
-          >
-            <SwapOutlined /> С эталоном
-          </Button>
+          <div className={css.actionsCol}>
+            {doneSteps.length > 0 && (
+              <Button onClick={() => setCarousel({ chain, initialSlide: 0 })}>
+                <EyeOutlined /> Смотреть
+              </Button>
+            )}
+            {chain.status === "done" && (
+              <Button onClick={() => setCarousel({ chain, initialSlide: -1 })}>
+                <SwapOutlined /> С эталоном
+              </Button>
+            )}
+            {chain.status === "failed" && canRun && (
+              <Button
+                onClick={() =>
+                  retryChain.mutate({ runId: run.id, chainId: chain.chainId })
+                }
+                loading={retryChain.isLoading}
+              >
+                <RedoOutlined /> Перезапустить ({usd(chainEstimate(chain))})
+              </Button>
+            )}
+            {chain.status === "failed" && !canRun && (
+              <Tag color="error">цепочка упала</Tag>
+            )}
+            {chain.status === "running" && <Tag color="processing">выполняется</Tag>}
+          </div>
         );
       },
     },
@@ -156,12 +197,13 @@ const RunView: FC<Props> = ({ run }) => {
         size="small"
         scroll={{ x: true }}
       />
-      <CompareModal
-        open={Boolean(compare)}
-        onClose={() => setCompare(null)}
-        title={`${compare?.title ?? ""} — сравнение с эталоном`}
-        resultUrl={compare?.resultUrl ?? ""}
+      <ChainCarouselModal
+        open={Boolean(carousel)}
+        onClose={() => setCarousel(null)}
+        chain={carousel?.chain ?? null}
+        sourceUrl={run.sourceUrl}
         referenceUrl={run.referenceUrl}
+        initialSlide={carousel?.initialSlide ?? 0}
       />
     </div>
   );

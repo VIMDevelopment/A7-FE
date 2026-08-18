@@ -302,3 +302,46 @@
   max-height: 120px;
   overflow-y: auto;
 }
+
+.actionsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.wastedPrice {
+  color: #ef4444;
+  font-size: 12px;
+  cursor: help;
+}
+
+.chainCarousel :global(.slick-arrow) {
+  color: #1f2328;
+  z-index: 2;
+}
+
+.chainCarousel :global(.slick-dots li button) {
+  background: #8b5cf6;
+}
+
+.carouselCaption {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.carouselFrame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+}
+
+.carouselImg {
+  max-width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+  border-radius: 8px;
+}

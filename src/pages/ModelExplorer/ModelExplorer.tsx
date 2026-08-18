@@ -261,7 +261,7 @@ const ModelExplorerPage: FC = () => {
       {runData?.run && (
         <div className={css.section}>
           <h2 className={css.sectionTitle}>Прогон</h2>
-          <RunView run={runData.run} />
+          <RunView run={runData.run} canRun={isRunner} />
         </div>
       )}
 
