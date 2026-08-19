@@ -20,6 +20,7 @@ import {
 import { canRunExplorer } from "./access";
 import RunView from "./components/RunView";
 import PromptPicker from "./components/PromptPicker";
+import ChainConfigurator from "./components/ChainConfigurator";
 import css from "./index.module.css";
 
 const usd = (value?: number) =>
@@ -267,6 +268,15 @@ const ModelExplorerPage: FC = () => {
         </div>
       )}
 
+      {config && (
+        <ChainConfigurator
+          chains={config.chains}
+          models={config.models}
+          resolution={resolution}
+          canEdit={isRunner}
+        />
+      )}
+
       {runData?.run && (
         <div className={css.section}>
           <h2 className={css.sectionTitle}>Прогон</h2>
@@ -303,16 +313,19 @@ const ModelExplorerPage: FC = () => {
         isLoading={startRun.isLoading}
       >
         <p>
-          Будут прогнаны все {config?.chains.length ?? "…"} цепочек конфига в {resolution}.
+          Будут прогнаны включённые цепочки набора (
+          {config?.chains.filter((c) => c.enabled).length ?? "…"} шт.) в {resolution}.
           Расчётная стоимость — <b>{usd(estimate)}</b> (лимит {usd(config?.limitUsd)}).
-          Эталон уже оплачен и повторно не тарифицируется.
+          Эталон уже оплачен и повторно не тарифицируется. Состав меняется в конфигураторе.
         </p>
         <ul className={css.confirmList}>
-          {config?.chains.map((chain) => (
-            <li key={chain.id}>
-              {chain.title} — {usd(chain.estimateUsd[resolution])}
-            </li>
-          ))}
+          {config?.chains
+            .filter((chain) => chain.enabled)
+            .map((chain) => (
+              <li key={chain.id}>
+                {chain.title} — {usd(chain.estimateUsd[resolution])}
+              </li>
+            ))}
         </ul>
       </Modal>
     </div>

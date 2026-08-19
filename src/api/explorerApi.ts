@@ -14,17 +14,31 @@ import { defaultApiAxiosParams } from "./helpers";
 
 export type ExplorerResolution = "2K" | "4K";
 
+export type ExplorerModelInfo = {
+  slug: string;
+  title: string;
+  kind: "generative" | "upscale";
+  priceUsd: Record<ExplorerResolution, number>;
+};
+
+/** Конфигурация цепочки из конфигуратора (R-19). */
+export type ExplorerChainConfig = {
+  id: string;
+  title: string;
+  steps: string[];
+  enabled: boolean;
+  order: number;
+  createdBy: string;
+  createdAt: string;
+  estimateUsd: Record<ExplorerResolution, number>;
+  stepsInfo: Array<{ slug: string; title: string; kind: "generative" | "upscale" } | null>;
+};
+
 export type ExplorerConfigResponse = {
   reference: { model: string; priceUsd: Record<ExplorerResolution, number> };
-  chains: Array<{
-    id: string;
-    title: string;
-    estimateUsd: Record<ExplorerResolution, number>;
-    steps: Record<
-      ExplorerResolution,
-      Array<{ model: string; kind: "generative" | "upscale"; priceUsd: number }>
-    >;
-  }>;
+  models: ExplorerModelInfo[];
+  chains: ExplorerChainConfig[];
+  /** оценка прогона по ВКЛЮЧЁННЫМ цепочкам (R-19.3) */
   estimateUsd: Record<ExplorerResolution, number>;
   limitUsd: number;
 };
@@ -162,6 +176,56 @@ export const useCreateReference = (
       );
       return data;
     },
+    options
+  );
+
+// ── CRUD конфигуратора цепочек (R-19) ──
+
+const put = <TBody, TResp>(
+  url: string,
+  body: TBody,
+  axiosOptions?: AxiosRequestConfig
+) => axios.put<TResp>(url, body, { ...defaultApiAxiosParams, ...axiosOptions });
+
+const del = <TResp>(url: string, axiosOptions?: AxiosRequestConfig) =>
+  axios.delete<TResp>(url, { ...defaultApiAxiosParams, ...axiosOptions });
+
+export type ChainConfigInput = {
+  title: string;
+  steps: string[];
+  enabled?: boolean;
+};
+
+export const useCreateChain = (
+  options?: UseMutationOptions<{ chain: ExplorerChainConfig }, unknown, ChainConfigInput>
+) =>
+  useMutation<{ chain: ExplorerChainConfig }, unknown, ChainConfigInput>(
+    (body) =>
+      post<ChainConfigInput, { chain: ExplorerChainConfig }>("/explorer/chains", body).then(
+        (r) => r.data
+      ),
+    options
+  );
+
+export type UpdateChainArgs = { id: string; patch: Partial<ChainConfigInput> };
+
+export const useUpdateChain = (
+  options?: UseMutationOptions<{ chain: ExplorerChainConfig }, unknown, UpdateChainArgs>
+) =>
+  useMutation<{ chain: ExplorerChainConfig }, unknown, UpdateChainArgs>(
+    ({ id, patch }) =>
+      put<Partial<ChainConfigInput>, { chain: ExplorerChainConfig }>(
+        `/explorer/chains/${id}`,
+        patch
+      ).then((r) => r.data),
+    options
+  );
+
+export const useDeleteChain = (
+  options?: UseMutationOptions<{ ok: boolean }, unknown, string>
+) =>
+  useMutation<{ ok: boolean }, unknown, string>(
+    (id) => del<{ ok: boolean }>(`/explorer/chains/${id}`).then((r) => r.data),
     options
   );
 

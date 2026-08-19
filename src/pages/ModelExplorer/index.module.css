@@ -345,3 +345,33 @@
   object-fit: contain;
   border-radius: 8px;
 }
+
+.configuratorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.configuratorActions {
+  display: flex;
+  gap: 6px;
+}
+
+.editorBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editorStepRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.editorStepRow > :first-child {
+  flex: 1;
+}
