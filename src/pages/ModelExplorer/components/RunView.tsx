@@ -179,11 +179,20 @@ const RunView: FC<Props> = ({ run, canRun }) => {
   ];
 
   const statusTag = RUN_STATUS_TAG[run.status];
+  const finishedChains = run.chains.filter(
+    (c) => c.status === "done" || c.status === "failed"
+  ).length;
 
   return (
     <div className={css.runView}>
       <div className={css.runHeader}>
         <Tag color={statusTag.color}>{statusTag.label}</Tag>
+        {run.status === "running" && (
+          <span className={css.runProgress}>
+            <Spin indicator={<LoadingOutlined spin />} size="small" />
+            готово {finishedChains} из {run.chains.length} цепочек
+          </span>
+        )}
         <span className={css.runMeta}>
           {run.resolution} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
           {usd(run.factUsd)}

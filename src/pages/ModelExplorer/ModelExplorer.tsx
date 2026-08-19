@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Image, Select, Table, Tabs, Tag, Upload } from "antd";
-import { InboxOutlined } from "@ant-design/icons";
+import { Alert, Image, Select, Spin, Table, Tabs, Tag, Upload } from "antd";
+import { InboxOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
 import { showNotification } from "../../components/ShowNotification";
@@ -45,6 +45,7 @@ const ModelExplorerPage: FC = () => {
   const [reference, setReference] = useState<ExplorerReference | null>(null);
   const [referenceCached, setReferenceCached] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [referenceError, setReferenceError] = useState<string | null>(null);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"run" | "configurator" | "history">("run");
   const previewUrlRef = useRef<string | null>(null);
@@ -63,6 +64,13 @@ const ModelExplorerPage: FC = () => {
     onSuccess: (data) => {
       if (prevRunStatusRef.current === "running" && data.run.status !== "running") {
         void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
+        showNotification({
+          type: data.run.status === "done" ? "success" : "info",
+          message:
+            data.run.status === "done"
+              ? `Прогон завершён, факт ${usd(data.run.factUsd)}`
+              : "Прогон завершён частично — упавшие цепочки можно перезапустить по одной",
+        });
       }
       prevRunStatusRef.current = data.run.status;
     },
@@ -72,12 +80,19 @@ const ModelExplorerPage: FC = () => {
     onSuccess: ({ reference: ref, cached }) => {
       setReference(ref);
       setReferenceCached(cached);
+      setReferenceError(null);
       showNotification({
         type: "success",
         message: cached
           ? "Эталон найден в кэше — повторная оплата не нужна"
           : `Эталон получен, стоимость ${usd(ref.costUsd)}`,
       });
+    },
+    onError: (err) => {
+      setReferenceError(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          "Не удалось получить эталон — попробуйте ещё раз"
+      );
     },
   });
 
@@ -158,7 +173,16 @@ const ModelExplorerPage: FC = () => {
               {filePreview ? (
                 <div className={css.previewWrap}>
                   <img src={filePreview} alt="Исходник" className={css.previewImg} />
-                  <Button onClick={() => { setFile(null); setFilePreview(null); setReference(null); }}>
+                  {createReference.isLoading && (
+                    <div className={css.previewOverlay}>
+                      <Spin indicator={<LoadingOutlined spin style={{ fontSize: 42 }} />} />
+                      <span>Обрабатываем эталон (nano-banana-pro)…</span>
+                    </div>
+                  )}
+                  <Button
+                    disabled={createReference.isLoading}
+                    onClick={() => { setFile(null); setFilePreview(null); setReference(null); setReferenceError(null); }}
+                  >
                     Заменить фото
                   </Button>
                 </div>
@@ -212,6 +236,25 @@ const ModelExplorerPage: FC = () => {
                   {`2. Прогнать цепочки (~${usd(estimate)})`}
                 </Button>
               </div>
+              {referenceError && (
+                <Alert
+                  type="error"
+                  message={referenceError}
+                  showIcon
+                  action={
+                    <Button
+                      size="small"
+                      disabled={!file || !prompt.trim() || createReference.isLoading}
+                      onClick={() =>
+                        file &&
+                        createReference.mutate({ photo: file, prompt: prompt.trim(), resolution })
+                      }
+                    >
+                      Повторить
+                    </Button>
+                  }
+                />
+              )}
               {overLimit && (
                 <Alert
                   type="error"
