@@ -35,7 +35,8 @@ export type ExplorerChainConfig = {
   order: number;
   createdBy: string;
   createdAt: string;
-  estimateUsd: Record<ExplorerResolution, number>;
+  /** цена цепочки — одна: разрешение задаётся на шаге, прогон на цепочки не влияет */
+  estimateUsd: number;
   stepsInfo: Array<{
     slug: string;
     title: string;
@@ -50,7 +51,7 @@ export type ExplorerConfigResponse = {
   models: ExplorerModelInfo[];
   chains: ExplorerChainConfig[];
   /** оценка прогона по ВКЛЮЧЁННЫМ цепочкам (R-19.3) */
-  estimateUsd: Record<ExplorerResolution, number>;
+  estimateUsd: number;
   limitUsd: number;
 };
 
@@ -70,6 +71,8 @@ export type ExplorerStep = {
   kind: "generative" | "upscale";
   status: "pending" | "running" | "done" | "failed" | "skipped";
   estimateUsd: number;
+  /** разрешение результата шага (у моделей, различающих 2К/4К) */
+  resolution?: ExplorerResolution;
   factUsd?: number;
   imageUrl?: string;
   error?: string;

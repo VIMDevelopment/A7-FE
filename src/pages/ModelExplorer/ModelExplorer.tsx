@@ -105,7 +105,7 @@ const ModelExplorerPage: FC = () => {
     },
   });
 
-  const estimate = config?.estimateUsd?.[resolution];
+  const estimate = config?.estimateUsd;
   const overLimit =
     estimate !== undefined && config !== undefined && estimate > config.limitUsd;
 
@@ -144,7 +144,6 @@ const ModelExplorerPage: FC = () => {
         ),
       },
       { title: "Промпт", dataIndex: "prompt", key: "prompt", ellipsis: true },
-      { title: "Разрешение", dataIndex: "resolution", key: "resolution", width: 110 },
       {
         title: "Статус",
         dataIndex: "status",
@@ -206,7 +205,7 @@ const ModelExplorerPage: FC = () => {
                 disabled={createReference.isLoading || startRun.isLoading}
                 onPromptBodyChange={(body) => setPrompt(body ?? "")}
               />
-              <label className={css.label}>Целевое разрешение</label>
+              <label className={css.label}>Разрешение эталона (на цепочки не влияет — у их шагов своё)</label>
               <Select
                 value={resolution}
                 onChange={(value: ExplorerResolution) => setResolution(value)}
@@ -313,7 +312,6 @@ const ModelExplorerPage: FC = () => {
     <ChainConfigurator
       chains={config.chains}
       models={config.models}
-      resolution={resolution}
       canEdit={isRunner}
     />
   ) : null;
@@ -381,16 +379,16 @@ const ModelExplorerPage: FC = () => {
       >
         <p>
           Будут прогнаны включённые цепочки набора (
-          {config?.chains.filter((c) => c.enabled).length ?? "…"} шт.) в {resolution}.
-          Расчётная стоимость — <b>{usd(estimate)}</b> (лимит {usd(config?.limitUsd)}).
-          Эталон уже оплачен и повторно не тарифицируется. Состав меняется в конфигураторе.
+          {config?.chains.filter((c) => c.enabled).length ?? "…"} шт.) — разрешение у
+          каждого шага своё, из конфигуратора. Расчётная стоимость — <b>{usd(estimate)}</b>{" "}
+          (лимит {usd(config?.limitUsd)}). Эталон уже оплачен и повторно не тарифицируется.
         </p>
         <ul className={css.confirmList}>
           {config?.chains
             .filter((chain) => chain.enabled)
             .map((chain) => (
               <li key={chain.id}>
-                {chain.title} — {usd(chain.estimateUsd[resolution])}
+                {chain.title} — {usd(chain.estimateUsd)}
               </li>
             ))}
         </ul>

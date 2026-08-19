@@ -125,6 +125,21 @@ const RunView: FC<Props> = ({ run, canRun }) => {
       ),
     },
     {
+      title: "Разрешение",
+      key: "resolution",
+      width: 110,
+      render: (_: unknown, chain: ExplorerChain) => {
+        const last = [...chain.steps]
+          .reverse()
+          .find((s) => s.resolution !== undefined);
+        return last?.resolution ?? (
+          <Tooltip title="Разрешение выхода у моделей цепочки фиксированное">
+            <span>—</span>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: "Цена",
       key: "price",
       width: 140,
@@ -194,7 +209,7 @@ const RunView: FC<Props> = ({ run, canRun }) => {
           </span>
         )}
         <span className={css.runMeta}>
-          {run.resolution} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
+          эталон {run.resolution} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
           {usd(run.factUsd)}
         </span>
       </div>

@@ -424,3 +424,24 @@
   color: #6b7280;
   font-size: 13px;
 }
+
+.editorStepCard {
+  position: relative;
+}
+
+.editorStepRemove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: none;
+  border: none;
+  padding: 2px;
+  color: #9ca3af;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 14px;
+}
+
+.editorStepRemove:hover {
+  color: #ef4444;
+}
