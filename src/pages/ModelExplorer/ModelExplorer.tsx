@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Image, Select, Table, Tag, Upload } from "antd";
-import type { UploadFile } from "antd";
+import { Alert, Image, Select, Table, Tabs, Tag, Upload } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
@@ -27,9 +26,10 @@ const usd = (value?: number) =>
   value === undefined ? "—" : `$${value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}`;
 
 /**
- * Model Explorer (R-11…R-16): сравнение цепочек Replicate против эталона
+ * Model Explorer (R-11…R-16, R-19): сравнение цепочек Replicate против эталона
  * nano-banana-pro по цене и качеству. Просмотр — админ и руководители,
- * запуск платной обработки — только админ (R-11.3).
+ * запуск платной обработки и конфигуратор — только админ (R-11.3).
+ * Страница разбита на табы: Прогон / Конфигуратор цепочек / История.
  */
 const ModelExplorerPage: FC = () => {
   const { data: profile } = useProfile();
@@ -46,6 +46,7 @@ const ModelExplorerPage: FC = () => {
   const [referenceCached, setReferenceCached] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"run" | "configurator" | "history">("run");
   const previewUrlRef = useRef<string | null>(null);
 
   const { data: runsData } = useExplorerRuns();
@@ -84,6 +85,7 @@ const ModelExplorerPage: FC = () => {
     onSuccess: ({ run }) => {
       setConfirmOpen(false);
       setActiveRunId(run.id);
+      setActiveTab("run");
       void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
     },
   });
@@ -146,23 +148,8 @@ const ModelExplorerPage: FC = () => {
     []
   );
 
-  return (
-    <div className={css.page}>
-      <h1 className={css.pageTitle}>Model Explorer</h1>
-      <div className={css.pageSubtitle}>
-        Сравнение цепочек Replicate против эталона {config?.reference.model ?? "…"} по
-        цене и качеству. Лимит одного прогона — {config ? usd(config.limitUsd) : "…"}.
-      </div>
-
-      {!isRunner && (
-        <Alert
-          className={css.readOnlyBanner}
-          type="info"
-          message="Режим просмотра: запускать обработку может только админ. История и результаты доступны."
-          showIcon
-        />
-      )}
-
+  const runTabContent = (
+    <>
       {isRunner && (
         <div className={css.newRunCard}>
           <h2 className={css.sectionTitle}>Новый прогон</h2>
@@ -228,7 +215,7 @@ const ModelExplorerPage: FC = () => {
               {overLimit && (
                 <Alert
                   type="error"
-                  message={`Оценка прогона ${usd(estimate)} выше лимита ${usd(config?.limitUsd)} — уменьшите набор цепочек в конфиге`}
+                  message={`Оценка прогона ${usd(estimate)} выше лимита ${usd(config?.limitUsd)} — выключите часть цепочек в конфигураторе`}
                   showIcon
                 />
               )}
@@ -268,36 +255,73 @@ const ModelExplorerPage: FC = () => {
         </div>
       )}
 
-      {config && (
-        <ChainConfigurator
-          chains={config.chains}
-          models={config.models}
-          resolution={resolution}
-          canEdit={isRunner}
-        />
-      )}
-
       {runData?.run && (
         <div className={css.section}>
-          <h2 className={css.sectionTitle}>Прогон</h2>
           <RunView run={runData.run} canRun={isRunner} />
         </div>
       )}
+      {!runData?.run && !isRunner && (
+        <div className={css.pageSubtitle}>Выберите прогон во вкладке «История».</div>
+      )}
+    </>
+  );
 
-      <div className={css.section}>
-        <h2 className={css.sectionTitle}>История прогонов</h2>
-        <Table
-          rowKey="id"
-          columns={historyColumns}
-          dataSource={runsData?.runs ?? []}
-          pagination={{ pageSize: 10 }}
-          size="small"
-          onRow={(item) => ({
-            onClick: () => setActiveRunId(item.id),
-            className: css.historyRow,
-          })}
-        />
+  const configuratorTabContent = config ? (
+    <ChainConfigurator
+      chains={config.chains}
+      models={config.models}
+      resolution={resolution}
+      canEdit={isRunner}
+    />
+  ) : null;
+
+  const historyTabContent = (
+    <Table
+      rowKey="id"
+      columns={historyColumns}
+      dataSource={runsData?.runs ?? []}
+      pagination={{ pageSize: 10 }}
+      size="small"
+      onRow={(item) => ({
+        onClick: () => {
+          setActiveRunId(item.id);
+          setActiveTab("run");
+        },
+        className: css.historyRow,
+      })}
+    />
+  );
+
+  return (
+    <div className={css.page}>
+      <h1 className={css.pageTitle}>Model Explorer</h1>
+      <div className={css.pageSubtitle}>
+        Сравнение цепочек Replicate против эталона {config?.reference.model ?? "…"} по
+        цене и качеству. Лимит одного прогона — {config ? usd(config.limitUsd) : "…"}.
       </div>
+
+      {!isRunner && (
+        <Alert
+          className={css.readOnlyBanner}
+          type="info"
+          message="Режим просмотра: запускать обработку может только админ. История и результаты доступны."
+          showIcon
+        />
+      )}
+
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => setActiveTab(key as typeof activeTab)}
+        items={[
+          { key: "run", label: "Прогон", children: runTabContent },
+          { key: "configurator", label: "Конфигуратор цепочек", children: configuratorTabContent },
+          {
+            key: "history",
+            label: `История (${runsData?.runs.length ?? 0})`,
+            children: historyTabContent,
+          },
+        ]}
+      />
 
       <Modal
         title="Подтверждение платного прогона"

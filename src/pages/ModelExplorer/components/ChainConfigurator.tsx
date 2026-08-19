@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from "react";
-import { Input, Popconfirm, Switch, Table, Tag, Tooltip } from "antd";
+import { Input, Popconfirm, Radio, Switch, Table, Tag, Tooltip } from "antd";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -12,6 +12,7 @@ import Modal from "../../../components/Modal/Modal";
 import Select from "../../../components/Select/Select";
 import { showNotification } from "../../../components/ShowNotification";
 import {
+  ChainStep,
   ExplorerChainConfig,
   ExplorerModelInfo,
   ExplorerResolution,
@@ -27,10 +28,12 @@ const usd = (value?: number) =>
 
 const MAX_STEPS = 5;
 
+type EditorStep = ChainStep & { stepKind: "generative" | "upscale" };
+
 type EditorState = {
   id?: string; // undefined = создание
   title: string;
-  steps: string[]; // [0] — генеративная, дальше апскейлеры
+  steps: EditorStep[];
 };
 
 type Props = {
@@ -42,27 +45,23 @@ type Props = {
 };
 
 /**
- * Конфигуратор цепочек (R-19): состав набора, шаги из кураторского справочника
- * моделей, включение/выключение цепочек — прогон исполняет включённые.
+ * Конфигуратор цепочек (R-19): шаги из кураторского справочника — на каждом шаге
+ * (кроме первого) выбирается тип (генеративная/апскейлер), у моделей с выбором
+ * разрешения качество шага можно зафиксировать (2К/4К) вместо наследования от прогона.
  */
 const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) => {
   const queryClient = useQueryClient();
   const [editor, setEditor] = useState<EditorState | null>(null);
 
-  const generativeOptions = useMemo(
-    () =>
-      models
-        .filter((m) => m.kind === "generative")
-        .map((m) => ({ label: `${m.title} · ${usd(m.priceUsd[resolution])}`, value: m.slug })),
-    [models, resolution]
+  const modelBySlug = useMemo(
+    () => new Map(models.map((m) => [m.slug, m])),
+    [models]
   );
-  const upscaleOptions = useMemo(
-    () =>
-      models
-        .filter((m) => m.kind === "upscale")
-        .map((m) => ({ label: `${m.title} · ${usd(m.priceUsd[resolution])}`, value: m.slug })),
-    [models, resolution]
-  );
+
+  const optionsFor = (kind: "generative" | "upscale") =>
+    models
+      .filter((m) => m.kind === kind)
+      .map((m) => ({ label: `${m.title} · ${usd(m.priceUsd[resolution])}`, value: m.slug }));
 
   const invalidate = () => queryClient.invalidateQueries(explorerConfigKey);
   const onError = (err: unknown) =>
@@ -77,26 +76,55 @@ const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) =
   const updateChain = useUpdateChain({ onSuccess: () => { void invalidate(); setEditor(null); }, onError });
   const deleteChain = useDeleteChain({ onSuccess: () => void invalidate(), onError });
 
-  const editorEstimate = (steps: string[]) =>
-    steps.reduce(
-      (sum, slug) => sum + (models.find((m) => m.slug === slug)?.priceUsd[resolution] ?? 0),
-      0
-    );
+  /** цена шага: зафиксированное качество побеждает разрешение прогона */
+  const stepPrice = (step: ChainStep) =>
+    modelBySlug.get(step.model)?.priceUsd[step.resolution ?? resolution] ?? 0;
+
+  const editorEstimate = (steps: ChainStep[]) =>
+    steps.reduce((sum, step) => sum + stepPrice(step), 0);
 
   const editorValid =
     editor !== null &&
     editor.title.trim().length > 0 &&
     editor.steps.length >= 1 &&
-    editor.steps.every((s) => s.length > 0);
+    editor.steps.every((s) => s.model.length > 0);
 
   const saveEditor = () => {
     if (!editor || !editorValid) return;
-    const body = { title: editor.title.trim(), steps: editor.steps };
+    const body = {
+      title: editor.title.trim(),
+      steps: editor.steps.map(({ model, resolution: stepRes }) => ({
+        model,
+        ...(stepRes ? { resolution: stepRes } : {}),
+      })),
+    };
     if (editor.id) {
       updateChain.mutate({ id: editor.id, patch: body });
     } else {
       createChain.mutate(body);
     }
+  };
+
+  const openEditor = (chain?: ExplorerChainConfig) => {
+    if (!chain) {
+      setEditor({ title: "", steps: [{ model: "", stepKind: "generative" }] });
+      return;
+    }
+    setEditor({
+      id: chain.id,
+      title: chain.title,
+      steps: chain.steps.map((step) => ({
+        ...step,
+        stepKind: modelBySlug.get(step.model)?.kind ?? "upscale",
+      })),
+    });
+  };
+
+  const patchStep = (index: number, patch: Partial<EditorStep>) => {
+    if (!editor) return;
+    const steps = [...editor.steps];
+    steps[index] = { ...steps[index], ...patch };
+    setEditor({ ...editor, steps });
   };
 
   const columns = [
@@ -112,10 +140,11 @@ const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) =
               info ? (
                 <Tag key={`${chain.id}-${i}`} color={info.kind === "generative" ? "purple" : "blue"}>
                   {info.title}
+                  {info.resolution ? ` · ${info.resolution}` : ""}
                 </Tag>
               ) : (
                 <Tooltip key={`${chain.id}-${i}`} title="Модель убрана из справочника">
-                  <Tag color="error">{chain.steps[i]}</Tag>
+                  <Tag color="error">{chain.steps[i]?.model}</Tag>
                 </Tooltip>
               )
             )}
@@ -124,9 +153,9 @@ const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) =
       ),
     },
     {
-      title: `Цена (${resolution})`,
+      title: `Цена (прогон ${resolution})`,
       key: "price",
-      width: 110,
+      width: 140,
       render: (_: unknown, chain: ExplorerChainConfig) => usd(chain.estimateUsd[resolution]),
     },
     {
@@ -149,12 +178,7 @@ const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) =
             width: 110,
             render: (_: unknown, chain: ExplorerChainConfig) => (
               <div className={css.configuratorActions}>
-                <Button
-                  size="small"
-                  onClick={() =>
-                    setEditor({ id: chain.id, title: chain.title, steps: [...chain.steps] })
-                  }
-                >
+                <Button size="small" onClick={() => openEditor(chain)}>
                   <EditOutlined />
                 </Button>
                 <Popconfirm
@@ -179,7 +203,7 @@ const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) =
       <div className={css.configuratorHeader}>
         <h2 className={css.sectionTitle}>Конфигуратор цепочек</h2>
         {canEdit && (
-          <Button onClick={() => setEditor({ title: "", steps: [""] })}>
+          <Button onClick={() => openEditor()}>
             <PlusOutlined /> Добавить цепочку
           </Button>
         )}
@@ -214,54 +238,98 @@ const ChainConfigurator: FC<Props> = ({ chains, models, resolution, canEdit }) =
               maxLength={80}
             />
 
-            <label className={css.label}>
-              Шаг 1 — генеративная модель (получает промпт прогона)
-            </label>
-            <Select
-              placeholder="Выберите модель"
-              value={editor.steps[0] || undefined}
-              onChange={(value) =>
-                setEditor({ ...editor, steps: [value ?? "", ...editor.steps.slice(1)] })
-              }
-              options={generativeOptions}
-            />
+            {editor.steps.map((step, i) => {
+              const model = step.model ? modelBySlug.get(step.model) : undefined;
+              return (
+                <div key={`step-${i}`} className={css.editorStepCard}>
+                  <div className={css.editorStepHeader}>
+                    <span className={css.label}>
+                      Шаг {i + 1}
+                      {i === 0 ? " — генеративная модель (получает промпт)" : ""}
+                    </span>
+                    {i > 0 && (
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          setEditor({
+                            ...editor,
+                            steps: editor.steps.filter((_, idx) => idx !== i),
+                          })
+                        }
+                        aria-label="Убрать шаг"
+                      >
+                        <MinusCircleOutlined />
+                      </Button>
+                    )}
+                  </div>
 
-            {editor.steps.slice(1).map((slug, i) => (
-              <div key={`step-${i + 1}`}>
-                <label className={css.label}>Шаг {i + 2} — апскейлер</label>
-                <div className={css.editorStepRow}>
+                  {i > 0 && (
+                    <Radio.Group
+                      value={step.stepKind}
+                      onChange={(e) =>
+                        patchStep(i, {
+                          stepKind: e.target.value,
+                          model: "",
+                          resolution: undefined,
+                        })
+                      }
+                      size="small"
+                    >
+                      <Radio.Button value="generative">Генеративная</Radio.Button>
+                      <Radio.Button value="upscale">Апскейлер</Radio.Button>
+                    </Radio.Group>
+                  )}
+
                   <Select
-                    placeholder="Выберите апскейлер"
-                    value={slug || undefined}
-                    onChange={(value) => {
-                      const steps = [...editor.steps];
-                      steps[i + 1] = value ?? "";
-                      setEditor({ ...editor, steps });
-                    }}
-                    options={upscaleOptions}
-                  />
-                  <Button
-                    size="small"
-                    onClick={() =>
-                      setEditor({
-                        ...editor,
-                        steps: editor.steps.filter((_, idx) => idx !== i + 1),
-                      })
+                    placeholder={
+                      step.stepKind === "generative" ? "Выберите модель" : "Выберите апскейлер"
                     }
-                    aria-label="Убрать шаг"
-                  >
-                    <MinusCircleOutlined />
-                  </Button>
+                    value={step.model || undefined}
+                    onChange={(value) => patchStep(i, { model: value ?? "", resolution: undefined })}
+                    options={optionsFor(step.stepKind)}
+                  />
+
+                  {model?.resolutionChoice && (
+                    <div className={css.editorQualityRow}>
+                      <span className={css.editorQualityLabel}>Качество шага:</span>
+                      <Radio.Group
+                        value={step.resolution ?? "run"}
+                        onChange={(e) =>
+                          patchStep(i, {
+                            resolution:
+                              e.target.value === "run"
+                                ? undefined
+                                : (e.target.value as ExplorerResolution),
+                          })
+                        }
+                        size="small"
+                      >
+                        <Radio.Button value="run">Как прогон</Radio.Button>
+                        <Radio.Button value="2K">2К</Radio.Button>
+                        <Radio.Button value="4K">4К</Radio.Button>
+                      </Radio.Group>
+                    </div>
+                  )}
+                  {model && !model.resolutionChoice && (
+                    <div className={css.editorQualityHint}>
+                      Модель не различает 2К/4К — качество задаёт прогон
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {editor.steps.length < MAX_STEPS && (
               <Button
-                onClick={() => setEditor({ ...editor, steps: [...editor.steps, ""] })}
-                disabled={!editor.steps[0]}
+                onClick={() =>
+                  setEditor({
+                    ...editor,
+                    steps: [...editor.steps, { model: "", stepKind: "upscale" }],
+                  })
+                }
+                disabled={!editor.steps[0].model}
               >
-                <PlusOutlined /> Добавить шаг-апскейлер
+                <PlusOutlined /> Добавить шаг
               </Button>
             )}
           </div>

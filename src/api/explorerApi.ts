@@ -19,19 +19,30 @@ export type ExplorerModelInfo = {
   title: string;
   kind: "generative" | "upscale";
   priceUsd: Record<ExplorerResolution, number>;
+  /** модель различает 2К/4К — у шага можно зафиксировать качество */
+  resolutionChoice?: boolean;
 };
+
+/** Шаг конфигурации: модель + опциональная фиксация качества (undefined = как прогон). */
+export type ChainStep = { model: string; resolution?: ExplorerResolution };
 
 /** Конфигурация цепочки из конфигуратора (R-19). */
 export type ExplorerChainConfig = {
   id: string;
   title: string;
-  steps: string[];
+  steps: ChainStep[];
   enabled: boolean;
   order: number;
   createdBy: string;
   createdAt: string;
   estimateUsd: Record<ExplorerResolution, number>;
-  stepsInfo: Array<{ slug: string; title: string; kind: "generative" | "upscale" } | null>;
+  stepsInfo: Array<{
+    slug: string;
+    title: string;
+    kind: "generative" | "upscale";
+    resolution?: ExplorerResolution;
+    resolutionChoice: boolean;
+  } | null>;
 };
 
 export type ExplorerConfigResponse = {
@@ -192,7 +203,7 @@ const del = <TResp>(url: string, axiosOptions?: AxiosRequestConfig) =>
 
 export type ChainConfigInput = {
   title: string;
-  steps: string[];
+  steps: ChainStep[];
   enabled?: boolean;
 };
 
