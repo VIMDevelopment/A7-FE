@@ -67,10 +67,14 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   };
 
   const handleEditOk = () => {
+    // [R-24] дубликатом считаем только совпадение с ДРУГИМ филиалом:
+    // своё текущее имя не в счёт, иначе нельзя сохранить без изменений
+    // или поменять только регистр/пробелы.
+    const normalize = (value: string) => value.toLocaleLowerCase().trim();
     const isNameUniq = !allProjectsNames.some(
       (item) =>
-        item.toLocaleLowerCase().trim() ===
-        inputValue.toLocaleLowerCase().trim()
+        normalize(item) === normalize(inputValue) &&
+        normalize(item) !== normalize(name ?? "")
     );
 
     if (isNameUniq) {
