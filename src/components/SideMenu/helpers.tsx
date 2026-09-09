@@ -2,7 +2,6 @@ import {
   BankOutlined,
   BarChartOutlined,
   BookOutlined,
-  ExperimentOutlined,
   EyeOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
@@ -81,10 +80,6 @@ export const getMenuItems: () => SideMenuItemProps[] = () => [
     title: "Администрирование",
     route: PublicRoutes.ADMINISTRATION.static,
   },
-  {
-    // R-11: пункт скрывается для ролей без доступа через roles роута (SideMenuItem)
-    icon: <ExperimentOutlined style={iconStyle} />,
-    title: "Model Explorer",
-    route: PublicRoutes.MODEL_EXPLORER.static,
-  },
+  // Model Explorer (R-14) в меню не показываем — вход только по прямой ссылке
+  // PublicRoutes.MODEL_EXPLORER (роут и роли остаются в routes/constants).
 ];
