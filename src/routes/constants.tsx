@@ -12,6 +12,8 @@ import SubprojectPage from "../pages/Subproject/Subproject";
 import RecognitionPage from "../pages/Recognition/Recognition";
 import PromptsPage from "../pages/Prompts/Prompts";
 import KnowledgeBasePage from "../pages/KnowledgeBase/KnowledgeBase";
+import ModelExplorerPage from "../pages/ModelExplorer/ModelExplorer";
+import { EXPLORER_VIEW_ROLES } from "../pages/ModelExplorer/access";
 
 const ALL_ROLES = [
   UserRolesItem.admin,
@@ -128,6 +130,13 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.KNOWLEDGE_BASE.static,
     roles: ALL_ROLES,
     component: <KnowledgeBasePage />,
+  },
+  {
+    // Model Explorer (R-11): видят админ и руководители; запуск — только админ (гейт внутри страницы и на BE)
+    id: "model-explorer",
+    path: PublicRoutes.MODEL_EXPLORER.static,
+    roles: EXPLORER_VIEW_ROLES,
+    component: <ModelExplorerPage />,
   },
 ];
 

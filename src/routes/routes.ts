@@ -77,6 +77,9 @@ export const PublicRoutes = {
   KNOWLEDGE_BASE: {
     static: "/knowledge-base",
   },
+  MODEL_EXPLORER: {
+    static: "/model-explorer",
+  },
   POLICY: {
     static: "/policy",
   },
