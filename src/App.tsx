@@ -18,6 +18,7 @@ import AuthPage from "./pages/Auth/Auth";
 import PolicyPage from "./pages/Policy/Policy";
 import NoAccessPage from "./pages/NoAccess/NoAccess";
 import { showNotification } from "./components/ShowNotification";
+import { globalErrorMessage } from "./utils/globalErrorMessage";
 import { loadFaceApiModels } from "./utils/faceDetection";
 
 const antdTheme = {
@@ -40,17 +41,18 @@ const antdTheme = {
 const config = new QueryClient({
   defaultOptions: {
     mutations: {
+      // R-34: обрыв соединения — не «ошибка на сервере»; текст различает сеть и сервер.
       onError: (err) =>
         showNotification({
           type: "error",
-          message: (err as any)?.response?.data?.message ?? "Произошла ошибка на сервере",
+          message: globalErrorMessage(err),
         }),
     },
     queries: {
       onError: (err) =>
         showNotification({
           type: "error",
-          message: (err as any)?.response?.data?.message ?? "Произошла ошибка на сервере",
+          message: globalErrorMessage(err),
         }),
       retry: false,
       staleTime: 20_000,

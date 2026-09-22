@@ -4,6 +4,11 @@ import { showNotification } from "../../../../components/ShowNotification";
 import css from "./index.module.css";
 import { usePostPhotosUpload } from "../../../../apiV2/a7-service";
 import { beforeUpload as oldBeforeUpload, normalizeFile } from "./helpers";
+import {
+  uploadWithRetry,
+  uploadFailureToast,
+  UPLOAD_TIMEOUT_MS,
+} from "./uploadRetry";
 import { resizeImageBeforeUpload } from "../../../../utils/imageResize/resizeImageBeforeUpload";
 import { ENV } from "../../../../env";
 import { apiGetToken } from "../../../../auth/apiGetToken";
@@ -39,8 +44,13 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
     isLoading: isUploading,
     mutateAsync: upload,
   } = usePostPhotosUpload({
+    // R-34: у аплоада свои повторы и свой финальный тост — глобальный onError
+    // (react-query defaultOptions) глушим, иначе он стрелял бы на каждую попытку.
+    mutation: { onError: () => undefined },
     axios: {
       baseURL: ENV.REACT_APP_API_URL,
+      // R-34: без таймаута запрос по рваному каналу висел вечно.
+      timeout: UPLOAD_TIMEOUT_MS,
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: apiGetToken() ? `Bearer ${apiGetToken()}` : "",
@@ -75,24 +85,27 @@ const UploadBox: FC<Props> = ({ size, albumId, isAlbumLoading }) => {
       const resized = await resizeImageBeforeUpload(original);
       const file = resized ?? original;
 
-      try {
-        await upload({
+      // R-34: обрыв сети/5xx — до 3 попыток с паузой; 4xx — сразу честный тост.
+      const result = await uploadWithRetry(() =>
+        upload({
           data: {
             photo: normalizeFile(file),
             albumId,
           },
-        });
+        })
+      );
 
-        setUploadDone((prev) => prev + 1);
-      } catch {
+      if (!result.ok) {
+        const toast = uploadFailureToast(original.name, result.failure);
         showNotification({
           type: "error",
-          message: `Ошибка загрузки файла ${original.name}`,
+          message: toast.message,
+          description: toast.description,
           duration: 30,
         });
-
-        setUploadDone((prev) => prev + 1);
       }
+
+      setUploadDone((prev) => prev + 1);
     }
 
     uploadingRef.current = false;
