@@ -17,6 +17,7 @@ import {
 import Button from "../../../components/Button/Button";
 import { showNotification } from "../../../components/ShowNotification";
 import ChainCarouselModal from "./ChainCarouselModal";
+import { compareTarget } from "../runMode";
 import css from "../index.module.css";
 
 const usd = (value?: number) =>
@@ -62,6 +63,9 @@ const RunView: FC<Props> = ({ run, canRun }) => {
       void queryClient.invalidateQueries(explorerRunKey(run.id));
     },
   });
+
+  // без эталона сравниваем с исходником (R-35.2)
+  const compare = compareTarget(run);
 
   const chainEstimate = (chain: ExplorerChain) =>
     chain.steps.reduce((sum, s) => sum + s.estimateUsd, 0);
@@ -170,7 +174,7 @@ const RunView: FC<Props> = ({ run, canRun }) => {
             )}
             {chain.status === "done" && (
               <Button onClick={() => setCarousel({ chain, initialSlide: -1 })}>
-                <SwapOutlined /> С эталоном
+                <SwapOutlined /> {compare.label === "эталон" ? "С эталоном" : "С исходником"}
               </Button>
             )}
             {chain.status === "failed" && canRun && (
@@ -209,7 +213,7 @@ const RunView: FC<Props> = ({ run, canRun }) => {
           </span>
         )}
         <span className={css.runMeta}>
-          эталон {run.resolution} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
+          {run.referenceUrl ? `эталон ${run.resolution}` : "без эталона"} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
           {usd(run.factUsd)}
         </span>
       </div>
@@ -226,7 +230,8 @@ const RunView: FC<Props> = ({ run, canRun }) => {
         onClose={() => setCarousel(null)}
         chain={carousel?.chain ?? null}
         sourceUrl={run.sourceUrl}
-        referenceUrl={run.referenceUrl}
+        compareUrl={compare.url}
+        compareLabel={compare.label}
         initialSlide={carousel?.initialSlide ?? 0}
       />
     </div>

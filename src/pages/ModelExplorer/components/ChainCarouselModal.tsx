@@ -18,21 +18,25 @@ type Props = {
   onClose: () => void;
   chain: ExplorerChain | null;
   sourceUrl: string;
-  referenceUrl: string;
-  /** с какого кадра открыть (последний = слайдер с эталоном) */
+  /** с чем сравнивать результат: эталон, у прогона без эталона — исходник (R-35.2) */
+  compareUrl: string;
+  compareLabel: "эталон" | "исходник";
+  /** с какого кадра открыть (последний = слайдер сравнения) */
   initialSlide?: number;
 };
 
 /**
  * Карусель цепочки (R-14): исходник → каждый шаг в большом масштабе → последний кадр
- * со слайдером-шторкой «результат ⟷ эталон» (как в модалке улучшения фото).
+ * со слайдером-шторкой «результат ⟷ эталон» (как в модалке улучшения фото);
+ * у прогона без эталона — «результат ⟷ исходник» (R-35.2).
  */
 const ChainCarouselModal: FC<Props> = ({
   open,
   onClose,
   chain,
   sourceUrl,
-  referenceUrl,
+  compareUrl,
+  compareLabel,
   initialSlide = 0,
 }) => {
   if (!open || !chain) return null;
@@ -66,12 +70,20 @@ const ChainCarouselModal: FC<Props> = ({
   if (finalStep?.imageUrl) {
     frames.push({
       key: "compare",
-      caption: "Результат ⟷ эталон (nano-banana-pro)",
+      caption:
+        compareLabel === "эталон"
+          ? "Результат ⟷ эталон (nano-banana-pro)"
+          : "Результат ⟷ исходник (прогон без эталона)",
       node: (
         <ReactCompareSlider
           className={css.compareSlider}
           itemOne={<ReactCompareSliderImage src={finalStep.imageUrl} alt="Результат цепочки" />}
-          itemTwo={<ReactCompareSliderImage src={referenceUrl} alt="Эталон" />}
+          itemTwo={
+            <ReactCompareSliderImage
+              src={compareUrl}
+              alt={compareLabel === "эталон" ? "Эталон" : "Исходник"}
+            />
+          }
           position={50}
         />
       ),
