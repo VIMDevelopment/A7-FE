@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Image, Input, Radio, Select, Spin, Table, Tabs, Tag, Upload } from "antd";
-import { InboxOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Alert, Image, Input, Popconfirm, Radio, Select, Spin, Table, Tabs, Tag, Upload } from "antd";
+import { DeleteOutlined, InboxOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
 import { showNotification } from "../../components/ShowNotification";
@@ -14,9 +14,12 @@ import {
   useExplorerConfig,
   useExplorerRun,
   useExplorerRuns,
+  ExplorerRunListItem,
+  useDeleteRun,
   useStartRun,
   useStartRunWithoutReference,
 } from "../../api/explorerApi";
+import { canDeleteRun } from "./historyActions";
 import { canRunExplorer } from "./access";
 import { canStartWithoutReference, effectivePrompt, PromptSource } from "./runMode";
 import RunView from "./components/RunView";
@@ -124,6 +127,21 @@ const ModelExplorerPage: FC = () => {
   });
   const runStarting = startRun.isLoading || startRunDirect.isLoading;
 
+  const deleteRun = useDeleteRun({
+    onSuccess: (_, runId) => {
+      if (runId === activeRunId) setActiveRunId(null);
+      void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
+      showNotification({ type: "success", message: "Прогон удалён из истории" });
+    },
+    onError: (err) =>
+      showNotification({
+        type: "error",
+        message:
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          "Не удалось удалить прогон",
+      }),
+  });
+
   const estimate = config?.estimateUsd;
   const overLimit =
     estimate !== undefined && config !== undefined && estimate > config.limitUsd;
@@ -188,8 +206,30 @@ const ModelExplorerPage: FC = () => {
         render: (_: unknown, item: { estimateUsd: number; factUsd?: number }) =>
           `${usd(item.factUsd)} (оценка ${usd(item.estimateUsd)})`,
       },
+      {
+        title: "",
+        key: "actions",
+        width: 60,
+        render: (_: unknown, item: ExplorerRunListItem) =>
+          canDeleteRun(item, isRunner) ? (
+            // клик по строке открывает прогон — кнопку от него изолируем
+            <span onClick={(e) => e.stopPropagation()}>
+              <Popconfirm
+                title="Удалить прогон из истории?"
+                description="Картинки цепочек удалятся из бакета; эталон останется в кэше."
+                okText="Удалить"
+                cancelText="Отмена"
+                onConfirm={() => deleteRun.mutate(item.id)}
+              >
+                <Button size="small" aria-label="Удалить прогон">
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            </span>
+          ) : null,
+      },
     ],
-    []
+    [isRunner, deleteRun]
   );
 
   const runTabContent = (

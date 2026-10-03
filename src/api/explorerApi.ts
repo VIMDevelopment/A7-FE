@@ -298,3 +298,10 @@ export const useStartRunWithoutReference = (
     },
     options
   );
+
+/** Удаление прогона из истории (R-36): запись + картинки цепочек; эталон остаётся (кэш). */
+export const useDeleteRun = (options?: UseMutationOptions<{ ok: boolean }, unknown, string>) =>
+  useMutation<{ ok: boolean }, unknown, string>(
+    (id) => del<{ ok: boolean }>(`/explorer/runs/${id}`).then((r) => r.data),
+    options
+  );
