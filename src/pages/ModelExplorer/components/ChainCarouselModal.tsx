@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { Carousel } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -23,6 +24,8 @@ type Props = {
   compareLabel: "эталон" | "исходник";
   /** с какого кадра открыть (последний = слайдер сравнения) */
   initialSlide?: number;
+  /** скачать картинку шага (индекс в chain.steps), R-37 */
+  onDownloadStep?: (stepIndex: number) => void;
 };
 
 /**
@@ -38,6 +41,7 @@ const ChainCarouselModal: FC<Props> = ({
   compareUrl,
   compareLabel,
   initialSlide = 0,
+  onDownloadStep,
 }) => {
   if (!open || !chain) return null;
 
@@ -46,14 +50,22 @@ const ChainCarouselModal: FC<Props> = ({
   );
   const finalStep = doneSteps[doneSteps.length - 1];
 
-  const frames: Array<{ key: string; caption: string; node: React.ReactNode }> = [
+  const frames: Array<{
+    key: string;
+    caption: string;
+    node: React.ReactNode;
+    /** индекс шага для кнопки «Скачать» (у исходника и слайдера — нет) */
+    stepIndex?: number;
+  }> = [
     {
       key: "source",
       caption: "Исходник",
       node: <img src={sourceUrl} alt="Исходник" className={css.carouselImg} />,
     },
+    // шаги цепочки идут по порядку и обрываются на упавшем — готовые шаги = её префикс
     ...doneSteps.map((step, i) => ({
       key: `step-${i}`,
+      stepIndex: i,
       caption: `Шаг ${i + 1}: ${shortModel(step.model)} · ${
         step.cached ? "из кэша" : usd(step.factUsd ?? step.estimateUsd)
       }`,
@@ -115,7 +127,21 @@ const ChainCarouselModal: FC<Props> = ({
       >
         {frames.map((frame) => (
           <div key={frame.key}>
-            <div className={css.carouselCaption}>{frame.caption}</div>
+            <div className={css.carouselCaption}>
+              {frame.caption}
+              {frame.stepIndex !== undefined && onDownloadStep && (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    className={css.linkButton}
+                    onClick={() => onDownloadStep(frame.stepIndex as number)}
+                  >
+                    <DownloadOutlined /> скачать
+                  </button>
+                </>
+              )}
+            </div>
             <div className={css.carouselFrame}>{frame.node}</div>
           </div>
         ))}
