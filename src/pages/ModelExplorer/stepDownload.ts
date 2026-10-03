@@ -1,4 +1,4 @@
-import { downloadImageByUrl } from "../Album/components/PhotoCard/helpers";
+import { showNotification } from "../../components/ShowNotification";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -28,15 +28,38 @@ export function stepFileName(
 }
 
 /**
- * Скачивание картинки шага прямо из бакета — тем же способом, что фото альбома
- * (CORS бакетов стенда и прода пускают свои домены; бэкенд не участвует).
+ * Скачивание картинки шага прямо из бакета (CORS бакетов стенда и прода пускают свои
+ * домены; бэкенд не участвует).
+ *
+ * cache: "no-store" обязателен: миниатюра шага — тот же URL, уже загруженный тегом <img>
+ * без CORS. S3 не шлёт `Vary: Origin`, поэтому обычный fetch получает этот ответ из
+ * HTTP-кэша без Access-Control-Allow-Origin, и браузер блокирует его по CORS
+ * (баг стенда 03.10). Мимо кэша запрос уходит с Origin и получает разрешение.
  */
-export function downloadStepImage(
+export async function downloadStepImage(
   imageUrl: string,
   runCreatedAt: string,
   chainTitle: string,
   stepIndex: number,
   model: string
 ): Promise<void> {
-  return downloadImageByUrl(imageUrl, stepFileName(runCreatedAt, chainTitle, stepIndex, model));
+  try {
+    const response = await fetch(imageUrl, { mode: "cors", cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const blobUrl = URL.createObjectURL(await response.blob());
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = stepFileName(runCreatedAt, chainTitle, stepIndex, model);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    showNotification({
+      type: "error",
+      message: "Не удалось скачать картинку — попробуйте ещё раз",
+    });
+  }
 }
