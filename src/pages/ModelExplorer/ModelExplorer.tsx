@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Image, Select, Spin, Table, Tabs, Tag, Upload } from "antd";
-import { InboxOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Alert, Image, Input, Popconfirm, Radio, Select, Spin, Table, Tabs, Tag, Upload } from "antd";
+import { DeleteOutlined, InboxOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
 import { showNotification } from "../../components/ShowNotification";
@@ -14,9 +14,14 @@ import {
   useExplorerConfig,
   useExplorerRun,
   useExplorerRuns,
+  ExplorerRunListItem,
+  useDeleteRun,
   useStartRun,
+  useStartRunWithoutReference,
 } from "../../api/explorerApi";
+import { canDeleteRun } from "./historyActions";
 import { canRunExplorer } from "./access";
+import { canStartWithoutReference, effectivePrompt, PromptSource } from "./runMode";
 import RunView from "./components/RunView";
 import PromptPicker from "./components/PromptPicker";
 import ChainConfigurator from "./components/ChainConfigurator";
@@ -40,11 +45,16 @@ const ModelExplorerPage: FC = () => {
 
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState("");
+  // промпт: из справочника или свой текст — свой уходит в модели дословно (R-35.4)
+  const [promptSource, setPromptSource] = useState<PromptSource>("catalog");
+  const [catalogPrompt, setCatalogPrompt] = useState<string | undefined>();
+  const [ownPrompt, setOwnPrompt] = useState("");
+  const prompt = effectivePrompt(promptSource, catalogPrompt, ownPrompt);
   const [resolution, setResolution] = useState<ExplorerResolution>("2K");
   const [reference, setReference] = useState<ExplorerReference | null>(null);
   const [referenceCached, setReferenceCached] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  // окно подтверждения суммы: прогон против эталона или быстрый без эталона (R-35)
+  const [confirmMode, setConfirmMode] = useState<"reference" | "direct" | null>(null);
   const [referenceError, setReferenceError] = useState<string | null>(null);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"run" | "configurator" | "history">("run");
@@ -96,13 +106,40 @@ const ModelExplorerPage: FC = () => {
     },
   });
 
-  const startRun = useStartRun({
-    onSuccess: ({ run }) => {
-      setConfirmOpen(false);
-      setActiveRunId(run.id);
-      setActiveTab("run");
+  const onRunStarted = ({ run }: { run: { id: string } }) => {
+    setConfirmMode(null);
+    setActiveRunId(run.id);
+    setActiveTab("run");
+    void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
+  };
+  const onRunStartError = (err: unknown) =>
+    showNotification({
+      type: "error",
+      message:
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Не удалось запустить прогон",
+    });
+
+  const startRun = useStartRun({ onSuccess: onRunStarted, onError: onRunStartError });
+  const startRunDirect = useStartRunWithoutReference({
+    onSuccess: onRunStarted,
+    onError: onRunStartError,
+  });
+  const runStarting = startRun.isLoading || startRunDirect.isLoading;
+
+  const deleteRun = useDeleteRun({
+    onSuccess: (_, runId) => {
+      if (runId === activeRunId) setActiveRunId(null);
       void queryClient.invalidateQueries(explorerRunsKey, { exact: true });
+      showNotification({ type: "success", message: "Прогон удалён из истории" });
     },
+    onError: (err) =>
+      showNotification({
+        type: "error",
+        message:
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          "Не удалось удалить прогон",
+      }),
   });
 
   const estimate = config?.estimateUsd;
@@ -121,9 +158,15 @@ const ModelExplorerPage: FC = () => {
 
   const referenceMatchesForm = Boolean(
     reference &&
-      reference.prompt === prompt.trim() &&
+      reference.prompt === prompt &&
       reference.resolution === resolution
   );
+  const directRunAllowed = canStartWithoutReference({
+    hasFile: Boolean(file),
+    prompt,
+    overLimit,
+    busy: runStarting || createReference.isLoading,
+  });
 
   const historyColumns = useMemo(
     () => [
@@ -148,8 +191,13 @@ const ModelExplorerPage: FC = () => {
         title: "Статус",
         dataIndex: "status",
         key: "status",
-        width: 120,
-        render: (status: string) => <Tag>{status}</Tag>,
+        width: 170,
+        render: (status: string, item: { withReference?: boolean }) => (
+          <>
+            <Tag>{status}</Tag>
+            {item.withReference === false && <Tag color="purple">без эталона</Tag>}
+          </>
+        ),
       },
       {
         title: "Стоимость",
@@ -158,8 +206,30 @@ const ModelExplorerPage: FC = () => {
         render: (_: unknown, item: { estimateUsd: number; factUsd?: number }) =>
           `${usd(item.factUsd)} (оценка ${usd(item.estimateUsd)})`,
       },
+      {
+        title: "",
+        key: "actions",
+        width: 60,
+        render: (_: unknown, item: ExplorerRunListItem) =>
+          canDeleteRun(item, isRunner) ? (
+            // клик по строке открывает прогон — кнопку от него изолируем
+            <span onClick={(e) => e.stopPropagation()}>
+              <Popconfirm
+                title="Удалить прогон из истории?"
+                description="Картинки цепочек удалятся из бакета; эталон останется в кэше."
+                okText="Удалить"
+                cancelText="Отмена"
+                onConfirm={() => deleteRun.mutate(item.id)}
+              >
+                <Button size="small" aria-label="Удалить прогон">
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            </span>
+          ) : null,
+      },
     ],
-    []
+    [isRunner, deleteRun]
   );
 
   const runTabContent = (
@@ -199,12 +269,34 @@ const ModelExplorerPage: FC = () => {
             </div>
             <div className={css.formCol}>
               <label className={css.label}>
-                Промпт (один на прогон, из общего справочника — как в модалке улучшения)
+                Промпт (один на прогон): из общего справочника — как в модалке улучшения — или свой текст
               </label>
-              <PromptPicker
-                disabled={createReference.isLoading || startRun.isLoading}
-                onPromptBodyChange={(body) => setPrompt(body ?? "")}
+              <Radio.Group
+                value={promptSource}
+                onChange={(e) => setPromptSource(e.target.value as PromptSource)}
+                disabled={createReference.isLoading || runStarting}
+                optionType="button"
+                options={[
+                  { value: "catalog", label: "Из справочника" },
+                  { value: "own", label: "Свой текст" },
+                ]}
               />
+              {/* справочник держим смонтированным: при возврате к нему выбор не теряется */}
+              <div style={{ display: promptSource === "catalog" ? undefined : "none" }}>
+                <PromptPicker
+                  disabled={createReference.isLoading || runStarting}
+                  onPromptBodyChange={setCatalogPrompt}
+                />
+              </div>
+              {promptSource === "own" && (
+                <Input.TextArea
+                  value={ownPrompt}
+                  onChange={(e) => setOwnPrompt(e.target.value)}
+                  autoSize={{ minRows: 5, maxRows: 14 }}
+                  placeholder="Вставьте текст промпта — уйдёт в модели дословно, без справочника и перевода"
+                  disabled={createReference.isLoading || runStarting}
+                />
+              )}
               <label className={css.label}>Разрешение эталона (на цепочки не влияет — у их шагов своё)</label>
               <Select
                 value={resolution}
@@ -218,10 +310,10 @@ const ModelExplorerPage: FC = () => {
 
               <div className={css.actionsRow}>
                 <Button
-                  disabled={!file || !prompt.trim() || createReference.isLoading}
+                  disabled={!file || !prompt || createReference.isLoading}
                   onClick={() =>
                     file &&
-                    createReference.mutate({ photo: file, prompt: prompt.trim(), resolution })
+                    createReference.mutate({ photo: file, prompt, resolution })
                   }
                 >
                   {createReference.isLoading
@@ -229,10 +321,13 @@ const ModelExplorerPage: FC = () => {
                     : `1. Получить эталон (${usd(config?.reference.priceUsd[resolution])})`}
                 </Button>
                 <Button
-                  disabled={!referenceMatchesForm || startRun.isLoading || overLimit}
-                  onClick={() => setConfirmOpen(true)}
+                  disabled={!referenceMatchesForm || runStarting || overLimit}
+                  onClick={() => setConfirmMode("reference")}
                 >
                   {`2. Прогнать цепочки (~${usd(estimate)})`}
+                </Button>
+                <Button disabled={!directRunAllowed} onClick={() => setConfirmMode("direct")}>
+                  {`Прогнать без эталона (~${usd(estimate)})`}
                 </Button>
               </div>
               {referenceError && (
@@ -243,10 +338,10 @@ const ModelExplorerPage: FC = () => {
                   action={
                     <Button
                       size="small"
-                      disabled={!file || !prompt.trim() || createReference.isLoading}
+                      disabled={!file || !prompt || createReference.isLoading}
                       onClick={() =>
                         file &&
-                        createReference.mutate({ photo: file, prompt: prompt.trim(), resolution })
+                        createReference.mutate({ photo: file, prompt, resolution })
                       }
                     >
                       Повторить
@@ -282,7 +377,7 @@ const ModelExplorerPage: FC = () => {
                       file &&
                       createReference.mutate({
                         photo: file,
-                        prompt: prompt.trim(),
+                        prompt,
                         resolution,
                         force: true,
                       })
@@ -365,23 +460,33 @@ const ModelExplorerPage: FC = () => {
       />
 
       <Modal
-        title="Подтверждение платного прогона"
-        open={confirmOpen}
-        onOk={() =>
-          reference &&
-          estimate !== undefined &&
-          startRun.mutate({ referenceId: reference.id, confirmEstimateUsd: estimate })
+        title={
+          confirmMode === "direct"
+            ? "Подтверждение платного прогона без эталона"
+            : "Подтверждение платного прогона"
         }
-        onCancel={() => setConfirmOpen(false)}
+        open={confirmMode !== null}
+        onOk={() => {
+          if (estimate === undefined) return;
+          if (confirmMode === "direct") {
+            if (file) startRunDirect.mutate({ photo: file, prompt, confirmEstimateUsd: estimate });
+          } else if (reference) {
+            startRun.mutate({ referenceId: reference.id, confirmEstimateUsd: estimate });
+          }
+        }}
+        onCancel={() => setConfirmMode(null)}
         okButtonName={`Запустить за ${usd(estimate)}`}
         cancelButtonName="Отмена"
-        isLoading={startRun.isLoading}
+        isLoading={runStarting}
       >
         <p>
           Будут прогнаны включённые цепочки набора (
           {config?.chains.filter((c) => c.enabled).length ?? "…"} шт.) — разрешение у
           каждого шага своё, из конфигуратора. Расчётная стоимость — <b>{usd(estimate)}</b>{" "}
-          (лимит {usd(config?.limitUsd)}). Эталон уже оплачен и повторно не тарифицируется.
+          (лимит {usd(config?.limitUsd)}).{" "}
+          {confirmMode === "direct"
+            ? `Эталон ${config?.reference.model ?? "nano-banana-pro"} не запрашивается — результаты сравниваются с исходником.`
+            : "Эталон уже оплачен и повторно не тарифицируется."}
         </p>
         <ul className={css.confirmList}>
           {config?.chains

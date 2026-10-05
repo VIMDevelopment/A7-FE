@@ -1,6 +1,7 @@
 import React, { FC, useState } from "react";
 import { Image, Spin, Table, Tag, Tooltip } from "antd";
 import {
+  DownloadOutlined,
   EyeOutlined,
   LoadingOutlined,
   RedoOutlined,
@@ -17,6 +18,8 @@ import {
 import Button from "../../../components/Button/Button";
 import { showNotification } from "../../../components/ShowNotification";
 import ChainCarouselModal from "./ChainCarouselModal";
+import { compareTarget } from "../runMode";
+import { downloadStepImage } from "../stepDownload";
 import css from "../index.module.css";
 
 const usd = (value?: number) =>
@@ -62,6 +65,17 @@ const RunView: FC<Props> = ({ run, canRun }) => {
       void queryClient.invalidateQueries(explorerRunKey(run.id));
     },
   });
+
+  // без эталона сравниваем с исходником (R-35.2)
+  const compare = compareTarget(run);
+
+  /** Скачивание картинки шага (R-37): прямо из бакета, с понятным именем файла. */
+  const downloadStep = (chain: ExplorerChain, stepIndex: number) => {
+    const step = chain.steps[stepIndex];
+    if (step?.imageUrl) {
+      void downloadStepImage(step.imageUrl, run.createdAt, chain.title, stepIndex, step.model);
+    }
+  };
 
   const chainEstimate = (chain: ExplorerChain) =>
     chain.steps.reduce((sum, s) => sum + s.estimateUsd, 0);
@@ -113,6 +127,18 @@ const RunView: FC<Props> = ({ run, canRun }) => {
                 <div className={css.stepPrice}>
                   {step.cached ? "из кэша" : usd(step.factUsd ?? step.estimateUsd)}
                 </div>
+                {step.status === "done" && step.imageUrl && (
+                  <Tooltip title="Скачать картинку шага">
+                    <button
+                      type="button"
+                      className={css.linkButton}
+                      aria-label={`Скачать шаг ${i + 1}`}
+                      onClick={() => downloadStep(chain, i)}
+                    >
+                      <DownloadOutlined /> скачать
+                    </button>
+                  </Tooltip>
+                )}
                 {step.error && (
                   <Tooltip title={step.error}>
                     <div className={css.stepError}>ошибка шага</div>
@@ -169,8 +195,13 @@ const RunView: FC<Props> = ({ run, canRun }) => {
               </Button>
             )}
             {chain.status === "done" && (
+              <Button onClick={() => downloadStep(chain, chain.steps.length - 1)}>
+                <DownloadOutlined /> Скачать результат
+              </Button>
+            )}
+            {chain.status === "done" && (
               <Button onClick={() => setCarousel({ chain, initialSlide: -1 })}>
-                <SwapOutlined /> С эталоном
+                <SwapOutlined /> {compare.label === "эталон" ? "С эталоном" : "С исходником"}
               </Button>
             )}
             {chain.status === "failed" && canRun && (
@@ -209,7 +240,7 @@ const RunView: FC<Props> = ({ run, canRun }) => {
           </span>
         )}
         <span className={css.runMeta}>
-          эталон {run.resolution} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
+          {run.referenceUrl ? `эталон ${run.resolution}` : "без эталона"} · промпт: «{run.prompt}» · оценка {usd(run.estimateUsd)} · факт{" "}
           {usd(run.factUsd)}
         </span>
       </div>
@@ -226,7 +257,9 @@ const RunView: FC<Props> = ({ run, canRun }) => {
         onClose={() => setCarousel(null)}
         chain={carousel?.chain ?? null}
         sourceUrl={run.sourceUrl}
-        referenceUrl={run.referenceUrl}
+        compareUrl={compare.url}
+        compareLabel={compare.label}
+        onDownloadStep={(stepIndex) => carousel && downloadStep(carousel.chain, stepIndex)}
         initialSlide={carousel?.initialSlide ?? 0}
       />
     </div>

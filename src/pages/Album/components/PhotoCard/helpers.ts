@@ -32,9 +32,14 @@ export type FileForZip = {
   fileName: string;
 };
 
+/**
+ * cache: "no-store" — грабля AGENTS №25: фото, уже показанное тегом <img> по тому же URL,
+ * лежит в HTTP-кэше без Access-Control-Allow-Origin (S3 не шлёт Vary: Origin), и fetch из
+ * кэша блокируется CORS. Мимо кэша запрос уходит с Origin и получает разрешение.
+ */
 export const downloadImageByUrl = async (url: string, filename: string) => {
   try {
-    const response = await fetch(url, { mode: "cors" });
+    const response = await fetch(url, { mode: "cors", cache: "no-store" });
     const blob = await response.blob();
 
     if (blob.size > 1000) {
@@ -87,7 +92,8 @@ export const handleDownloadAll = async ({
   for (const file of files) {
     const filename = file.fileName;
     try {
-      const res = await fetch(file.url, { mode: "cors" });
+      // мимо HTTP-кэша — см. downloadImageByUrl (грабля №25)
+      const res = await fetch(file.url, { mode: "cors", cache: "no-store" });
       const blob = await res.blob();
       folder?.file(filename, blob);
     } catch (err) {

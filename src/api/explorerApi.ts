@@ -97,9 +97,10 @@ export type ExplorerRun = {
   prompt: string;
   resolution: ExplorerResolution;
   status: "running" | "done" | "partial" | "failed";
-  referenceId: string;
+  /** нет у прогона без эталона (R-35) */
+  referenceId?: string;
   sourceUrl: string;
-  referenceUrl: string;
+  referenceUrl?: string;
   estimateUsd: number;
   factUsd?: number;
   chains: ExplorerChain[];
@@ -116,7 +117,10 @@ export type ExplorerRunListItem = Pick<
   | "estimateUsd"
   | "factUsd"
   | "sourceUrl"
->;
+> & {
+  /** false — быстрый прогон без эталона (R-35.2) */
+  withReference?: boolean;
+};
 
 const get = <TResp>(url: string, axiosOptions?: AxiosRequestConfig) =>
   axios.get<TResp>(url, { ...defaultApiAxiosParams, ...axiosOptions });
@@ -268,5 +272,36 @@ export const useStartRun = (
       post<StartRunArgs, { run: ExplorerRun }>("/explorer/runs", body).then(
         (r) => r.data
       ),
+    options
+  );
+
+export type StartRunWithoutReferenceArgs = {
+  photo: File;
+  prompt: string;
+  confirmEstimateUsd: number;
+};
+
+/** Быстрый прогон без эталона (R-35): фото и промпт уходят прямо в прогон, NBP не вызывается. */
+export const useStartRunWithoutReference = (
+  options?: UseMutationOptions<{ run: ExplorerRun }, unknown, StartRunWithoutReferenceArgs>
+) =>
+  useMutation<{ run: ExplorerRun }, unknown, StartRunWithoutReferenceArgs>(
+    async ({ photo, prompt, confirmEstimateUsd }) => {
+      const form = new FormData();
+      form.append("photo", photo);
+      form.append("prompt", prompt);
+      form.append("confirmEstimateUsd", String(confirmEstimateUsd));
+      const { data } = await post<FormData, { run: ExplorerRun }>("/explorer/runs/direct", form, {
+        headers: { ...defaultApiAxiosParams.headers, "Content-Type": "multipart/form-data" },
+      });
+      return data;
+    },
+    options
+  );
+
+/** Удаление прогона из истории (R-36): запись + картинки цепочек; эталон остаётся (кэш). */
+export const useDeleteRun = (options?: UseMutationOptions<{ ok: boolean }, unknown, string>) =>
+  useMutation<{ ok: boolean }, unknown, string>(
+    (id) => del<{ ok: boolean }>(`/explorer/runs/${id}`).then((r) => r.data),
     options
   );
