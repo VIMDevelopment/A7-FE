@@ -130,3 +130,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.fieldError {
+  color: var(--color-error);
+  font-size: 13px;
+  margin-top: -4px;
+}
+
+.hint {
+  color: var(--color-text-secondary, var(--color-text));
+  font-size: 13px;
+}

@@ -35,6 +35,7 @@ import {
   getFavoritePromptsKey,
 } from "../../api/favoritesApi";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
+import { defaultPromptOf, promptBodyOf } from "../prompts/promptCatalog";
 import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
 import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
 import type { PostPhotosImproveBody } from "../../apiV2/a7-service/model/postPhotosImproveBody";
@@ -214,11 +215,8 @@ const ImprovementModal: FC<Props> = ({
     selectedVersion != null
       ? promptHistory.find((h) => h.promptVersion === selectedVersion)
       : undefined;
-  const bodyForRequest =
-    selectedVersion != null
-      ? promptHistory.find((h) => h.promptVersion === selectedVersion)
-          ?.promptBody ?? selectedPrompt?.body
-      : selectedPrompt?.body;
+  // текст — только выбранного промпта категории; body категории не отправляется (R-38.5)
+  const bodyForRequest = promptBodyOf(selectedPrompt, selectedVersion);
 
   useEffect(() => {
     if (prevStatusRef.current === "processing" && status === "success") {
@@ -457,17 +455,14 @@ const ImprovementModal: FC<Props> = ({
             <div className={css.promptSelectContainer}>
               <Select
                 searchable
-                label="Промпт"
-                placeholder="Выберите промпт"
+                label="Категория"
+                placeholder="Выберите категорию"
                 value={selectedPromptId}
                 onChange={(value) => {
                   setSelectedPromptId(value ?? undefined);
-                  const prompt = promptsList.find((p) => p.id === value);
-                  const history = prompt?.history ?? [];
+                  // один промпт в категории — подставляем; несколько — выбирает человек (R-38.5)
                   setSelectedVersion(
-                    history.length > 0
-                      ? history[history.length - 1].promptVersion
-                      : null
+                    defaultPromptOf(promptsList.find((p) => p.id === value))
                   );
                 }}
                 options={sortedPrompts.map((p) => ({
@@ -508,8 +503,8 @@ const ImprovementModal: FC<Props> = ({
               {selectedPromptId && promptHistory.length > 0 && (
                 <div className={css.versionSelect}>
                   <Select
-                    label="Версия"
-                    placeholder="Выберите версию"
+                    label="Промпт"
+                    placeholder="Выберите промпт"
                     value={selectedVersion}
                     onChange={(value) => setSelectedVersion(value ?? null)}
                     options={promptHistory.map(

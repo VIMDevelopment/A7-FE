@@ -30,8 +30,8 @@ type Props = {
 
 /**
  * Выбор промпта для эталона/прогона — тот же принцип, что в модалке улучшения фото:
- * общий справочник промптов, избранные филиала сверху со звёздами, выбор версии
- * из history с тултипом тела и описанием (R-12/R-13.5).
+ * общий справочник, категория → промпт внутри неё (R-38), избранные категории филиала
+ * сверху со звёздами, тултип с текстом промпта и описание (R-12/R-13.5).
  */
 const PromptPicker: FC<Props> = ({ disabled, onPromptBodyChange }) => {
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
@@ -88,8 +88,8 @@ const PromptPicker: FC<Props> = ({ disabled, onPromptBodyChange }) => {
     <div className={css.promptPicker}>
       <Select
         searchable
-        label="Промпт"
-        placeholder="Выберите промпт"
+        label="Категория"
+        placeholder="Выберите категорию"
         value={selectedPromptId}
         onChange={(value) => {
           const prompt = promptsList.find((p) => p.id === value);
@@ -131,8 +131,8 @@ const PromptPicker: FC<Props> = ({ disabled, onPromptBodyChange }) => {
 
       {selectedPromptId && promptHistory.length > 0 && (
         <Select
-          label="Версия"
-          placeholder="Выберите версию"
+          label="Промпт"
+          placeholder="Выберите промпт"
           value={selectedVersion}
           onChange={(value) => {
             setSelectedVersion(value ?? null);
