@@ -20,6 +20,7 @@ import {
   resolvePromptBody,
   sortPromptsByFavorites,
 } from "../promptSelection";
+import { categoriesWithPrompts } from "../../../components/prompts/promptCatalog";
 import css from "../index.module.css";
 
 type Props = {
@@ -54,7 +55,7 @@ const PromptPicker: FC<Props> = ({ disabled, onPromptBodyChange }) => {
   const { mutate: removeFavorite } = useDeleteFavoritePrompt();
 
   const favoriteIdSet = new Set(favoritesData?.data.promptIds ?? []);
-  const sortedPrompts = sortPromptsByFavorites(promptsList, favoriteIdSet);
+  const sortedPrompts = sortPromptsByFavorites(categoriesWithPrompts(promptsList), favoriteIdSet);
 
   const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
   const promptHistory = selectedPrompt?.history ?? [];

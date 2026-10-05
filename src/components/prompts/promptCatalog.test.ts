@@ -1,6 +1,8 @@
 import {
+  categoriesWithPrompts,
   defaultPromptOf,
   promptBodyOf,
+  validateNewCategoryName,
   validateNewPromptName,
 } from "./promptCatalog";
 import type {
@@ -47,5 +49,20 @@ describe("Справочник: категории и промпты [R-38]", ()
       "Промпт «Страница» уже есть в категории «Комикс»"
     );
     expect(validateNewPromptName(c, "Значок")).toBeNull();
+  });
+
+  it("[R-38.2] имя новой категории: не пустое и уникальное (без учёта регистра и пробелов)", () => {
+    const cats = [category([item("Страница")])];
+    expect(validateNewCategoryName(cats, "   ")).toBe("Введите название категории");
+    expect(validateNewCategoryName(cats, " комикс ")).toBe("Категория «Комикс» уже есть");
+    expect(validateNewCategoryName(cats, "Значки")).toBeNull();
+  });
+
+  it("[R-38.5] фотографу показываются только категории с промптами — в пустой применять нечего", () => {
+    const empty = { id: "c2", title: "Пустая", body: "", history: [] } as PromptResponse;
+    const noHistory = { id: "c3", title: "Старая", body: "x" } as PromptResponse;
+    const full = category([item("Страница")]);
+    expect(categoriesWithPrompts([empty, noHistory, full]).map((c) => c.id)).toEqual(["c1"]);
+    expect(categoriesWithPrompts([])).toEqual([]);
   });
 });

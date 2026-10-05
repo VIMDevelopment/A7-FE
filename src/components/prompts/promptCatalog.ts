@@ -37,3 +37,20 @@ export function validateNewPromptName(
   }
   return null;
 }
+
+/** Имя новой категории (R-38.2): не пустое и уникальное — без учёта регистра и пробелов. */
+export function validateNewCategoryName(
+  categories: PromptResponse[],
+  rawName: string
+): string | null {
+  const name = rawName.trim();
+  if (!name) return "Введите название категории";
+  const key = name.toLowerCase();
+  const clash = categories.find((c) => (c.title ?? "").trim().toLowerCase() === key);
+  return clash ? `Категория «${clash.title}» уже есть` : null;
+}
+
+/** Фотографу (модалка, Explorer) — только категории с промптами: в пустой применять нечего (R-38.5). */
+export function categoriesWithPrompts(categories: PromptResponse[]): PromptResponse[] {
+  return categories.filter((c) => (c.history ?? []).length > 0);
+}

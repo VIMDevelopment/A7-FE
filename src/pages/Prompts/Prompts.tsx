@@ -17,7 +17,10 @@ import { useQueryClient } from "react-query";
 import Modal from "../../components/Modal/Modal";
 import { DeleteOutlined } from "@ant-design/icons";
 import { Tabs } from "antd";
-import { validateNewPromptName } from "../../components/prompts/promptCatalog";
+import {
+  validateNewCategoryName,
+  validateNewPromptName,
+} from "../../components/prompts/promptCatalog";
 
 /**
  * Справочник (R-38): запись = КАТЕГОРИЯ («Комикс»), её history = ПРОМПТЫ внутри
@@ -27,11 +30,10 @@ import { validateNewPromptName } from "../../components/prompts/promptCatalog";
 const PromptsPage = () => {
   const queryClient = useQueryClient();
 
-  // «Новая категория»
+  const [activeTab, setActiveTab] = useState("create");
+
+  // «Добавить категорию» — только название; промпты добавляются во вкладке «Добавить промпт» (R-38.2)
   const [createTitle, setCreateTitle] = useState("");
-  const [createPromptName, setCreatePromptName] = useState("");
-  const [createBody, setCreateBody] = useState("");
-  const [createDescription, setCreateDescription] = useState("");
 
   // «Добавить промпт» в существующую категорию (R-38.3)
   const [addCategoryId, setAddCategoryId] = useState<string | undefined>();
@@ -87,6 +89,7 @@ const PromptsPage = () => {
   const addNameError = addCategoryId
     ? validateNewPromptName(addCategory, addPromptName)
     : null;
+  const createNameError = validateNewCategoryName(categories, createTitle);
 
   useEffect(() => {
     if (selectedCategory == null) {
@@ -110,32 +113,20 @@ const PromptsPage = () => {
     void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
 
   const handleCreateCategory = async () => {
+    if (createNameError) return;
     const title = createTitle.trim();
-    const promptName = createPromptName.trim();
-    const body = createBody.trim();
-    const description = createDescription.trim();
-    if (!title || !promptName || !body) return;
     try {
-      const response = await createCategory({ data: { title, body } });
-      const createdId = response.data.id;
-      if (createdId) {
-        await updateCategory({
-          id: createdId,
-          data: {
-            title,
-            body,
-            history: [
-              { promptVersion: promptName, promptBody: body, ru: body, description, rate: 0 },
-            ],
-          },
-        });
-      }
-      showNotification({ type: "success", message: "Категория создана" });
+      // body пустой: категория без промптов (R-38.2) — BE принимает body опциональным
+      const response = await createCategory({ data: { title, body: "" } });
+      showNotification({
+        type: "success",
+        message: `Категория «${title}» создана — добавьте в неё промпт`,
+      });
       setCreateTitle("");
-      setCreatePromptName("");
-      setCreateBody("");
-      setCreateDescription("");
       invalidate();
+      // сразу к добавлению промпта в новую категорию
+      setAddCategoryId(response.data.id ?? undefined);
+      setActiveTab("add");
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
     }
@@ -249,14 +240,15 @@ const PromptsPage = () => {
 
       <Tabs
         className={css.tabs}
-        defaultActiveKey="create"
+        activeKey={activeTab}
+        onChange={setActiveTab}
         items={[
           {
             key: "create",
-            label: "Новая категория",
+            label: "Добавить категорию",
             children: (
               <div className={css.section}>
-                <div className={css.sectionTitle}>Новая категория с первым промптом</div>
+                <div className={css.sectionTitle}>Новая категория</div>
                 <div className={css.form}>
                   <Input
                     label="Название категории"
@@ -265,47 +257,19 @@ const PromptsPage = () => {
                     disabled={isCreateLoading}
                     placeholder="Например: Комикс"
                   />
-                  <Input
-                    label="Название первого промпта"
-                    value={createPromptName}
-                    onChange={(e) => setCreatePromptName(e.target.value)}
-                    disabled={isCreateLoading}
-                    placeholder="Например: Страница комикса"
-                  />
-                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                  {/* @ts-ignore */}
-                  <InputTextArea
-                    label="Текст промпта"
-                    value={createBody}
-                    onChange={(e) => setCreateBody(e.target.value)}
-                    disabled={isCreateLoading}
-                    placeholder="Введите текст промпта"
-                    className={css.bodyField}
-                    rows={4}
-                  />
-                  {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                  {/* @ts-ignore */}
-                  <InputTextArea
-                    label="Описание промпта (опционально)"
-                    value={createDescription}
-                    onChange={(e) => setCreateDescription(e.target.value)}
-                    disabled={isCreateLoading}
-                    placeholder="Что получится на фото"
-                    className={css.bodyField}
-                    rows={2}
-                  />
+                  {createTitle.trim() && createNameError && (
+                    <div className={css.fieldError}>{createNameError}</div>
+                  )}
+                  <div className={css.hint}>
+                    Промпты добавляются во вкладке «Добавить промпт» — после создания она откроется сама.
+                  </div>
                   <Button
                     className={css.btn}
-                    disabled={
-                      isCreateLoading ||
-                      !createTitle.trim() ||
-                      !createPromptName.trim() ||
-                      !createBody.trim()
-                    }
+                    disabled={isCreateLoading || !!createNameError}
                     onClick={handleCreateCategory}
                     showSpinner={isCreateLoading}
                   >
-                    Создать категорию
+                    Добавить категорию
                   </Button>
                 </div>
               </div>
@@ -436,6 +400,11 @@ const PromptsPage = () => {
                       </div>
                     )}
                   </div>
+                  {selectedCategoryId && selectedPrompts.length === 0 && (
+                    <div className={css.hint}>
+                      В категории пока нет промптов — добавьте их во вкладке «Добавить промпт».
+                    </div>
+                  )}
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore */}
                   <InputTextArea

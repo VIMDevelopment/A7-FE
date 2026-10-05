@@ -35,7 +35,7 @@ import {
   getFavoritePromptsKey,
 } from "../../api/favoritesApi";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
-import { defaultPromptOf, promptBodyOf } from "../prompts/promptCatalog";
+import { categoriesWithPrompts, defaultPromptOf, promptBodyOf } from "../prompts/promptCatalog";
 import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
 import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
 import type { PostPhotosImproveBody } from "../../apiV2/a7-service/model/postPhotosImproveBody";
@@ -179,11 +179,13 @@ const ImprovementModal: FC<Props> = ({
   // Избранное филиала: множество id + отсортированный список (избранные сверху по title,
   // затем остальные в исходном порядке бэкенда — createdAt desc).
   const favoriteIdSet = new Set(favoritesData?.data.promptIds ?? []);
+  // фотографу — только категории с промптами (R-38.5); избранные филиала сверху
+  const visibleCategories = categoriesWithPrompts(promptsList);
   const sortedPrompts = [
-    ...promptsList
+    ...visibleCategories
       .filter((p) => favoriteIdSet.has(p.id ?? ""))
       .sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "")),
-    ...promptsList.filter((p) => !favoriteIdSet.has(p.id ?? "")),
+    ...visibleCategories.filter((p) => !favoriteIdSet.has(p.id ?? "")),
   ];
 
   const toggleFavorite = (
