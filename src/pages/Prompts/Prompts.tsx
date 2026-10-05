@@ -16,7 +16,16 @@ import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import Modal from "../../components/Modal/Modal";
 import { DeleteOutlined } from "@ant-design/icons";
-import { Tabs } from "antd";
+import { Popconfirm, Tabs } from "antd";
+import { useProfile } from "../../auth/auth";
+import { canRunExplorer } from "../ModelExplorer/access";
+import { useExplorerConfig } from "../../api/explorerApi";
+import {
+  CategoryWithProcessing,
+  useBindCategory,
+  useUnbindCategory,
+} from "../../api/processingApi";
+import { describeProcessing, processingOf } from "../../components/prompts/categoryProcessing";
 import {
   validateNewCategoryName,
   validateNewPromptName,
@@ -27,8 +36,14 @@ import {
  * («Страница», «Значок»). Хранение и API прежние (promptVersion = название промпта):
  * десктоп на точках синхронизирует справочник с прода и работает без нового релиза.
  */
+const usd = (value?: number) =>
+  value === undefined ? "—" : `$${value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}`;
+
 const PromptsPage = () => {
   const queryClient = useQueryClient();
+  const { data: profile } = useProfile();
+  // привязка категории к цепочке — платное решение, только админ (R-39.6)
+  const isAdmin = canRunExplorer(profile?.roles);
 
   const [activeTab, setActiveTab] = useState("create");
 
@@ -47,6 +62,9 @@ const PromptsPage = () => {
   const [editBody, setEditBody] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
+  // «Обработка категории» (R-39): цепочка из конструктора
+  const [chainToBind, setChainToBind] = useState<string | undefined>();
+
   // «Удаление»
   const [categoryToDelete, setCategoryToDelete] = useState<{
     id: string;
@@ -61,6 +79,27 @@ const PromptsPage = () => {
 
   const { data: promptsData, isLoading: isCategoriesLoading } = useGetPrompts({
     axios: defaultApiAxiosParams,
+  });
+  const { data: explorerConfig } = useExplorerConfig({ enabled: isAdmin });
+  const bindCategory = useBindCategory({
+    onSuccess: ({ processing }) => {
+      showNotification({ type: "success", message: `Категория привязана к цепочке «${processing.chainTitle}»` });
+      setChainToBind(undefined);
+      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+    },
+    onError: (err) =>
+      showNotification({
+        type: "error",
+        message:
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          "Не удалось привязать категорию",
+      }),
+  });
+  const unbindCategory = useUnbindCategory({
+    onSuccess: () => {
+      showNotification({ type: "success", message: "Привязка снята — категория обрабатывается nano-banana-pro" });
+      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+    },
   });
 
   const { mutateAsync: createCategory, isLoading: isCreateLoading } =
@@ -90,6 +129,7 @@ const PromptsPage = () => {
     ? validateNewPromptName(addCategory, addPromptName)
     : null;
   const createNameError = validateNewCategoryName(categories, createTitle);
+  const currentProcessing = processingOf(selectedCategory as CategoryWithProcessing | undefined);
 
   useEffect(() => {
     if (selectedCategory == null) {
@@ -403,6 +443,65 @@ const PromptsPage = () => {
                   {selectedCategoryId && selectedPrompts.length === 0 && (
                     <div className={css.hint}>
                       В категории пока нет промптов — добавьте их во вкладке «Добавить промпт».
+                    </div>
+                  )}
+                  {selectedCategory && (
+                    <div className={css.processingBlock}>
+                      <div className={css.processingTitle}>Обработка категории</div>
+                      {currentProcessing ? (
+                        <div className={css.hint}>
+                          Цепочка «{currentProcessing.chainTitle}»: {describeProcessing(currentProcessing)}.
+                          {" "}Привязал {currentProcessing.boundBy},{" "}
+                          {new Date(currentProcessing.boundAt).toLocaleDateString("ru-RU")}.
+                        </div>
+                      ) : (
+                        <div className={css.hint}>
+                          По умолчанию — nano-banana-pro ($0.15 за 2К, $0.30 за 4К). Привязка к цепочке из
+                          конструктора меняет модель и цену для всех промптов категории.
+                        </div>
+                      )}
+                      {isAdmin && (
+                        <div className={css.processingControls}>
+                          <Select
+                            searchable
+                            label="Цепочка из конструктора"
+                            placeholder="Выберите цепочку"
+                            value={chainToBind}
+                            onChange={(value) => setChainToBind(value ?? undefined)}
+                            options={(explorerConfig?.chains ?? []).map((c) => ({
+                              label: `${c.title} · ${usd(c.estimateUsd)}`,
+                              value: c.id,
+                            }))}
+                            disabled={bindCategory.isLoading}
+                          />
+                          <div className={css.processingButtons}>
+                            <Button
+                              className={css.btn}
+                              disabled={!chainToBind || !selectedCategoryId || bindCategory.isLoading}
+                              onClick={() =>
+                                chainToBind &&
+                                selectedCategoryId &&
+                                bindCategory.mutate({ categoryId: selectedCategoryId, chainId: chainToBind })
+                              }
+                              showSpinner={bindCategory.isLoading}
+                            >
+                              {currentProcessing ? "Заменить цепочку" : "Привязать"}
+                            </Button>
+                            {currentProcessing && (
+                              <Popconfirm
+                                title="Снять привязку? Категория вернётся на nano-banana-pro."
+                                okText="Снять"
+                                cancelText="Отмена"
+                                onConfirm={() => selectedCategoryId && unbindCategory.mutate(selectedCategoryId)}
+                              >
+                                <Button className={css.btn} disabled={unbindCategory.isLoading}>
+                                  Снять привязку
+                                </Button>
+                              </Popconfirm>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}

@@ -36,6 +36,8 @@ import {
 } from "../../api/favoritesApi";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
 import { categoriesWithPrompts, defaultPromptOf, promptBodyOf } from "../prompts/promptCatalog";
+import { addLayerPayload, processingOf } from "../prompts/categoryProcessing";
+import type { CategoryWithProcessing } from "../../api/processingApi";
 import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
 import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
 import type { PostPhotosImproveBody } from "../../apiV2/a7-service/model/postPhotosImproveBody";
@@ -219,6 +221,8 @@ const ImprovementModal: FC<Props> = ({
       : undefined;
   // текст — только выбранного промпта категории; body категории не отправляется (R-38.5)
   const bodyForRequest = promptBodyOf(selectedPrompt, selectedVersion);
+  // привязка категории к цепочке (R-39): модель выбирает бэкенд, разрешение задано шагами
+  const boundProcessing = processingOf(selectedPrompt as CategoryWithProcessing | undefined);
 
   useEffect(() => {
     if (prevStatusRef.current === "processing" && status === "success") {
@@ -276,11 +280,15 @@ const ImprovementModal: FC<Props> = ({
 
   const handleImprovePhoto = () => {
     if (selectedPromptId && bodyForRequest != null) {
-      void runAddLayer({
-        photoId,
-        prompt: bodyForRequest,
-        outputResolution,
-      });
+      void runAddLayer(
+        addLayerPayload({
+          photoId,
+          prompt: bodyForRequest,
+          categoryId: selectedPromptId,
+          outputResolution,
+          processing: boundProcessing,
+        }) as PostPhotosAddlayerBody
+      );
     } else {
       void runImprove({
         photoIds: [photoId],
@@ -542,6 +550,8 @@ const ImprovementModal: FC<Props> = ({
                 </div>
               </div>
             )}
+            {/* у привязанной категории разрешение задано шагами цепочки (R-39.2) */}
+            {!boundProcessing && (
             <div className={css.resolutionGroup}>
               <span className={css.resolutionLabel}>Разрешение:</span>
               <Radio.Group
@@ -557,6 +567,7 @@ const ImprovementModal: FC<Props> = ({
                 <Radio value="4K">4K (высокое качество)</Radio>
               </Radio.Group>
             </div>
+            )}
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (
                 <Button
