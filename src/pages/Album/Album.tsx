@@ -30,12 +30,20 @@ import { Image } from "antd";
 import Button from "../../components/Button/Button";
 import {
   downloadImageByUrl,
-  FileForZip,
-  getPhotoVersion,
   handleDownloadAll,
   handlePrintPhoto,
-  makeFileName,
 } from "./components/PhotoCard/helpers";
+import {
+  buildDeleteConfirmMessage,
+  buildPhotoTiles,
+  deletionPlanFromTileKeys,
+  downloadFilesFromTileKeys,
+  photoIdsFromTileKeys,
+  previewSourcesFromTiles,
+  reconcileSelectedTileKeys,
+  tilesForPreview,
+  type PhotoTile,
+} from "./photoTiles";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
 import ImprovementModal from "../../components/ImprovementModal/ImprovementModal";
 import YandexDiskProjectSyncControl from "../../components/YandexDiskProjectSyncControl/YandexDiskProjectSyncControl";
@@ -45,9 +53,12 @@ const AlbumPage = () => {
   const queryClient = useQueryClient();
   const isReadyProductView = !!useMatch(PublicRoutes.ALBUM_READY_PRODUCT.static);
 
-  const [selectedOriginalPhotos, setSelectedOriginalPhotos] = useState<
-    string[]
-  >([]);
+  // R-44: выбор — по ключам ПЛИТОК (у модифицированного фото их две: модификат + оригинал).
+  const [selectedTileKeys, setSelectedTileKeys] = useState<string[]>([]);
+  const [photoIdsToDelete, setPhotoIdsToDelete] = useState<string[]>([]);
+  const [deleteTileLabel, setDeleteTileLabel] = useState("");
+  const [partiallySelectedCount, setPartiallySelectedCount] = useState(0);
+  const [frozenTiles, setFrozenTiles] = useState<PhotoTile[] | null>(null);
   const [isDeletePhotosModalOpen, setIsDeletePhotosModalOpen] = useState(false);
   const [isImprovePhotoModalOpen, setIsImprovePhotoModalOpen] = useState(false);
   const [improvementPhotoId, setImprovementPhotoId] = useState("");
@@ -119,7 +130,16 @@ const AlbumPage = () => {
     () => sortedAlbumPhotos.filter((item) => !!item.current?.original),
     [sortedAlbumPhotos]
   );
-  
+
+  // R-44: модифицированное фото — две плитки (модификат, за ним оригинал).
+  const displayTiles = useMemo(() => buildPhotoTiles(displayPhotos), [displayPhotos]);
+  // Пока открыт просмотр, список заморожен: опрос при обработке пересобрал бы индексы.
+  const gridTiles = tilesForPreview(frozenTiles, displayTiles);
+
+  useEffect(() => {
+    setSelectedTileKeys((prev) => reconcileSelectedTileKeys(displayTiles, prev));
+  }, [displayTiles]);
+
   useEffect(() => {
     if (isReadyProductView) {
       return;
@@ -150,25 +170,26 @@ const AlbumPage = () => {
     queryClient,
   ]);
 
-  const handleDeletePhotosClick = (id?: string) => {
-    if (id) {
-      setSelectedOriginalPhotos([id]);
-      setIsDeletePhotosModalOpen(true);
-    } else {
-      setIsDeletePhotosModalOpen(true);
-    }
+  // Удаление с одной плитки (тулбар просмотра) — всё фото целиком.
+  const handleDeletePhotoClick = (tile: PhotoTile) => {
+    setPhotoIdsToDelete([tile.photoId]);
+    setDeleteTileLabel(tile.label);
+    setPartiallySelectedCount(0);
+    setIsDeletePhotosModalOpen(true);
+  };
+
+  // Удаление выбранного: фото уходит, только если выбраны ВСЕ его плитки (R-12 точки).
+  const handleDeleteSelectedPhotosClick = () => {
+    const plan = deletionPlanFromTileKeys(gridTiles, selectedTileKeys);
+    setPhotoIdsToDelete(plan.photoIds);
+    setPartiallySelectedCount(plan.partiallySelectedCount);
+    setDeleteTileLabel(gridTiles.find((t) => selectedTileKeys.includes(t.key))?.label ?? "");
+    setIsDeletePhotosModalOpen(true);
   };
 
   const handleDownloadPhotosClick = () => {
-    const preparedFilesData: FileForZip[] = displayPhotos
-      .filter((item) => selectedOriginalPhotos.includes(item.id))
-      .map((item) => ({
-        url: getPhotoVersion(item).original,
-        fileName: makeFileName({
-          fileName: item.fileName,
-          isOriginal: !item.current,
-        }),
-      }));
+    // Скачиваем выбранные ПЛИТКИ: отмечены обе версии — нужны оба файла.
+    const preparedFilesData = downloadFilesFromTileKeys(gridTiles, selectedTileKeys);
 
     setIsDownloading(true);
     setDownloadProgress(0);
@@ -192,17 +213,24 @@ const AlbumPage = () => {
   };
 
   const handleDeletePhotosOk = async () => {
+    // Все выбранные фото выбраны лишь одной карточкой — удалять нечего (R-12).
+    if (photoIdsToDelete.length === 0) {
+      setIsDeletePhotosModalOpen(false);
+      return;
+    }
     try {
-      await Promise.all(
-        selectedOriginalPhotos.map((id) => deletePhoto({ id }))
-      );
+      await Promise.all(photoIdsToDelete.map((id) => deletePhoto({ id })));
 
       showNotification({
         message: "Фото удалены",
         type: "success",
       });
 
-      setSelectedOriginalPhotos([]);
+      const deleted = new Set(photoIdsToDelete);
+      setSelectedTileKeys((prev) =>
+        prev.filter((key) => !gridTiles.some((t) => t.key === key && deleted.has(t.photoId)))
+      );
+      setPhotoIdsToDelete([]);
       setIsDeletePhotosModalOpen(false);
 
       void queryClient.invalidateQueries({
@@ -227,7 +255,8 @@ const AlbumPage = () => {
   const handleImprovePhotosClick = () => {
     improvePhoto({
       data: {
-        photoIds: selectedOriginalPhotos,
+        // одно фото — одна обработка, даже если выбраны обе его плитки
+        photoIds: photoIdsFromTileKeys(gridTiles, selectedTileKeys),
         prompt: "mock"
       },
     })
@@ -236,7 +265,7 @@ const AlbumPage = () => {
           message: "Фотографии отправлены на улучшение",
           type: "success",
         });
-        setSelectedOriginalPhotos([]);
+        setSelectedTileKeys([]);
       })
       .catch(() => {
         showNotification({
@@ -246,19 +275,18 @@ const AlbumPage = () => {
       });
   };
 
-  const toggleSelectPhoto = (id: string) => {
-    setSelectedOriginalPhotos((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  const toggleSelectPhoto = (key: string) => {
+    setSelectedTileKeys((prev) =>
+      prev.includes(key) ? prev.filter((x) => x !== key) : [...prev, key]
     );
   };
 
   const handleSelectAllPhotos = () => {
-    const photosIds = displayPhotos.map((item) => item.id);
-    setSelectedOriginalPhotos(photosIds);
+    setSelectedTileKeys(gridTiles.map((tile) => tile.key));
   };
 
   const handleResetSelectedPhotos = () => {
-    setSelectedOriginalPhotos([]);
+    setSelectedTileKeys([]);
   };
 
   const { backButton } = useBreadcrumbsBackButton();
@@ -369,27 +397,27 @@ const AlbumPage = () => {
         <Button onClick={handleSelectAllPhotos}>Выбрать все</Button>
         <Button onClick={handleResetSelectedPhotos}>Отменить выбор</Button>
         <Button
-          disabled={selectedOriginalPhotos.length === 0}
+          disabled={selectedTileKeys.length === 0}
           onClick={() => handleImprovePhotosClick()}
         >
           Улучшить выбранные
         </Button>
         <Button
-          disabled={selectedOriginalPhotos.length === 0}
+          disabled={selectedTileKeys.length === 0}
           onClick={handleDownloadPhotosClick}
         >
           Скачать выбранные
         </Button>
         <Button
-          disabled={selectedOriginalPhotos.length === 0}
-          onClick={() => handleDeletePhotosClick()}
+          disabled={selectedTileKeys.length === 0}
+          onClick={handleDeleteSelectedPhotosClick}
         >
           Удалить выбранные
         </Button>
       </div>
       <div
         className={css.counter}
-      >{`Выбрано фотографий: ${selectedOriginalPhotos.length} из ${displayPhotos.length}`}</div>
+      >{`Выбрано карточек: ${selectedTileKeys.length} из ${gridTiles.length}`}</div>
       {sortedAlbumPhotos.length === 0 ? (
         <UploadBox
           isAlbumLoading={isAlbumPhotosLoading}
@@ -404,9 +432,12 @@ const AlbumPage = () => {
             />
           )}
           <Image.PreviewGroup
+            // Явный список превью в порядке плиток — тулбар адресует кадр индексом плитки.
+            items={previewSourcesFromTiles(gridTiles)}
             preview={{
+              onVisibleChange: (visible) => setFrozenTiles(visible ? displayTiles : null),
               toolbarRender: (_, info) => {
-                const currentPhoto = displayPhotos[info.current];
+                const currentTile = gridTiles[info.current];
                 const toolbarIcons = (
                   <>
                     {info.icons.flipXIcon}
@@ -424,38 +455,27 @@ const AlbumPage = () => {
                     <div className={css.customToolbarButtonsContainer}>
                       <PrinterOutlined
                         onClick={() =>
-                          handlePrintPhoto(
-                            getPhotoVersion(currentPhoto).original,
-                            makeFileName({
-                              fileName: currentPhoto.fileName,
-                              isOriginal: !currentPhoto.current,
-                            })
-                          )
+                          currentTile &&
+                          handlePrintPhoto(currentTile.versions.original, currentTile.downloadFileName)
                         }
                         className={css.toolbarBtn}
                       />
                       <DownloadOutlined
                         className={css.toolbarBtn}
                         onClick={() =>
-                          downloadImageByUrl(
-                            getPhotoVersion(currentPhoto).original,
-                            makeFileName({
-                              fileName: currentPhoto.fileName,
-                              isOriginal: !currentPhoto.current,
-                            })
-                          )
+                          currentTile &&
+                          downloadImageByUrl(currentTile.versions.original, currentTile.downloadFileName)
                         }
                       />
                       <DeleteOutlined
                         className={css.toolbarBtn}
-                        onClick={() => {
-                          handleDeletePhotosClick(currentPhoto.id);
-                        }}
+                        onClick={() => currentTile && handleDeletePhotoClick(currentTile)}
                       />
                       <RocketOutlined
                         className={css.toolbarBtn}
                         onClick={() => {
-                          setImprovementPhotoId(currentPhoto.id);
+                          if (!currentTile) return;
+                          setImprovementPhotoId(currentTile.photoId);
                           setIsImprovePhotoModalOpen(true);
                         }}
                       />
@@ -465,28 +485,25 @@ const AlbumPage = () => {
               },
             }}
           >
-            {displayPhotos.map((item) => {
-              const photoVersion = getPhotoVersion(item);
-
-              return (
-                <PhotoCard
-                  key={item.id}
-                  id={item.id}
-                  isOriginal={!item.current}
-                  hasImprovedVersion={improvedPhotos.some(
-                    (el) => item.id === el.id
-                  )}
-                  url={photoVersion.original}
-                  smallUrl={photoVersion.small}
-                  previewUrl={photoVersion.preview}
-                  name={item.fileName}
-                  isSelected={selectedOriginalPhotos.includes(item.id)}
-                  albumId={albumId ?? ""}
-                  status={item.status}
-                  onSelect={toggleSelectPhoto}
-                />
-              );
-            })}
+            {gridTiles.map((tile) => (
+              <PhotoCard
+                key={tile.key}
+                id={tile.photoId}
+                selectionKey={tile.key}
+                isOriginal={tile.variant !== "modified"}
+                hasImprovedVersion={tile.variant !== "single"}
+                url={tile.versions.original}
+                smallUrl={tile.versions.small}
+                previewUrl={tile.versions.preview}
+                name={tile.label}
+                downloadFileName={tile.downloadFileName}
+                canRename={tile.variant !== "original"}
+                isSelected={selectedTileKeys.includes(tile.key)}
+                albumId={albumId ?? ""}
+                status={tile.variant === "original" ? undefined : tile.photo.status}
+                onSelect={toggleSelectPhoto}
+              />
+            ))}
           </Image.PreviewGroup>
           {!isReadyProductView && (
             <UploadBox
@@ -531,19 +548,16 @@ const AlbumPage = () => {
         customOkButtonClassName={css.deleteButton}
       >
         <div className={css.modalContent}>
-          <div>{`Вы уверены, что хотите удалить ${
-            selectedOriginalPhotos.length === 1
-              ? `фото ${
-                  sortedAlbumPhotos.find(
-                    (item) => item.id === selectedOriginalPhotos[0]
-                  )?.fileName ?? ""
-                }`
-              : `выбранные (${selectedOriginalPhotos.length}) фото`
-          }? Данные будут безвозвратно
-        утеряны.`}</div>
+          <div>
+            {buildDeleteConfirmMessage({
+              photoCount: photoIdsToDelete.length,
+              tileLabel: deleteTileLabel,
+              partiallySelectedCount,
+            })}
+          </div>
           <div
             className={css.warningInfo}
-          >{`Внимание! При удалении оригинала фото, удаляется также его улучшенная версия`}</div>
+          >{`Внимание! Удаляется всё фото целиком — и модифицированная версия, и оригинал (в альбоме пропадут обе карточки).`}</div>
         </div>
       </Modal>
     </div>
