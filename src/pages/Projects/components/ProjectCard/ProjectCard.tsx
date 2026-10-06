@@ -18,6 +18,8 @@ import Input from "../../../../components/Input/Input";
 import { useMediaQuery } from "react-responsive";
 import { useShowPermissions } from "../../../../auth/userData";
 import { UserRolesItem } from "../../../../apiV2/a7-service/model";
+import axios from "axios";
+import { describeProjectDeletion, ProjectDeletionSummary } from "./projectDeletion";
 
 type Props = {
   id?: string;
@@ -33,6 +35,8 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState(name ?? "");
+  // R-45: сводка «что уйдёт» для окна удаления (каскад необратим)
+  const [deletionSummary, setDeletionSummary] = useState<ProjectDeletionSummary | null>(null);
 
   const { isLoading: isEditLoading, mutateAsync: updateProject } =
     usePutProjectsUpdate({
@@ -47,6 +51,9 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   const { data: allProjectsData } = useGetProjects({
     axios: defaultApiAxiosParams,
   });
+
+  // R-45: удаление филиала каскадное — только администратор
+  const canDeleteProject = hasPrivileges([UserRolesItem.admin]);
 
   const canEditProject = hasPrivileges([
     UserRolesItem.admin,
@@ -63,7 +70,12 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
   };
 
   const handleDeleteClick = () => {
+    setDeletionSummary(null);
     setIsDeleteModalOpen(true);
+    axios
+      .get<ProjectDeletionSummary>(`/projects/${id}/deletion-summary`, defaultApiAxiosParams)
+      .then(({ data }) => setDeletionSummary(data))
+      .catch(() => setDeletionSummary(null));
   };
 
   const handleEditOk = () => {
@@ -135,12 +147,16 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
       label: "Переименовать",
       onClick: handleEditClick,
     },
-    {
-      key: "2",
-      label: "Удалить",
-      danger: true,
-      onClick: handleDeleteClick,
-    },
+    ...(canDeleteProject
+      ? [
+          {
+            key: "2",
+            label: "Удалить",
+            danger: true,
+            onClick: handleDeleteClick,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -187,13 +203,12 @@ const ProjectCard: FC<Props> = ({ id, name }) => {
         open={isDeleteModalOpen}
         onOk={handleDeleteOk}
         onCancel={handleDeleteCancel}
-        okButtonName="Удалить"
+        okButtonName="Удалить навсегда"
         destroyOnHidden
         isLoading={isDeleteLoading}
         customOkButtonClassName={css.deleteButton}
       >
-        {`Вы уверены, что хотите удалить филиал "${name}"? Все данные будут безвозвратно
-        утеряны.`}
+        {describeProjectDeletion(name ?? "", deletionSummary)}
       </Modal>
     </div>
   );
