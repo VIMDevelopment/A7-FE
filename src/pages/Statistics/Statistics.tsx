@@ -11,22 +11,16 @@ import { useShowPermissions } from "../../auth/userData";
 import { UserRolesItem } from "../../apiV2/a7-service/model";
 import Select from "../../components/Select/Select";
 import { formatUTCDate } from "../../lib/formatters/date";
+import { CostTotalReport, describeCostTotal } from "./costTotal";
 
 const { RangePicker } = DatePicker;
 
 dayjs.locale("ru");
 
-type ProcessingUsageReport = {
-  totalRub: number;
+type ProcessingUsageReport = CostTotalReport & {
   runCount: number;
   photoCount: number;
 };
-
-const rubFormatter = new Intl.NumberFormat("ru-RU", {
-  style: "currency",
-  currency: "RUB",
-  maximumFractionDigits: 0,
-});
 
 const intFormatter = new Intl.NumberFormat("ru-RU");
 
@@ -84,6 +78,7 @@ const StatisticsPage = () => {
   );
 
   const report = usageResponse?.data as ProcessingUsageReport | undefined;
+  const costTotal = describeCostTotal(report);
 
   const projectOptions = useMemo(
     () =>
@@ -143,9 +138,10 @@ const StatisticsPage = () => {
                 style={{ width: 220, height: 40 }}
               />
             ) : (
-              <div className={css.cardValue}>
-                {rubFormatter.format(report?.totalRub ?? 0)}
-              </div>
+              <div className={css.cardValue}>{costTotal.value}</div>
+            )}
+            {costTotal.warning && (
+              <div className={css.cardHint}>{costTotal.warning}</div>
             )}
             <div className={css.cardHint}>
               Сумма всех запусков ИИ-обработки за выбранный период. Стоимость

@@ -1,9 +1,10 @@
 import type { PromptResponse } from "../../apiV2/a7-service/model";
+import { defaultPromptOf, promptBodyOf } from "../../components/prompts/promptCatalog";
 
 /**
  * Выбор промпта в Explorer — тот же принцип, что в модалке улучшения фото:
- * избранные филиала сверху (по title), остальные в порядке бэкенда;
- * тело запроса = тело выбранной версии из history, fallback — body промпта.
+ * избранные категории филиала сверху (по title), остальные в порядке бэкенда;
+ * текст прогона = текст выбранного промпта категории (R-38).
  */
 export function sortPromptsByFavorites(
   prompts: PromptResponse[],
@@ -17,21 +18,8 @@ export function sortPromptsByFavorites(
   ];
 }
 
-export function resolvePromptBody(
-  prompt: PromptResponse | undefined,
-  selectedVersion: string | null
-): string | undefined {
-  if (!prompt) return undefined;
-  const history = prompt.history ?? [];
-  if (selectedVersion != null) {
-    const item = history.find((h) => h.promptVersion === selectedVersion);
-    if (item?.promptBody != null) return item.promptBody;
-  }
-  return prompt.body ?? undefined;
-}
+/** Текст прогона — только выбранного промпта категории (R-38.5, общее правило с модалкой). */
+export const resolvePromptBody = promptBodyOf;
 
-/** Дефолт версии при выборе промпта — последняя запись history (как в модалке). */
-export function defaultVersionOf(prompt: PromptResponse | undefined): string | null {
-  const history = prompt?.history ?? [];
-  return history.length > 0 ? history[history.length - 1].promptVersion ?? null : null;
-}
+/** Дефолт промпта при выборе категории: один — он сам, несколько — выбирает человек (R-38.5). */
+export const defaultVersionOf = defaultPromptOf;

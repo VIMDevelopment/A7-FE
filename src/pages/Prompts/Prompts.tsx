@@ -16,217 +16,263 @@ import { showNotification } from "../../components/ShowNotification";
 import { useQueryClient } from "react-query";
 import Modal from "../../components/Modal/Modal";
 import { DeleteOutlined } from "@ant-design/icons";
-import { Tabs } from "antd";
+import { Popconfirm, Tabs } from "antd";
+import { useProfile } from "../../auth/auth";
+import { canRunExplorer } from "../ModelExplorer/access";
+import { useExplorerConfig } from "../../api/explorerApi";
+import {
+  CategoryWithProcessing,
+  useBindCategory,
+  useUnbindCategory,
+} from "../../api/processingApi";
+import { describeProcessing, processingOf } from "../../components/prompts/categoryProcessing";
+import {
+  validateNewCategoryName,
+  validateNewPromptName,
+} from "../../components/prompts/promptCatalog";
+
+/**
+ * Справочник (R-38): запись = КАТЕГОРИЯ («Комикс»), её history = ПРОМПТЫ внутри
+ * («Страница», «Значок»). Хранение и API прежние (promptVersion = название промпта):
+ * десктоп на точках синхронизирует справочник с прода и работает без нового релиза.
+ */
+const usd = (value?: number) =>
+  value === undefined ? "—" : `$${value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}`;
 
 const PromptsPage = () => {
   const queryClient = useQueryClient();
+  const { data: profile } = useProfile();
+  // привязка категории к цепочке — платное решение, только админ (R-39.6)
+  const isAdmin = canRunExplorer(profile?.roles);
+
+  const [activeTab, setActiveTab] = useState("create");
+
+  // «Добавить категорию» — только название; промпты добавляются во вкладке «Добавить промпт» (R-38.2)
   const [createTitle, setCreateTitle] = useState("");
-  const [createBody, setCreateBody] = useState("");
-  const [createVersion, setCreateVersion] = useState("");
-  const [createDescription, setCreateDescription] = useState("");
-  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
-  const [versionForSave, setVersionForSave] = useState("");
-  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+
+  // «Добавить промпт» в существующую категорию (R-38.3)
+  const [addCategoryId, setAddCategoryId] = useState<string | undefined>();
+  const [addPromptName, setAddPromptName] = useState("");
+  const [addBody, setAddBody] = useState("");
+  const [addDescription, setAddDescription] = useState("");
+
+  // «Изменение»
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
+  const [selectedPromptName, setSelectedPromptName] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [promptToDelete, setPromptToDelete] = useState<{
+
+  // «Обработка категории» (R-39): цепочка из конструктора
+  const [chainToBind, setChainToBind] = useState<string | undefined>();
+
+  // «Удаление»
+  const [categoryToDelete, setCategoryToDelete] = useState<{
     id: string;
     title: string;
   } | null>(null);
-  const [deleteSelectedPromptId, setDeleteSelectedPromptId] = useState<
-    string | undefined
-  >(undefined);
-  const [versionToDelete, setVersionToDelete] = useState<{
-    promptId: string;
-    promptTitle: string;
-    version: string;
+  const [deleteCategoryId, setDeleteCategoryId] = useState<string | undefined>(undefined);
+  const [promptToDelete, setPromptToDelete] = useState<{
+    categoryId: string;
+    categoryTitle: string;
+    promptName: string;
   } | null>(null);
 
-  const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
+  const { data: promptsData, isLoading: isCategoriesLoading } = useGetPrompts({
     axios: defaultApiAxiosParams,
   });
+  const { data: explorerConfig } = useExplorerConfig({ enabled: isAdmin });
+  const bindCategory = useBindCategory({
+    onSuccess: ({ processing }) => {
+      showNotification({ type: "success", message: `Категория привязана к цепочке «${processing.chainTitle}»` });
+      setChainToBind(undefined);
+      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+    },
+    onError: (err) =>
+      showNotification({
+        type: "error",
+        message:
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+          "Не удалось привязать категорию",
+      }),
+  });
+  const unbindCategory = useUnbindCategory({
+    onSuccess: () => {
+      showNotification({ type: "success", message: "Привязка снята — категория обрабатывается nano-banana-pro" });
+      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+    },
+  });
 
-  const { mutateAsync: createPrompt, isLoading: isCreateLoading } =
+  const { mutateAsync: createCategory, isLoading: isCreateLoading } =
     usePostPrompts({
       axios: defaultApiAxiosParams,
     });
 
-  const { mutateAsync: updatePrompt, isLoading: isUpdateLoading } =
+  const { mutateAsync: updateCategory, isLoading: isUpdateLoading } =
     usePutPromptsId({
       axios: defaultApiAxiosParams,
     });
 
-  const { mutateAsync: deletePrompt, isLoading: isDeleteLoading } =
+  const { mutateAsync: deleteCategory, isLoading: isDeleteLoading } =
     useDeletePromptsId({
       axios: defaultApiAxiosParams,
     });
 
-  const promptsList = promptsData?.data ?? [];
-  const selectedPrompt = promptsList.find((p) => p.id === selectedPromptId);
-  const promptHistory = selectedPrompt?.history ?? [];
+  const categories = promptsData?.data ?? [];
+  const categoryOptions = categories.map((c) => ({
+    label: c.title ?? "",
+    value: c.id ?? "",
+  }));
+  const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+  const selectedPrompts = selectedCategory?.history ?? [];
+  const addCategory = categories.find((c) => c.id === addCategoryId);
+  const addNameError = addCategoryId
+    ? validateNewPromptName(addCategory, addPromptName)
+    : null;
+  const createNameError = validateNewCategoryName(categories, createTitle);
+  const currentProcessing = processingOf(selectedCategory as CategoryWithProcessing | undefined);
 
   useEffect(() => {
-    if (selectedPrompt == null) {
-      setSelectedVersion(null);
+    if (selectedCategory == null) {
+      setSelectedPromptName(null);
       setEditBody("");
-      setVersionForSave("");
       setEditDescription("");
       return;
     }
-    const history = selectedPrompt.history ?? [];
-    const hasSelectedVersion =
-      selectedVersion != null &&
-      history.some((item) => item.promptVersion === selectedVersion);
-
-    if (!hasSelectedVersion) {
-      setSelectedVersion(null);
+    const prompts = selectedCategory.history ?? [];
+    const stillThere =
+      selectedPromptName != null &&
+      prompts.some((item) => item.promptVersion === selectedPromptName);
+    if (!stillThere) {
+      setSelectedPromptName(null);
       setEditBody("");
       setEditDescription("");
     }
-    setVersionForSave("");
-  }, [selectedPrompt?.id, selectedPrompt?.body, selectedPrompt?.history]);
+  }, [selectedCategory?.id, selectedCategory?.body, selectedCategory?.history]);
 
-  const handleCreate = async () => {
-    const version = createVersion.trim();
-    if (!createTitle.trim() || !createBody.trim() || !version) return;
+  const invalidate = () =>
+    void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+
+  const handleCreateCategory = async () => {
+    if (createNameError) return;
     const title = createTitle.trim();
-    const body = createBody.trim();
-    const description = createDescription.trim();
     try {
-      const response = await createPrompt({
-        data: { title, body },
-      });
-      const createdId = response.data.id;
-      if (createdId) {
-        await updatePrompt({
-          id: createdId,
-          data: {
-            title,
-            body,
-            history: [
-              {
-                promptVersion: version,
-                promptBody: body,
-                ru: body,
-                description,
-                rate: 0,
-              },
-            ],
-          },
-        });
-      }
+      // body пустой: категория без промптов (R-38.2) — BE принимает body опциональным
+      const response = await createCategory({ data: { title, body: "" } });
       showNotification({
         type: "success",
-        message: "Промпт создан",
+        message: `Категория «${title}» создана — добавьте в неё промпт`,
       });
       setCreateTitle("");
-      setCreateBody("");
-      setCreateVersion("");
-      setCreateDescription("");
-      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+      invalidate();
+      // сразу к добавлению промпта в новую категорию
+      setAddCategoryId(response.data.id ?? undefined);
+      setActiveTab("add");
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
     }
   };
 
-  const handleUpdate = async () => {
-    if (!selectedPromptId || selectedPrompt == null) return;
-    const version = versionForSave.trim();
-    const prevHistory = selectedPrompt.history ?? [];
-
-    const newHistory =
-      version !== ""
-        ? [
-          ...prevHistory,
-          {
-            promptVersion: version,
-            promptBody: editBody,
-            ru: editBody,
-            description: editDescription.trim(),
-            rate: 0,
-          },
-        ]
-        : prevHistory.map((item) =>
-          item.promptVersion === selectedVersion
-            ? {
-              ...item,
-              promptBody: editBody,
-              ru: editBody,
-              description: editDescription.trim(),
-            }
-            : item
-        );
-
+  const handleAddPrompt = async () => {
+    if (!addCategoryId || !addCategory || addNameError || !addBody.trim()) return;
+    const promptName = addPromptName.trim();
+    const body = addBody.trim();
     try {
-      await updatePrompt({
-        id: selectedPromptId,
+      await updateCategory({
+        id: addCategoryId,
         data: {
-          title: selectedPrompt.title,
-          history: newHistory,
+          title: addCategory.title,
+          history: [
+            ...(addCategory.history ?? []),
+            {
+              promptVersion: promptName,
+              promptBody: body,
+              ru: body,
+              description: addDescription.trim(),
+              rate: 0,
+            },
+          ],
         },
       });
       showNotification({
         type: "success",
-        message: "Промпт обновлён",
+        message: `Промпт «${promptName}» добавлен в категорию «${addCategory.title}»`,
       });
-      if (version !== "") {
-        setSelectedVersion(version);
-      }
-      setVersionForSave("");
-      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+      setAddPromptName("");
+      setAddBody("");
+      setAddDescription("");
+      invalidate();
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
     }
   };
 
-  const handleDeleteOk = async () => {
-    if (!promptToDelete) return;
-    try {
-      await deletePrompt({ id: promptToDelete.id });
-      showNotification({
-        type: "success",
-        message: "Промпт удалён",
-      });
-      setPromptToDelete(null);
-      setDeleteSelectedPromptId(undefined);
-      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
-    } catch {
-      // ошибка показывается через глобальный onError в QueryClient
-    }
-  };
-
-  const handleDeleteVersionOk = async () => {
-    if (!versionToDelete) return;
-    const prompt = promptsList.find((p) => p.id === versionToDelete.promptId);
-    if (!prompt) return;
-    const prevHistory = prompt.history ?? [];
-    if (prevHistory.length <= 1) return;
-    const newHistory = prevHistory.filter(
-      (item) => item.promptVersion !== versionToDelete.version
+  const handleUpdatePrompt = async () => {
+    if (!selectedCategoryId || selectedCategory == null || selectedPromptName == null) return;
+    const newHistory = (selectedCategory.history ?? []).map((item) =>
+      item.promptVersion === selectedPromptName
+        ? { ...item, promptBody: editBody, ru: editBody, description: editDescription.trim() }
+        : item
     );
     try {
-      await updatePrompt({
-        id: versionToDelete.promptId,
-        data: {
-          title: prompt.title,
-          history: newHistory,
-        },
+      await updateCategory({
+        id: selectedCategoryId,
+        data: { title: selectedCategory.title, history: newHistory },
       });
-      showNotification({
-        type: "success",
-        message: "Версия промпта удалена",
-      });
-      setVersionToDelete(null);
-      if (selectedPromptId === versionToDelete.promptId && selectedVersion === versionToDelete.version) {
-        const lastItem = newHistory[newHistory.length - 1];
-        setSelectedVersion(lastItem?.promptVersion ?? null);
-        setEditBody(lastItem?.ru ?? lastItem?.promptBody ?? "");
-      }
-      void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
+      showNotification({ type: "success", message: "Промпт обновлён" });
+      invalidate();
     } catch {
       // ошибка показывается через глобальный onError в QueryClient
     }
   };
+
+  const handleDeleteCategoryOk = async () => {
+    if (!categoryToDelete) return;
+    try {
+      await deleteCategory({ id: categoryToDelete.id });
+      showNotification({ type: "success", message: "Категория удалена" });
+      setCategoryToDelete(null);
+      setDeleteCategoryId(undefined);
+      invalidate();
+    } catch {
+      // ошибка показывается через глобальный onError в QueryClient
+    }
+  };
+
+  const handleDeletePromptOk = async () => {
+    if (!promptToDelete) return;
+    const category = categories.find((c) => c.id === promptToDelete.categoryId);
+    if (!category) return;
+    const prevHistory = category.history ?? [];
+    // последний промпт категории не удаляется — удаляется категория целиком (R-38.4)
+    if (prevHistory.length <= 1) return;
+    const newHistory = prevHistory.filter(
+      (item) => item.promptVersion !== promptToDelete.promptName
+    );
+    try {
+      await updateCategory({
+        id: promptToDelete.categoryId,
+        data: { title: category.title, history: newHistory },
+      });
+      showNotification({ type: "success", message: "Промпт удалён" });
+      setPromptToDelete(null);
+      if (
+        selectedCategoryId === promptToDelete.categoryId &&
+        selectedPromptName === promptToDelete.promptName
+      ) {
+        setSelectedPromptName(null);
+        setEditBody("");
+        setEditDescription("");
+      }
+      invalidate();
+    } catch {
+      // ошибка показывается через глобальный onError в QueryClient
+    }
+  };
+
+  const promptOptions = selectedPrompts.map((item: PromptResponseHistoryItem) => ({
+    label: item.promptVersion,
+    value: item.promptVersion,
+  }));
 
   return (
     <div className={css.container}>
@@ -234,36 +280,75 @@ const PromptsPage = () => {
 
       <Tabs
         className={css.tabs}
-        defaultActiveKey="create"
+        activeKey={activeTab}
+        onChange={setActiveTab}
         items={[
           {
             key: "create",
-            label: "Добавление",
+            label: "Добавить категорию",
             children: (
               <div className={css.section}>
-                <div className={css.sectionTitle}>Добавление нового промпта</div>
+                <div className={css.sectionTitle}>Новая категория</div>
                 <div className={css.form}>
                   <Input
-                    label="Название промпта"
+                    label="Название категории"
                     value={createTitle}
                     onChange={(e) => setCreateTitle(e.target.value)}
                     disabled={isCreateLoading}
-                    placeholder="Введите название промпта"
+                    placeholder="Например: Комикс"
+                  />
+                  {createTitle.trim() && createNameError && (
+                    <div className={css.fieldError}>{createNameError}</div>
+                  )}
+                  <div className={css.hint}>
+                    Промпты добавляются во вкладке «Добавить промпт» — после создания она откроется сама.
+                  </div>
+                  <Button
+                    className={css.btn}
+                    disabled={isCreateLoading || !!createNameError}
+                    onClick={handleCreateCategory}
+                    showSpinner={isCreateLoading}
+                  >
+                    Добавить категорию
+                  </Button>
+                </div>
+              </div>
+            ),
+          },
+          {
+            key: "add",
+            label: "Добавить промпт",
+            children: (
+              <div className={css.section}>
+                <div className={css.sectionTitle}>Добавить промпт в категорию</div>
+                <div className={css.form}>
+                  <Select
+                    searchable
+                    label="Категория"
+                    placeholder="Выберите категорию"
+                    value={addCategoryId}
+                    onChange={(value) => setAddCategoryId(value ?? undefined)}
+                    options={categoryOptions}
+                    disabled={isCategoriesLoading}
+                    loading={isCategoriesLoading}
                   />
                   <Input
-                    label="Название первой версии"
-                    value={createVersion}
-                    onChange={(e) => setCreateVersion(e.target.value)}
-                    disabled={isCreateLoading}
-                    placeholder="Введите название первой версии"
+                    label="Название промпта"
+                    value={addPromptName}
+                    onChange={(e) => setAddPromptName(e.target.value)}
+                    disabled={isUpdateLoading || !addCategoryId}
+                    placeholder="Например: Круглый значок"
                   />
+                  {addPromptName.trim() && addNameError && (
+                    <div className={css.fieldError}>{addNameError}</div>
+                  )}
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore */}
                   <InputTextArea
                     label="Текст промпта"
-                    value={createBody}
-                    onChange={(e) => setCreateBody(e.target.value)}
-                    disabled={isCreateLoading}
+                    value={addBody}
+                    onChange={(e) => setAddBody(e.target.value)}
+                    disabled={isUpdateLoading || !addCategoryId}
                     placeholder="Введите текст промпта"
                     className={css.bodyField}
                     rows={4}
@@ -271,26 +356,23 @@ const PromptsPage = () => {
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore */}
                   <InputTextArea
-                    label="Описание первой версии (опционально)"
-                    value={createDescription}
-                    onChange={(e) => setCreateDescription(e.target.value)}
-                    disabled={isCreateLoading}
-                    placeholder="Введите описание первой версии"
+                    label="Описание промпта (опционально)"
+                    value={addDescription}
+                    onChange={(e) => setAddDescription(e.target.value)}
+                    disabled={isUpdateLoading || !addCategoryId}
+                    placeholder="Что получится на фото"
                     className={css.bodyField}
                     rows={2}
                   />
                   <Button
                     className={css.btn}
                     disabled={
-                      isCreateLoading ||
-                      !createTitle.trim() ||
-                      !createBody.trim() ||
-                      !createVersion.trim()
+                      isUpdateLoading || !addCategoryId || !!addNameError || !addBody.trim()
                     }
-                    onClick={handleCreate}
-                    showSpinner={isCreateLoading}
+                    onClick={handleAddPrompt}
+                    showSpinner={isUpdateLoading}
                   >
-                    Создать промпт
+                    Добавить промпт
                   </Button>
                 </div>
               </div>
@@ -301,63 +383,52 @@ const PromptsPage = () => {
             label: "Изменение",
             children: (
               <div className={css.section}>
-                <div className={css.sectionTitle}>Изменение существующего промпта</div>
+                <div className={css.sectionTitle}>Изменение промпта</div>
                 <div className={css.form}>
                   <div className={css.editPromptRow}>
                     <div className={css.selectPrompt}>
                       <Select
                         searchable
-                        label="Промпт"
-                        placeholder="Выберите промпт"
-                        value={selectedPromptId ?? undefined}
-                        onChange={(value) => setSelectedPromptId(value ?? undefined)}
-                        options={promptsList.map((p) => ({
-                          label: p.title ?? "",
-                          value: p.id ?? "",
-                        }))}
-                        disabled={isPromptsLoading}
-                        loading={isPromptsLoading}
+                        label="Категория"
+                        placeholder="Выберите категорию"
+                        value={selectedCategoryId ?? undefined}
+                        onChange={(value) => setSelectedCategoryId(value ?? undefined)}
+                        options={categoryOptions}
+                        disabled={isCategoriesLoading}
+                        loading={isCategoriesLoading}
                       />
                     </div>
-                    {selectedPromptId && promptHistory.length > 0 && (
+                    {selectedCategoryId && selectedPrompts.length > 0 && (
                       <div className={css.selectVersion}>
                         <Select
-                          label="Версия"
-                          placeholder="Версия"
-                          value={selectedVersion}
+                          label="Промпт"
+                          placeholder="Выберите промпт"
+                          value={selectedPromptName}
                           onChange={(value) => {
-                            setSelectedVersion(value);
-                            setVersionForSave("");
-                            const currentVersion = promptHistory.find(
+                            setSelectedPromptName(value);
+                            const current = selectedPrompts.find(
                               (item) => item.promptVersion === value
                             );
-                            setEditBody(
-                              currentVersion?.ru ?? currentVersion?.promptBody ?? ""
-                            );
-                            setEditDescription(currentVersion?.description ?? "");
+                            setEditBody(current?.ru ?? current?.promptBody ?? "");
+                            setEditDescription(current?.description ?? "");
                           }}
-                          options={promptHistory.map(
-                            (item: PromptResponseHistoryItem) => ({
-                              label: item.promptVersion,
-                              value: item.promptVersion,
-                            })
-                          )}
+                          options={promptOptions}
                           optionRender={(option) => (
                             <div className={css.versionOption}>
                               <span className={css.optionText}>
                                 {option.label ?? option.value}
                               </span>
-                              {promptHistory.length > 1 && (
+                              {selectedPrompts.length > 1 && (
                                 <DeleteOutlined
                                   className={css.versionOptionDelete}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    if (selectedPromptId && selectedPrompt) {
-                                      setVersionToDelete({
-                                        promptId: selectedPromptId,
-                                        promptTitle: selectedPrompt.title ?? "",
-                                        version: String(option.value),
+                                    if (selectedCategoryId && selectedCategory) {
+                                      setPromptToDelete({
+                                        categoryId: selectedCategoryId,
+                                        categoryTitle: selectedCategory.title ?? "",
+                                        promptName: String(option.value),
                                       });
                                     }
                                   }}
@@ -369,49 +440,98 @@ const PromptsPage = () => {
                       </div>
                     )}
                   </div>
+                  {selectedCategoryId && selectedPrompts.length === 0 && (
+                    <div className={css.hint}>
+                      В категории пока нет промптов — добавьте их во вкладке «Добавить промпт».
+                    </div>
+                  )}
+                  {selectedCategory && (
+                    <div className={css.processingBlock}>
+                      <div className={css.processingTitle}>Обработка категории</div>
+                      {currentProcessing ? (
+                        <div className={css.hint}>
+                          Цепочка «{currentProcessing.chainTitle}»: {describeProcessing(currentProcessing)}.
+                          {" "}Привязал {currentProcessing.boundBy},{" "}
+                          {new Date(currentProcessing.boundAt).toLocaleDateString("ru-RU")}.
+                        </div>
+                      ) : (
+                        <div className={css.hint}>
+                          По умолчанию — nano-banana-pro ($0.15 за 2К, $0.30 за 4К). Привязка к цепочке из
+                          конструктора меняет модель и цену для всех промптов категории.
+                        </div>
+                      )}
+                      {isAdmin && (
+                        <div className={css.processingControls}>
+                          <Select
+                            searchable
+                            label="Цепочка из конструктора"
+                            placeholder="Выберите цепочку"
+                            value={chainToBind}
+                            onChange={(value) => setChainToBind(value ?? undefined)}
+                            options={(explorerConfig?.chains ?? []).map((c) => ({
+                              label: `${c.title} · ${usd(c.estimateUsd)}`,
+                              value: c.id,
+                            }))}
+                            disabled={bindCategory.isLoading}
+                          />
+                          <div className={css.processingButtons}>
+                            <Button
+                              className={css.btn}
+                              disabled={!chainToBind || !selectedCategoryId || bindCategory.isLoading}
+                              onClick={() =>
+                                chainToBind &&
+                                selectedCategoryId &&
+                                bindCategory.mutate({ categoryId: selectedCategoryId, chainId: chainToBind })
+                              }
+                              showSpinner={bindCategory.isLoading}
+                            >
+                              {currentProcessing ? "Заменить цепочку" : "Привязать"}
+                            </Button>
+                            {currentProcessing && (
+                              <Popconfirm
+                                title="Снять привязку? Категория вернётся на nano-banana-pro."
+                                okText="Снять"
+                                cancelText="Отмена"
+                                onConfirm={() => selectedCategoryId && unbindCategory.mutate(selectedCategoryId)}
+                              >
+                                <Button className={css.btn} disabled={unbindCategory.isLoading}>
+                                  Снять привязку
+                                </Button>
+                              </Popconfirm>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore */}
                   <InputTextArea
                     label="Текст промпта"
                     value={editBody}
                     onChange={(e) => setEditBody(e.target.value)}
-                    disabled={isUpdateLoading || !selectedPromptId}
-                    placeholder="Выберите промпт или введите текст"
+                    disabled={isUpdateLoading || selectedPromptName == null}
+                    placeholder="Выберите категорию и промпт"
                     className={css.bodyField}
                     rows={4}
                   />
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore */}
                   <InputTextArea
-                    label="Описание версии (опционально)"
+                    label="Описание промпта (опционально)"
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    disabled={isUpdateLoading || !selectedPromptId}
-                    placeholder="Введите описание версии"
+                    disabled={isUpdateLoading || selectedPromptName == null}
+                    placeholder="Что получится на фото"
                     className={css.bodyField}
                     rows={2}
-                  />
-                  <Input
-                    label="Название новой версии (опционально, при заполнении этого поля создается новая версия промпта, иначе изменяется выбранная)"
-                    value={versionForSave}
-                    onChange={(e) => {
-                      const newValue = e.target.value;
-                      setVersionForSave(newValue);
-                      if (newValue.trim() !== "") {
-                        setSelectedVersion(null);
-                      }
-                    }}
-                    disabled={isUpdateLoading || !selectedPromptId}
-                    placeholder="Введите название новой версии"
                   />
                   <Button
                     className={css.btn}
                     disabled={
-                      isUpdateLoading ||
-                      !selectedPromptId ||
-                      (!selectedVersion && !versionForSave)
+                      isUpdateLoading || selectedPromptName == null || !editBody.trim()
                     }
-                    onClick={handleUpdate}
+                    onClick={handleUpdatePrompt}
                     showSpinner={isUpdateLoading}
                   >
                     Сохранить
@@ -425,41 +545,33 @@ const PromptsPage = () => {
             label: "Удаление",
             children: (
               <div className={css.section}>
-                <div className={css.sectionTitle}>Удаление промпта</div>
+                <div className={css.sectionTitle}>Удаление категории</div>
                 <div className={css.form}>
                   <div className={css.deletePromptContainer}>
                     <div className={css.selectPrompt}>
                       <Select
                         searchable
-                        label="Промпт"
-                        placeholder="Выберите промпт"
-                        value={deleteSelectedPromptId}
-                        onChange={(value) =>
-                          setDeleteSelectedPromptId(value ?? undefined)
-                        }
-                        options={promptsList.map((p) => ({
-                          label: p.title ?? "",
-                          value: p.id ?? "",
-                        }))}
-                        disabled={isPromptsLoading}
-                        loading={isPromptsLoading}
+                        label="Категория"
+                        placeholder="Выберите категорию"
+                        value={deleteCategoryId}
+                        onChange={(value) => setDeleteCategoryId(value ?? undefined)}
+                        options={categoryOptions}
+                        disabled={isCategoriesLoading}
+                        loading={isCategoriesLoading}
                       />
+                    </div>
+                    <div className={css.hint}>
+                      Отдельный промпт удаляется на вкладке «Изменение» — корзина рядом с ним в списке.
                     </div>
                     <Button
                       className={`${css.btn} ${css.deleteButton}`}
-                      disabled={isPromptsLoading || !deleteSelectedPromptId}
+                      disabled={isCategoriesLoading || !deleteCategoryId}
                       onClick={() => {
-                        const p = promptsList.find(
-                          (x) => x.id === deleteSelectedPromptId
-                        );
-                        if (p)
-                          setPromptToDelete({
-                            id: p.id ?? "",
-                            title: p.title ?? "",
-                          });
+                        const c = categories.find((x) => x.id === deleteCategoryId);
+                        if (c) setCategoryToDelete({ id: c.id ?? "", title: c.title ?? "" });
                       }}
                     >
-                      Удалить
+                      Удалить категорию
                     </Button>
                   </div>
                 </div>
@@ -470,31 +582,31 @@ const PromptsPage = () => {
       />
 
       <Modal
-        title="Удаление промпта"
-        open={promptToDelete !== null}
-        onOk={handleDeleteOk}
-        onCancel={() => setPromptToDelete(null)}
+        title="Удаление категории"
+        open={categoryToDelete !== null}
+        onOk={handleDeleteCategoryOk}
+        onCancel={() => setCategoryToDelete(null)}
         okButtonName="Удалить"
         destroyOnHidden
         isLoading={isDeleteLoading}
         customOkButtonClassName={css.deleteButton}
       >
-        {promptToDelete &&
-          `Вы уверены, что хотите удалить промпт «${promptToDelete.title}» и все его версии? Это действие необратимо.`}
+        {categoryToDelete &&
+          `Удалить категорию «${categoryToDelete.title}» и все её промпты? Это действие необратимо.`}
       </Modal>
 
       <Modal
-        title="Удаление версии промпта"
-        open={versionToDelete !== null}
-        onOk={handleDeleteVersionOk}
-        onCancel={() => setVersionToDelete(null)}
+        title="Удаление промпта"
+        open={promptToDelete !== null}
+        onOk={handleDeletePromptOk}
+        onCancel={() => setPromptToDelete(null)}
         okButtonName="Удалить"
         destroyOnHidden
         isLoading={isUpdateLoading}
         customOkButtonClassName={css.deleteButton}
       >
-        {versionToDelete &&
-          `Вы уверены, что хотите удалить версию «${versionToDelete.version}» промпта «${versionToDelete.promptTitle}»? Это действие необратимо.`}
+        {promptToDelete &&
+          `Удалить промпт «${promptToDelete.promptName}» из категории «${promptToDelete.categoryTitle}»? Это действие необратимо.`}
       </Modal>
     </div>
   );

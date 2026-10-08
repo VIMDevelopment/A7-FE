@@ -33,22 +33,22 @@ describe("Explorer prompt selection [R-12]", () => {
     expect(sortPromptsByFavorites(list, new Set()).map((p) => p.id)).toEqual(["1", "2"]);
   });
 
-  it("[R-12] тело запроса — из выбранной версии history, fallback — body промпта", () => {
+  it("[R-38] текст прогона — только выбранный промпт категории; body категории не отправляется", () => {
     const p = prompt("1", "Т", {
       history: [version("v1", "старое"), version("v2", "новое")],
     });
     expect(resolvePromptBody(p, "v1")).toBe("старое");
     expect(resolvePromptBody(p, "v2")).toBe("новое");
-    expect(resolvePromptBody(p, "нет-такой")).toBe("body-1");
-    expect(resolvePromptBody(p, null)).toBe("body-1");
+    expect(resolvePromptBody(p, "нет-такой")).toBeUndefined();
+    expect(resolvePromptBody(p, null)).toBeUndefined();
     expect(resolvePromptBody(undefined, "v1")).toBeUndefined();
   });
 
-  it("[R-12] дефолтная версия — последняя запись history", () => {
-    const p = prompt("1", "Т", {
-      history: [version("v1"), version("v2")],
-    });
-    expect(defaultVersionOf(p)).toBe("v2");
+  it("[R-38] дефолт промпта: единственный подставляется, из нескольких выбирает человек", () => {
+    expect(defaultVersionOf(prompt("1", "Т", { history: [version("v1")] }))).toBe("v1");
+    expect(
+      defaultVersionOf(prompt("1", "Т", { history: [version("v1"), version("v2")] }))
+    ).toBeNull();
     expect(defaultVersionOf(prompt("2", "Без истории"))).toBeNull();
   });
 });

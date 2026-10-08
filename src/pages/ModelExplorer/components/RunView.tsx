@@ -3,6 +3,7 @@ import { Image, Spin, Table, Tag, Tooltip } from "antd";
 import {
   DownloadOutlined,
   EyeOutlined,
+  LinkOutlined,
   LoadingOutlined,
   RedoOutlined,
   SwapOutlined,
@@ -18,6 +19,7 @@ import {
 import Button from "../../../components/Button/Button";
 import { showNotification } from "../../../components/ShowNotification";
 import ChainCarouselModal from "./ChainCarouselModal";
+import BindCategoriesModal from "./BindCategoriesModal";
 import { compareTarget } from "../runMode";
 import { downloadStepImage } from "../stepDownload";
 import css from "../index.module.css";
@@ -57,6 +59,8 @@ type Props = {
  */
 const RunView: FC<Props> = ({ run, canRun }) => {
   const [carousel, setCarousel] = useState<CarouselState>(null);
+  // «Назначить категории» (R-39.1) — у завершённой цепочки, только админ
+  const [bindFor, setBindFor] = useState<ExplorerChain | null>(null);
   const queryClient = useQueryClient();
 
   const retryChain = useRetryChain({
@@ -194,6 +198,11 @@ const RunView: FC<Props> = ({ run, canRun }) => {
                 <EyeOutlined /> Смотреть
               </Button>
             )}
+            {chain.status === "done" && canRun && (
+              <Button onClick={() => setBindFor(chain)}>
+                <LinkOutlined /> Назначить категории
+              </Button>
+            )}
             {chain.status === "done" && (
               <Button onClick={() => downloadStep(chain, chain.steps.length - 1)}>
                 <DownloadOutlined /> Скачать результат
@@ -262,6 +271,14 @@ const RunView: FC<Props> = ({ run, canRun }) => {
         onDownloadStep={(stepIndex) => carousel && downloadStep(carousel.chain, stepIndex)}
         initialSlide={carousel?.initialSlide ?? 0}
       />
+      {bindFor && (
+        <BindCategoriesModal
+          open
+          chainId={bindFor.chainId}
+          chainTitle={bindFor.title}
+          onClose={() => setBindFor(null)}
+        />
+      )}
     </div>
   );
 };

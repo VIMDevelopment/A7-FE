@@ -35,6 +35,9 @@ import {
   getFavoritePromptsKey,
 } from "../../api/favoritesApi";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
+import { categoriesWithPrompts, defaultPromptOf, promptBodyOf } from "../prompts/promptCatalog";
+import { addLayerPayload, processingOf } from "../prompts/categoryProcessing";
+import type { CategoryWithProcessing } from "../../api/processingApi";
 import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
 import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
 import type { PostPhotosImproveBody } from "../../apiV2/a7-service/model/postPhotosImproveBody";
@@ -178,11 +181,13 @@ const ImprovementModal: FC<Props> = ({
   // Избранное филиала: множество id + отсортированный список (избранные сверху по title,
   // затем остальные в исходном порядке бэкенда — createdAt desc).
   const favoriteIdSet = new Set(favoritesData?.data.promptIds ?? []);
+  // фотографу — только категории с промптами (R-38.5); избранные филиала сверху
+  const visibleCategories = categoriesWithPrompts(promptsList);
   const sortedPrompts = [
-    ...promptsList
+    ...visibleCategories
       .filter((p) => favoriteIdSet.has(p.id ?? ""))
       .sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "")),
-    ...promptsList.filter((p) => !favoriteIdSet.has(p.id ?? "")),
+    ...visibleCategories.filter((p) => !favoriteIdSet.has(p.id ?? "")),
   ];
 
   const toggleFavorite = (
@@ -214,11 +219,10 @@ const ImprovementModal: FC<Props> = ({
     selectedVersion != null
       ? promptHistory.find((h) => h.promptVersion === selectedVersion)
       : undefined;
-  const bodyForRequest =
-    selectedVersion != null
-      ? promptHistory.find((h) => h.promptVersion === selectedVersion)
-          ?.promptBody ?? selectedPrompt?.body
-      : selectedPrompt?.body;
+  // текст — только выбранного промпта категории; body категории не отправляется (R-38.5)
+  const bodyForRequest = promptBodyOf(selectedPrompt, selectedVersion);
+  // привязка категории к цепочке (R-39): модель выбирает бэкенд, разрешение задано шагами
+  const boundProcessing = processingOf(selectedPrompt as CategoryWithProcessing | undefined);
 
   useEffect(() => {
     if (prevStatusRef.current === "processing" && status === "success") {
@@ -276,11 +280,15 @@ const ImprovementModal: FC<Props> = ({
 
   const handleImprovePhoto = () => {
     if (selectedPromptId && bodyForRequest != null) {
-      void runAddLayer({
-        photoId,
-        prompt: bodyForRequest,
-        outputResolution,
-      });
+      void runAddLayer(
+        addLayerPayload({
+          photoId,
+          prompt: bodyForRequest,
+          categoryId: selectedPromptId,
+          outputResolution,
+          processing: boundProcessing,
+        }) as PostPhotosAddlayerBody
+      );
     } else {
       void runImprove({
         photoIds: [photoId],
@@ -457,17 +465,14 @@ const ImprovementModal: FC<Props> = ({
             <div className={css.promptSelectContainer}>
               <Select
                 searchable
-                label="Промпт"
-                placeholder="Выберите промпт"
+                label="Категория"
+                placeholder="Выберите категорию"
                 value={selectedPromptId}
                 onChange={(value) => {
                   setSelectedPromptId(value ?? undefined);
-                  const prompt = promptsList.find((p) => p.id === value);
-                  const history = prompt?.history ?? [];
+                  // один промпт в категории — подставляем; несколько — выбирает человек (R-38.5)
                   setSelectedVersion(
-                    history.length > 0
-                      ? history[history.length - 1].promptVersion
-                      : null
+                    defaultPromptOf(promptsList.find((p) => p.id === value))
                   );
                 }}
                 options={sortedPrompts.map((p) => ({
@@ -508,8 +513,8 @@ const ImprovementModal: FC<Props> = ({
               {selectedPromptId && promptHistory.length > 0 && (
                 <div className={css.versionSelect}>
                   <Select
-                    label="Версия"
-                    placeholder="Выберите версию"
+                    label="Промпт"
+                    placeholder="Выберите промпт"
                     value={selectedVersion}
                     onChange={(value) => setSelectedVersion(value ?? null)}
                     options={promptHistory.map(
@@ -545,6 +550,8 @@ const ImprovementModal: FC<Props> = ({
                 </div>
               </div>
             )}
+            {/* у привязанной категории разрешение задано шагами цепочки (R-39.2) */}
+            {!boundProcessing && (
             <div className={css.resolutionGroup}>
               <span className={css.resolutionLabel}>Разрешение:</span>
               <Radio.Group
@@ -560,6 +567,7 @@ const ImprovementModal: FC<Props> = ({
                 <Radio value="4K">4K (высокое качество)</Radio>
               </Radio.Group>
             </div>
+            )}
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (
                 <Button

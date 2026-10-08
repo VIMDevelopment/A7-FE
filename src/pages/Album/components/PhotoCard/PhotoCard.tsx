@@ -34,7 +34,16 @@ type Props = {
   isSelected: boolean;
   albumId: string;
   status?: PhotoStatus;
-  onSelect: (id: string) => void;
+  /**
+   * R-44: ключ карточки в выборе. В альбоме это ключ плитки — у модифицированного фото две
+   * карточки (модификат + оригинал), по id их не различить. По умолчанию — id фото.
+   */
+  selectionKey?: string;
+  /** R-44: готовое имя файла для печати/скачивания (у плитки-оригинала — исходник). */
+  downloadFileName?: string;
+  /** R-44: «Переименовать» в меню (у плитки-оригинала — нет: имя одно на запись). */
+  canRename?: boolean;
+  onSelect: (key: string) => void;
   onDelete?: (id: string) => void;
 };
 
@@ -49,6 +58,9 @@ const PhotoCard: FC<Props> = ({
   isSelected,
   albumId,
   status,
+  selectionKey,
+  downloadFileName,
+  canRename = true,
   onSelect,
   onDelete,
 }) => {
@@ -114,6 +126,8 @@ const PhotoCard: FC<Props> = ({
     setIsImprovePhotoModalOpen(false);
   };
 
+  const fileNameToSave = downloadFileName ?? makeFileName({ fileName: name, isOriginal });
+
   const items: ItemType[] = [
     {
       key: "0",
@@ -123,32 +137,22 @@ const PhotoCard: FC<Props> = ({
     {
       key: "1",
       label: "Печать",
-      onClick: () =>
-        handlePrintPhoto(
-          url,
-          makeFileName({
-            fileName: name,
-            isOriginal,
-          })
-        ),
+      onClick: () => handlePrintPhoto(url, fileNameToSave),
     },
     {
       key: "2",
       label: "Скачать",
-      onClick: () =>
-        downloadImageByUrl(
-          url,
-          makeFileName({
-            fileName: name,
-            isOriginal,
-          })
-        ),
+      onClick: () => downloadImageByUrl(url, fileNameToSave),
     },
-    {
-      key: "3",
-      label: "Переименовать",
-      onClick: () => setIsEditPhotoNameModalOpen(true),
-    },
+    ...(canRename
+      ? [
+          {
+            key: "3",
+            label: "Переименовать",
+            onClick: () => setIsEditPhotoNameModalOpen(true),
+          },
+        ]
+      : []),
     {
       key: "4",
       label: "Удалить",
@@ -187,7 +191,7 @@ const PhotoCard: FC<Props> = ({
           <Checkbox
             className={css.checkbox}
             checked={isSelected}
-            onClick={() => onSelect(id)}
+            onClick={() => onSelect(selectionKey ?? id)}
           />
         </div>
         <div className={css.rocketWrapper}>
@@ -281,9 +285,11 @@ const PhotoCard: FC<Props> = ({
         >
           <div className={css.modalContent}>
             <div>{`Вы уверены, что хотите удалить фото ${name}? Данные будут безвозвратно утеряны.`}</div>
-            <div
-              className={css.warningInfo}
-            >{`Внимание! При удалении оригинала фото, удаляется также его улучшенная версия`}</div>
+            {hasImprovedVersion && (
+              <div
+                className={css.warningInfo}
+              >{`Внимание! Удаляется всё фото целиком — и модифицированная версия, и оригинал (в альбоме пропадут обе карточки).`}</div>
+            )}
           </div>
         </Modal>
       </div>
