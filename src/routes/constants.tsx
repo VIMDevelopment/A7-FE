@@ -135,10 +135,12 @@ export const ROUTES: Routes[] = [
   },
 ];
 
+// Неизвестный или недоступный роли адрес → «Файлы» для ВСЕХ ролей (раньше только для admin —
+// остальные видели пустую страницу; в т.ч. старые адреса вырезанных экранов, R-50.2).
 export const REDIRECTS: RedirectRoutes[] = [
   {
     id: "projects",
     path: PublicRoutes.PROJECTS.static,
-    roles: [UserRolesItem.admin],
+    roles: ALL_ROLES,
   },
 ];
