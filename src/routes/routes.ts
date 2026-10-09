@@ -68,9 +68,6 @@ export const PublicRoutes = {
   STATISTICS: {
     static: "/statistics",
   },
-  RECOGNITION: {
-    static: "/recognition",
-  },
   PROMPTS: {
     static: "/prompts",
   },

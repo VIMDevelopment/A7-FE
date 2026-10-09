@@ -3,7 +3,6 @@ import cn from "classnames";
 import css from "./index.module.css";
 import Input from "../../components/Input/Input";
 import {
-  PostCameras201,
   UserRolesItem,
   UserUpdateDto,
 } from "../../apiV2/a7-service/model";
@@ -12,7 +11,6 @@ import {
   useDeleteUsersDelete,
   useGetProjects,
   useGetUsersAll,
-  usePostCameras,
   usePutUsersUpdate,
 } from "../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../api/helpers";
@@ -29,8 +27,6 @@ import {
 } from "./helpers";
 import { AllBranchesNote, SuperadminRolesHint } from "./SuperadminNotes";
 import Modal from "../../components/Modal/Modal";
-import CameraSetupSlider from "../../components/CameraSetupSlider/CameraSetupSlider";
-import { getCameraSetupSteps } from "./cameraSetupSteps";
 import { Tabs } from "antd";
 import {
   formatFullNameForApi,
@@ -47,9 +43,6 @@ type UserUpdateForm = Omit<UserUpdateDto, "name"> & {
 const AdministrationPage = () => {
   const [isUpdatePasswordError, setIsUpdatePasswordError] = useState(false);
   const [updateFormState, setUpdateFormState] = useState<UserUpdateForm>();
-  const [selectedProjectId, setSelectedProjectId] = useState<string>();
-  const [cameraData, setCameraData] = useState<PostCameras201 | undefined>();
-  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
   const [deleteSelectedUserId, setDeleteSelectedUserId] = useState<string>();
   const [userToDelete, setUserToDelete] = useState<{
     id: string;
@@ -77,15 +70,6 @@ const AdministrationPage = () => {
   });
 
   const {
-    isLoading: isCameraLoading,
-    isSuccess: isCameraSuccess,
-    data: cameraResponse,
-    mutate: createCamera,
-  } = usePostCameras({
-    axios: defaultApiAxiosParams,
-  });
-
-  const {
     isLoading: isDeleteLoading,
     mutateAsync: deleteUser,
   } = useDeleteUsersDelete({
@@ -104,16 +88,6 @@ const AdministrationPage = () => {
       setUpdateFormState(undefined);
     }
   }, [isSuccess]);
-
-  useEffect(() => {
-    if (isCameraSuccess) {
-      setCameraData(cameraResponse.data);
-      showNotification({
-        type: "success",
-        message: "Данные для привязки фотоаппарата сгенерированы",
-      });
-    }
-  }, [isCameraSuccess, cameraResponse]);
 
   const handleUpdateClick = () => {
     const validPasswords =
@@ -142,24 +116,6 @@ const AdministrationPage = () => {
           "Для обновления пароля пользователя нужно ввести одинаковые пароли в оба поля",
       });
     }
-  };
-
-  const handleGenerateCameraData = () => {
-    if (selectedProjectId) {
-      createCamera({
-        data: {
-          projectId: selectedProjectId,
-        },
-      });
-    }
-  };
-
-  const handleShowInstruction = () => {
-    setIsInstructionModalOpen(true);
-  };
-
-  const handleCloseInstruction = () => {
-    setIsInstructionModalOpen(false);
   };
 
   const handleOpenDeleteModal = () => {
@@ -200,15 +156,6 @@ const AdministrationPage = () => {
     }
   };
 
-  const cameraSetupSteps = cameraData
-    ? getCameraSetupSteps(
-      cameraData.cameraId,
-      cameraData.ftpUsername,
-      cameraData.ftpPassword,
-      cameraData.pasvUrl
-    )
-    : [];
-
   const isSupervisor = (currentUser?.roles ?? []).includes(
     UserRolesItem.supervisor
   );
@@ -239,56 +186,8 @@ const AdministrationPage = () => {
 
       <Tabs
         className={css.tabs}
-        defaultActiveKey="camera"
+        defaultActiveKey="pending-users"
         items={[
-          {
-            key: "camera",
-            label: "Привязка фотоаппарата",
-            children: (
-              <div className={css.section}>
-                <div className={css.sectionTitle}>Привязка фотоаппарата</div>
-                <div className={css.form}>
-                  {isCameraSuccess ? (
-                    <>
-                      <div className={css.notificationText}>
-                        Фотоаппарат готов к привязке. Пожалуйста, подключите фотоаппарат по инструкции.
-                      </div>
-                      <Button
-                        className={css.btn}
-                        onClick={handleShowInstruction}
-                      >
-                        Настроить фотоаппарат
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Select
-                        label="Филиал"
-                        onChange={(value) => setSelectedProjectId(value as string)}
-                        value={selectedProjectId}
-                        placeholder="Выберите из списка"
-                        disabled={isCameraLoading || isProjectsLoading}
-                        loading={isProjectsLoading}
-                        options={getWorkplaceOptions(
-                          projectsData?.data.projects ?? [],
-                          currentUser?.roles,
-                          currentUser?.workplace
-                        )}
-                      />
-                      <Button
-                        className={css.btn}
-                        disabled={isCameraLoading || !selectedProjectId}
-                        onClick={handleGenerateCameraData}
-                        showSpinner={isCameraLoading}
-                      >
-                        Сгенерировать данные для привязки
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ),
-          },
           {
             key: "pending-users",
             label: "Ожидают доступа",
@@ -485,19 +384,6 @@ const AdministrationPage = () => {
           },
         ]}
       />
-
-      <Modal
-        title="Инструкция по настройке Canon R6"
-        open={isInstructionModalOpen}
-        onCancel={handleCloseInstruction}
-        onOk={handleCloseInstruction}
-        withFooter={false}
-        width={1000}
-      >
-        {cameraSetupSteps.length > 0 && (
-          <CameraSetupSlider steps={cameraSetupSteps} />
-        )}
-      </Modal>
 
       <Modal
         title="Удаление пользователя"

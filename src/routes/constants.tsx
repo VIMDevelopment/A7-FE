@@ -9,7 +9,6 @@ import AlbumPage from "../pages/Album/Album";
 import { UserRolesItem } from "../apiV2/a7-service/model";
 import ProjectPage from "../pages/Project/Project";
 import SubprojectPage from "../pages/Subproject/Subproject";
-import RecognitionPage from "../pages/Recognition/Recognition";
 import PromptsPage from "../pages/Prompts/Prompts";
 import KnowledgeBasePage from "../pages/KnowledgeBase/KnowledgeBase";
 import ModelExplorerPage from "../pages/ModelExplorer/ModelExplorer";
@@ -112,12 +111,6 @@ export const ROUTES: Routes[] = [
     path: PublicRoutes.PROMPTS.static,
     roles: ALL_ROLES,
     component: <PromptsPage />,
-  },
-  {
-    id: "recognition",
-    path: PublicRoutes.RECOGNITION.static,
-    roles: ALL_ROLES,
-    component: <RecognitionPage />,
   },
   {
     id: "statistics",
