@@ -18,8 +18,8 @@ const httpError = (status: number, message?: string) =>
 
 describe("uploadWithRetry (R-34)", () => {
   it("[R-34] сетевой обрыв ретраится и успех со второй попытки — без ошибки наружу", async () => {
-    const sleep = jest.fn().mockResolvedValue(undefined);
-    const attempt = jest
+    const sleep = vi.fn().mockResolvedValue(undefined);
+    const attempt = vi
       .fn()
       .mockRejectedValueOnce(networkError())
       .mockResolvedValueOnce(undefined);
@@ -31,8 +31,8 @@ describe("uploadWithRetry (R-34)", () => {
   });
 
   it("[R-34] 5xx ретраится; все попытки исчерпаны → ok:false с сетевой причиной", async () => {
-    const sleep = jest.fn().mockResolvedValue(undefined);
-    const attempt = jest.fn().mockRejectedValue(httpError(502));
+    const sleep = vi.fn().mockResolvedValue(undefined);
+    const attempt = vi.fn().mockRejectedValue(httpError(502));
 
     const res = await uploadWithRetry(attempt, sleep);
 
@@ -42,8 +42,8 @@ describe("uploadWithRetry (R-34)", () => {
   });
 
   it("[R-34] 4xx с текстом сервера — БЕЗ повторов, текст сохраняется", async () => {
-    const sleep = jest.fn();
-    const attempt = jest
+    const sleep = vi.fn();
+    const attempt = vi
       .fn()
       .mockRejectedValue(httpError(422, "Файл не является изображением"));
 

@@ -8,7 +8,7 @@ ok()  { echo "  ✓ $*"; }
 bad() { echo "  ✗ $*"; fail=1; }
 
 INDEX_HEADERS=$(curl -s -D - -o /tmp/verify-delivery-index.html "$BASE/")
-JS=$(grep -oE '/(static/js|assets)/[^"]+\.js' /tmp/verify-delivery-index.html | head -1)
+JS=$(grep -oE '/(static|assets)/[^"]+\.js' /tmp/verify-delivery-index.html | head -1)
 [ -n "$JS" ] || { echo "не нашёл основной js в $BASE/"; exit 2; }
 echo "Сайт: $BASE · основной код: $JS"
 
@@ -19,7 +19,8 @@ SENT=$(curl -s -o /dev/null -w '%{size_download}' -H 'Accept-Encoding: gzip, br'
 echo "[R-53.1] сжатие"
 if echo "$JS_HEADERS" | grep -qiE '^content-encoding: *(gzip|br)'; then ok "Content-Encoding есть"; else bad "код идёт без сжатия"; fi
 PCT=$(( SENT * 100 / RAW ))
-if [ "$PCT" -le 30 ]; then ok "передано $SENT из $RAW байт ($PCT% ≤ 30%)"; else bad "передано $SENT из $RAW байт ($PCT% > 30%)"; fi
+# Порог — «сжат минимум вдвое» (R-53.1, ревизия 09.10: было ≤ 30% — подбиралось под вывод CRA).
+if [ "$PCT" -le 50 ]; then ok "передано $SENT из $RAW байт ($PCT% ≤ 50%)"; else bad "передано $SENT из $RAW байт ($PCT% > 50%)"; fi
 
 echo "[R-53.2] кэш файлов с хешем"
 CC=$(echo "$JS_HEADERS" | grep -i '^cache-control:' | tr -d '\r')

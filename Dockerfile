@@ -1,6 +1,6 @@
 # A7-FE (прод веб-версия Wanmax) — образ для Dokploy.
-# CRA (react-scripts): REACT_APP_* вшивается на этапе BUILD → образ прод ≠ образ стенд
-# (разный REACT_APP_API_URL). Значение задаётся build-arg'ом в Dokploy на каждую среду.
+# Vite (R-54; раньше CRA): REACT_APP_API_URL вшивается на этапе BUILD → образ прод ≠ образ стенд.
+# Значение задаётся build-arg'ом в Dokploy на каждую среду (имя переменной прежнее — envPrefix).
 FROM node:18-bullseye AS build
 WORKDIR /app
 
@@ -8,7 +8,7 @@ ARG REACT_APP_API_URL=https://api.wanmax.io
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 COPY . .
 RUN npm run build
 

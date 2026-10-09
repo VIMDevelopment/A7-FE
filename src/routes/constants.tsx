@@ -1,18 +1,20 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, lazy } from "react";
 import { PublicRoutes } from "./routes";
-import AdministrationPage from "../pages/Administration/Administration";
-import ProjectsPage from "../pages/Projects/Projects";
 // import ReportsPage from "../pages/Reports/Reports";
-import SettingsPage from "../pages/Settings/Settings";
-import StatisticsPage from "../pages/Statistics/Statistics";
-import AlbumPage from "../pages/Album/Album";
 import { UserRolesItem } from "../apiV2/a7-service/model";
-import ProjectPage from "../pages/Project/Project";
-import SubprojectPage from "../pages/Subproject/Subproject";
-import PromptsPage from "../pages/Prompts/Prompts";
-import KnowledgeBasePage from "../pages/KnowledgeBase/KnowledgeBase";
-import ModelExplorerPage from "../pages/ModelExplorer/ModelExplorer";
 import { EXPLORER_VIEW_ROLES } from "../pages/ModelExplorer/access";
+
+// R-54: страницы грузятся по требованию — каждая своим файлом (Suspense — в App).
+const AdministrationPage = lazy(() => import("../pages/Administration/Administration"));
+const ProjectsPage = lazy(() => import("../pages/Projects/Projects"));
+const SettingsPage = lazy(() => import("../pages/Settings/Settings"));
+const StatisticsPage = lazy(() => import("../pages/Statistics/Statistics"));
+const AlbumPage = lazy(() => import("../pages/Album/Album"));
+const ProjectPage = lazy(() => import("../pages/Project/Project"));
+const SubprojectPage = lazy(() => import("../pages/Subproject/Subproject"));
+const PromptsPage = lazy(() => import("../pages/Prompts/Prompts"));
+const KnowledgeBasePage = lazy(() => import("../pages/KnowledgeBase/KnowledgeBase"));
+const ModelExplorerPage = lazy(() => import("../pages/ModelExplorer/ModelExplorer"));
 
 const ALL_ROLES = [
   UserRolesItem.admin,
