@@ -48,9 +48,12 @@ export const getRolesOptions = (currentUserRoles?: UserRolesItem[]) => {
   const canManageCapabilities = (currentUserRoles ?? []).some((r) =>
     CAPABILITY_MANAGERS.includes(r)
   );
+  // Админ («Суперадмин») назначает любые роли, включая админа, — как разрешает бэк
+  // (ROLE_CREATION_PERMISSIONS.admin). Остальные — только строго ниже себя.
+  const isAdmin = (currentUserRoles ?? []).includes(UserRolesItem.admin);
 
   const hierarchical = HIERARCHICAL_ROLES.filter(
-    (r) => (ROLE_PRIORITY[r] ?? 0) < currentLevel
+    (r) => isAdmin || (ROLE_PRIORITY[r] ?? 0) < currentLevel
   ).map((r) => ({ key: r, value: r, label: getRoleDescription(r) }));
 
   const capabilities = canManageCapabilities
