@@ -4,7 +4,8 @@ import { StarFilled, StarOutlined } from "@ant-design/icons";
 import cn from "classnames";
 import { useQueryClient } from "react-query";
 import Select from "../../../components/Select/Select";
-import { useGetPrompts } from "../../../apiV2/a7-service";
+import { useGetProjects, useGetPrompts } from "../../../apiV2/a7-service";
+import { favoritesBranchId } from "../../Administration/helpers";
 import { defaultApiAxiosParams } from "../../../api/helpers";
 import { useProfile } from "../../../auth/auth";
 import {
@@ -40,8 +41,13 @@ const PromptPicker: FC<Props> = ({ disabled, onPromptBodyChange }) => {
 
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
-  // На странице Explorer нет projectId в URL — как в Recognition, берём первый филиал юзера.
-  const branchId = profile?.workplace?.[0];
+  // На странице Explorer нет projectId в URL — берём первый филиал юзера, а у суперадмина
+  // без списка филиалов — первый филиал из общего списка.
+  const { data: projectsData } = useGetProjects({ axios: defaultApiAxiosParams });
+  const branchId = favoritesBranchId(
+    profile?.workplace,
+    projectsData?.data.projects ?? []
+  );
 
   const { data: promptsData, isLoading: isPromptsLoading } = useGetPrompts({
     axios: defaultApiAxiosParams,

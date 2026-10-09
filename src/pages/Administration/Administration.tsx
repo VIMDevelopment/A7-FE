@@ -21,10 +21,13 @@ import Select from "../../components/Select/Select";
 import { useQueryClient } from "react-query";
 import { useProfile } from "../../auth/auth";
 import {
-  getEffectiveLevel,
+  applyRolesSelection,
+  canEditUser,
+  isSuperadmin,
   getRolesOptions,
   getWorkplaceOptions,
 } from "./helpers";
+import { AllBranchesNote, SuperadminRolesHint } from "./SuperadminNotes";
 import Modal from "../../components/Modal/Modal";
 import CameraSetupSlider from "../../components/CameraSetupSlider/CameraSetupSlider";
 import { getCameraSetupSteps } from "./cameraSetupSteps";
@@ -206,8 +209,6 @@ const AdministrationPage = () => {
     )
     : [];
 
-  const currentUserLevel = getEffectiveLevel(currentUser?.roles);
-
   const isSupervisor = (currentUser?.roles ?? []).includes(
     UserRolesItem.supervisor
   );
@@ -215,8 +216,7 @@ const AdministrationPage = () => {
   const allUsersDataOptions = data?.data
     .filter((item) => {
       const defaultFilter =
-        item.id !== currentUser?.id &&
-        getEffectiveLevel(item.roles) < currentUserLevel;
+        item.id !== currentUser?.id && canEditUser(currentUser?.roles, item.roles);
 
       if (isSupervisor) {
         return (
@@ -401,35 +401,42 @@ const AdministrationPage = () => {
                     placeholder="Повторно введите пароль"
                     status={isUpdatePasswordError ? "error" : ""}
                   />
-                  <Select
-                    label="Место работы / доступные филиалы"
-                    onChange={(value) =>
-                      setUpdateFormState((prev) => ({
-                        ...prev,
-                        workplace: value,
-                      }))
-                    }
-                    mode="multiple"
-                    showSelectAll
-                    value={updateFormState?.workplace}
-                    placeholder="Выберите из списка"
-                    disabled={
-                      isLoading || isProjectsLoading || !updateFormState?.id
-                    }
-                    loading={isProjectsLoading}
-                    options={getWorkplaceOptions(
-                      projectsData?.data.projects ?? [],
-                      currentUser?.roles,
-                      currentUser?.workplace
-                    )}
-                  />
+                  {isSuperadmin(updateFormState?.roles) ? (
+                    <AllBranchesNote label="Место работы / доступные филиалы" />
+                  ) : (
+                    <Select
+                      label="Место работы / доступные филиалы"
+                      onChange={(value) =>
+                        setUpdateFormState((prev) => ({
+                          ...prev,
+                          workplace: value,
+                        }))
+                      }
+                      mode="multiple"
+                      showSelectAll
+                      value={updateFormState?.workplace}
+                      placeholder="Выберите из списка"
+                      disabled={
+                        isLoading || isProjectsLoading || !updateFormState?.id
+                      }
+                      loading={isProjectsLoading}
+                      options={getWorkplaceOptions(
+                        projectsData?.data.projects ?? [],
+                        currentUser?.roles,
+                        currentUser?.workplace
+                      )}
+                    />
+                  )}
                   <Select
                     label="Роль"
                     mode="multiple"
                     onChange={(value) =>
                       setUpdateFormState((prev) => ({
                         ...prev,
-                        roles: value as UserRolesItem[],
+                        roles: applyRolesSelection(
+                          prev?.roles ?? [],
+                          value as UserRolesItem[]
+                        ),
                       }))
                     }
                     value={updateFormState?.roles}
@@ -437,6 +444,7 @@ const AdministrationPage = () => {
                     disabled={isLoading || !updateFormState?.id}
                     options={getRolesOptions(currentUser?.roles)}
                   />
+                  {isSuperadmin(updateFormState?.roles) && <SuperadminRolesHint />}
                   <Button
                     className={css.btn}
                     disabled={isLoading || isUpdatePasswordError || !updateFormState?.id}

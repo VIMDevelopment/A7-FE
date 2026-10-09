@@ -15,7 +15,13 @@ import { showNotification } from "../../components/ShowNotification";
 import Button from "../../components/Button/Button";
 import Select from "../../components/Select/Select";
 import Modal from "../../components/Modal/Modal";
-import { getRolesOptions, getWorkplaceOptions } from "./helpers";
+import {
+  applyRolesSelection,
+  getRolesOptions,
+  getWorkplaceOptions,
+  isSuperadmin,
+} from "./helpers";
+import { AllBranchesNote, SuperadminRolesHint } from "./SuperadminNotes";
 import css from "./index.module.css";
 
 type GrantFormState = {
@@ -112,7 +118,8 @@ const PendingUsersTab: React.FC = () => {
       id: selectedPending.id,
       data: {
         roles: grantForm.roles,
-        workplace: grantForm.workplace,
+        // Суперадмин видит все филиалы — список ему не нужен.
+        workplace: isSuperadmin(grantForm.roles) ? [] : grantForm.workplace,
       },
     });
   };
@@ -191,32 +198,37 @@ const PendingUsersTab: React.FC = () => {
               onChange={(value) =>
                 setGrantForm((prev) => ({
                   ...prev,
-                  roles: value as UserRolesItem[],
+                  roles: applyRolesSelection(prev.roles, value as UserRolesItem[]),
                 }))
               }
               options={getRolesOptions(currentUser?.roles)}
               placeholder="Выберите одну или несколько ролей"
             />
-            <Select
-              label="Доступные филиалы"
-              mode="multiple"
-              showSelectAll
-              value={grantForm.workplace}
-              onChange={(value) =>
-                setGrantForm((prev) => ({
-                  ...prev,
-                  workplace: value as string[],
-                }))
-              }
-              options={getWorkplaceOptions(
-                projectsData?.data.projects ?? [],
-                currentUser?.roles,
-                currentUser?.workplace
-              )}
-              placeholder="Выберите филиалы"
-              loading={isProjectsLoading}
-              disabled={isProjectsLoading}
-            />
+            {isSuperadmin(grantForm.roles) && <SuperadminRolesHint />}
+            {isSuperadmin(grantForm.roles) ? (
+              <AllBranchesNote label="Доступные филиалы" />
+            ) : (
+              <Select
+                label="Доступные филиалы"
+                mode="multiple"
+                showSelectAll
+                value={grantForm.workplace}
+                onChange={(value) =>
+                  setGrantForm((prev) => ({
+                    ...prev,
+                    workplace: value as string[],
+                  }))
+                }
+                options={getWorkplaceOptions(
+                  projectsData?.data.projects ?? [],
+                  currentUser?.roles,
+                  currentUser?.workplace
+                )}
+                placeholder="Выберите филиалы"
+                loading={isProjectsLoading}
+                disabled={isProjectsLoading}
+              />
+            )}
           </div>
         )}
       </Modal>
