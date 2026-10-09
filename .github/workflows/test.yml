@@ -1,0 +1,23 @@
+name: Tests
+
+# Тесты на каждый push в dev/main и в PR (R-50.5, R-52.4: сторож вырезанного — часть тестов).
+# Выкатка (deploy.yml) пока от этого не зависит — красный тест виден в Actions и в PR.
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit -p tsconfig.json
+      - run: npx craco test --watchAll=false
+        env:
+          CI: true
