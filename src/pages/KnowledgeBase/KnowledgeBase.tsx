@@ -168,7 +168,7 @@ const KnowledgeBasePage = () => {
       <div className={css.searchWrapper}>
         <Input
           label="Поиск по инструкциям"
-          placeholder="Например: загрузка, промпт, распознавание"
+          placeholder="Например: загрузка, промпт, модификация"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

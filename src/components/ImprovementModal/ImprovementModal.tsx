@@ -118,7 +118,7 @@ const ImprovementModal: FC<Props> = ({
   const queryClient = useQueryClient();
 
   // Филиал избранного: из URL альбома (projectId) либо fallback на первый филиал юзера
-  // (нужно для контекстов без projectId в роуте, напр. Recognition).
+  // (нужно для контекстов без projectId в роуте).
   const { data: profile } = useProfile();
   const branchId = projectId ?? profile?.workplace?.[0];
 

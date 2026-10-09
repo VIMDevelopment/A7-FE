@@ -19,7 +19,6 @@ import PolicyPage from "./pages/Policy/Policy";
 import NoAccessPage from "./pages/NoAccess/NoAccess";
 import { showNotification } from "./components/ShowNotification";
 import { globalErrorMessage } from "./utils/globalErrorMessage";
-import { loadFaceApiModels } from "./utils/faceDetection";
 
 const antdTheme = {
   token: {
@@ -68,12 +67,6 @@ const AppShell = () => {
 
   useEffect(() => {
     void getProfileFx();
-    // Прогреваем модели face-api в фоне сразу при старте приложения.
-    // К моменту, когда пользователь откроет экран распознавания, модели
-    // уже будут в памяти — не будет блокировки кнопки «Загрузка моделей...».
-    void loadFaceApiModels().catch((err) => {
-      console.warn("Не удалось предварительно загрузить модели face-api", err);
-    });
   }, []);
 
   const routes = useMemo(() => {

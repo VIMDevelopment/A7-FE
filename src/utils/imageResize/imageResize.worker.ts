@@ -2,6 +2,9 @@
 import Pica from "pica";
 import type { ResizeRequest, ResizeResponse } from "./types";
 
+/** OffscreenCanvas.convertToBlob — есть в браузерах, нет в lib.dom TS 4.9. */
+type BlobConvertible = { convertToBlob(options?: { type?: string; quality?: number }): Promise<Blob> };
+
 interface WorkerScope {
   onmessage: ((e: MessageEvent<ResizeRequest>) => void) | null;
   postMessage(message: ResizeResponse, transfer?: Transferable[]): void;
@@ -55,7 +58,8 @@ ctx.onmessage = async (event: MessageEvent<ResizeRequest>) => {
     const targetH = Math.round(height * scale);
 
     const source = new OffscreenCanvas(width, height);
-    const sourceCtx = source.getContext("2d");
+    // Без явного типа TS видит общий OffscreenRenderingContext (до R-50 его «чинили» глобальные типы удалённой ML-библиотеки).
+    const sourceCtx = source.getContext("2d") as OffscreenCanvasRenderingContext2D | null;
     if (!sourceCtx) {
       throw new Error("OffscreenCanvas 2d context unavailable");
     }
@@ -69,7 +73,8 @@ ctx.onmessage = async (event: MessageEvent<ResizeRequest>) => {
       { filter: "lanczos3" },
     );
 
-    const blob = await target.convertToBlob({
+    // TS 4.9 lib.dom не знает OffscreenCanvas.convertToBlob (до R-50 его давали глобальные типы удалённой ML-библиотеки).
+    const blob = await (target as unknown as BlobConvertible).convertToBlob({
       type: "image/jpeg",
       quality,
     });
