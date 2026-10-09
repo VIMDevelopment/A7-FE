@@ -30,5 +30,11 @@ echo "[R-53.3] главная страница не кэшируется"
 ICC=$(echo "$INDEX_HEADERS" | grep -i '^cache-control:' | tr -d '\r')
 if echo "$ICC" | grep -qE 'no-cache|no-store|max-age=0'; then ok "$ICC"; else bad "Cache-Control у главной: '${ICC:-нет}'"; fi
 
+echo "[SPA] прямые ссылки на страницы отдают сайт (и там, где в статике есть одноимённая папка)"
+for path in /projects/x /knowledge-base /knowledge-base/ /administration; do
+  R=$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "$BASE$path")
+  if echo "$R" | grep -q '^200 text/html'; then ok "$path → $R"; else bad "$path → $R"; fi
+done
+
 [ "$fail" = 0 ] && echo "ИТОГ: OK" || echo "ИТОГ: НЕ ВЫПОЛНЕНО"
 exit "$fail"
