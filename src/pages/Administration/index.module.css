@@ -203,3 +203,23 @@
     row-gap: 12px;
   }
 }
+
+.allBranches {
+  display: flex;
+  flex-direction: column;
+  row-gap: 8px;
+}
+
+.allBranchesLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.allBranchesText,
+.rolesHint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary, var(--color-text));
+}
