@@ -4,6 +4,7 @@ import {
   canEditUser,
   favoritesBranchId,
   getRolesOptions,
+  getWorkplaceOptions,
   isSuperadmin,
 } from "./helpers";
 
@@ -66,4 +67,23 @@ describe("Суперадмин — все филиалы и все права п
     expect(favoritesBranchId([], [{ id: "p1" }, { id: "p2" }])).toBe("p1");
     expect(favoritesBranchId(undefined, [])).toBeUndefined();
   });
+});
+
+// Иван 09.10: «админ видит все филиалы, но добавить себе филиал не может» — у пользователя с несколькими ролями
+// (например, admin + supervisor) филиалы вне его workplace были выключены, как у «чистого» руководителя.
+describe("[R-49] выбор филиалов в окне доступа — по старшей роли выдающего", () => {
+  const projects = [{ id: "own", name: "Свой" }, { id: "other", name: "Чужой" }];
+  const disabled = (roles: UserRolesItem[]) =>
+    getWorkplaceOptions(projects, roles, ["own"]).filter((o) => o.disabled).map((o) => o.value);
+
+  it("руководитель филиала выдаёт только свои филиалы", () => {
+    expect(disabled([UserRolesItem.supervisor])).toEqual(["other"]);
+  });
+
+  it.each([UserRolesItem.admin, UserRolesItem.owner, UserRolesItem.agency, UserRolesItem.cluster])(
+    "%s вместе с ролью руководителя выдаёт любые филиалы",
+    (senior) => {
+      expect(disabled([UserRolesItem.supervisor, senior])).toEqual([]);
+    }
+  );
 });
