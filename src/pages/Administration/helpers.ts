@@ -96,16 +96,28 @@ export const getRolesOptions = (currentUserRoles?: UserRolesItem[]) => {
   return [...hierarchical, ...capabilities];
 };
 
+// Старшие роли выдают любые филиалы — как и видят их все (Statistics, Projects, бэк R-49).
+const ALL_BRANCHES_ROLES = [
+  UserRolesItem.admin,
+  UserRolesItem.owner,
+  UserRolesItem.agency,
+  UserRolesItem.cluster,
+];
+
 export const getWorkplaceOptions = (
   projects: ProjectPreviewDto[],
   userRoles?: UserRolesItem[],
   userWorkplace?: string[]
-) =>
-  projects.map((item) => ({
+) => {
+  const roles = userRoles ?? [];
+  // Только свои филиалы — у «чистого» руководителя; с любой старшей ролью рядом (мультироль) — все.
+  const onlyOwn =
+    roles.includes(UserRolesItem.supervisor) &&
+    !roles.some((r) => ALL_BRANCHES_ROLES.includes(r));
+  return projects.map((item) => ({
     key: item.id,
     value: item.id,
     label: item.name,
-    disabled:
-      (userRoles ?? []).includes(UserRolesItem.supervisor) &&
-      !userWorkplace?.includes(item.id ?? ""),
+    disabled: onlyOwn && !userWorkplace?.includes(item.id ?? ""),
   }));
+};
