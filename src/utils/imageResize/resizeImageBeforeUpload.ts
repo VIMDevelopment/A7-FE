@@ -53,6 +53,7 @@ export const resizeImageBeforeUpload = async (
     try {
       worker = new Worker(
         new URL("./imageResize.worker.ts", import.meta.url),
+        { type: "module" },
       );
     } catch (err) {
       console.warn("[imageResize] worker init failed → send original", err);

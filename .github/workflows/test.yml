@@ -18,6 +18,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit -p tsconfig.json
-      - run: npx craco test --watchAll=false
-        env:
-          CI: true
+      - run: npx vitest run

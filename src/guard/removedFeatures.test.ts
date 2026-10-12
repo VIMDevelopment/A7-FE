@@ -33,7 +33,7 @@ describe("[R-50] в вебе нет распознавания лиц", () => {
 
   it("[R-50] весов нейросетей нет в сайте", () => {
     expect(existsSync(join(ROOT, "public/weights"))).toBe(false);
-    expect(readFileSync(join(ROOT, "craco.config.js"), "utf-8")).not.toMatch(/face-api/);
+    expect(readFileSync(join(ROOT, "vite.config.ts"), "utf-8")).not.toMatch(/face-api/);
   });
 
   it("[R-50] код не распознаёт лица и не ведёт на экран «Распознавание»", () => {

@@ -1,4 +1,6 @@
-import { stepFileName } from "./stepDownload";
+import type { Mock } from "vitest";
+import { downloadStepImage, stepFileName } from "./stepDownload";
+import { showNotification } from "../../components/ShowNotification";
 
 // время прогона задаём в локальной зоне — имя файла тоже в локальной (как видит пользователь)
 const createdAt = new Date(2026, 9, 3, 4, 6, 44).toISOString();
@@ -24,25 +26,23 @@ describe("Explorer: скачивание картинок цепочек [R-37]"
   });
 });
 
-jest.mock("../../components/ShowNotification", () => ({ showNotification: jest.fn() }));
+vi.mock("../../components/ShowNotification", () => ({ showNotification: vi.fn() }));
 
 describe("Explorer: скачивание в обход кэша браузера [R-37]", () => {
   // Миниатюра шага — тот же URL, уже загруженный <img> без CORS и закэшированный без
   // Access-Control-Allow-Origin (S3 не шлёт Vary: Origin) → обычный fetch из кэша
   // блокируется CORS. Баг стенда 03.10: «Произошла ошибка при скачивании файла».
-  const { downloadStepImage } = jest.requireActual("./stepDownload");
-  const { showNotification } = jest.requireMock("../../components/ShowNotification");
 
   beforeEach(() => {
-    (global as any).fetch = jest.fn(async () => ({
+    (global as any).fetch = vi.fn(async () => ({
       ok: true,
       blob: async () => new Blob(["jpeg-bytes"], { type: "image/jpeg" }),
     }));
-    (URL as any).createObjectURL = jest.fn(() => "blob:test");
-    (URL as any).revokeObjectURL = jest.fn();
+    (URL as any).createObjectURL = vi.fn(() => "blob:test");
+    (URL as any).revokeObjectURL = vi.fn();
     // клик по ссылке скачивания в jsdom не нужен — подменяем, чтобы не навигировать
-    jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
-    showNotification.mockClear();
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    (showNotification as unknown as Mock).mockClear();
   });
 
   it("[R-37] картинка запрашивается с CORS и мимо HTTP-кэша (cache: no-store)", async () => {
@@ -55,7 +55,7 @@ describe("Explorer: скачивание в обход кэша браузера
 
   it("[R-37] файл сохраняется под понятным именем", async () => {
     let downloadName = "";
-    (HTMLAnchorElement.prototype.click as jest.Mock).mockImplementation(function (this: HTMLAnchorElement) {
+    (HTMLAnchorElement.prototype.click as Mock).mockImplementation(function (this: HTMLAnchorElement) {
       downloadName = this.download;
     });
     await downloadStepImage("https://s3.test/x.jpg", createdAt, "Цепочка", 1, "o/m");
@@ -63,7 +63,7 @@ describe("Explorer: скачивание в обход кэша браузера
   });
 
   it("[R-37] сбой сети — человеческое сообщение", async () => {
-    (global as any).fetch = jest.fn(async () => {
+    (global as any).fetch = vi.fn(async () => {
       throw new TypeError("Failed to fetch");
     });
     await downloadStepImage("https://s3.test/x.jpg", createdAt, "Цепочка", 0, "o/m");

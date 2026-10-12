@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { Suspense, lazy, useEffect, useMemo } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -15,10 +15,12 @@ import { PublicRoutes } from "./routes/routes";
 import SideMenuWrapper from "./components/SideMenuWrapper/SideMenuWrapper";
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import AuthPage from "./pages/Auth/Auth";
-import PolicyPage from "./pages/Policy/Policy";
 import NoAccessPage from "./pages/NoAccess/NoAccess";
 import { showNotification } from "./components/ShowNotification";
 import { globalErrorMessage } from "./utils/globalErrorMessage";
+
+// R-54: длинный текст политики — отдельным файлом, только по запросу.
+const PolicyPage = lazy(() => import("./pages/Policy/Policy"));
 
 const antdTheme = {
   token: {
@@ -110,7 +112,9 @@ const AppShell = () => {
   return (
     <SideMenuWrapper>
       <PageWrapper>
-        <Routes>{routes}</Routes>
+        <Suspense fallback={null}>
+          <Routes>{routes}</Routes>
+        </Suspense>
       </PageWrapper>
     </SideMenuWrapper>
   );
@@ -124,7 +128,14 @@ const App = () => {
           <Routes>
             <Route path={PublicRoutes.LOGIN.static} element={<AuthPage />} />
             <Route path={PublicRoutes.NO_ACCESS.static} element={<NoAccessPage />} />
-            <Route path={PublicRoutes.POLICY.static} element={<PolicyPage />} />
+            <Route
+              path={PublicRoutes.POLICY.static}
+              element={
+                <Suspense fallback={null}>
+                  <PolicyPage />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<AppShell />} />
           </Routes>
         </Router>
