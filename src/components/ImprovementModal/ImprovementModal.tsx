@@ -13,7 +13,7 @@ import { defaultApiAxiosParams } from "../../api/helpers";
 import { showNotification } from "../ShowNotification";
 import Button from "../Button/Button";
 import Select from "../Select/Select";
-import { Radio, Result, Spin, Tooltip } from "antd";
+import { Result, Spin, Tooltip } from "antd";
 import {
   CloseCircleFilled,
   LoadingOutlined,
@@ -36,15 +36,12 @@ import {
 } from "../../api/favoritesApi";
 import type { PromptResponseHistoryItem } from "../../apiV2/a7-service/model/promptResponseHistoryItem";
 import { categoriesWithPrompts, defaultPromptOf, promptBodyOf } from "../prompts/promptCatalog";
-import { addLayerPayload, processingOf } from "../prompts/categoryProcessing";
-import type { CategoryWithProcessing } from "../../api/processingApi";
+import { addLayerPayload } from "../prompts/categoryProcessing";
 import type { PostPhotosAddlayerBody } from "../../apiV2/a7-service/model/postPhotosAddlayerBody";
-import type { PostPhotosAddlayerBodyOutputResolution } from "../../apiV2/a7-service/model/postPhotosAddlayerBodyOutputResolution";
 import type { PostPhotosImproveBody } from "../../apiV2/a7-service/model/postPhotosImproveBody";
 import type { PhotoStatus } from "../../apiV2/a7-service/model/photoStatus";
 import type { PhotoStatusOperation } from "../../apiV2/a7-service/model/photoStatusOperation";
 
-const DEFAULT_OUTPUT_RESOLUTION: PostPhotosAddlayerBodyOutputResolution = "2K";
 const POLLING_INTERVAL_MS = 1500;
 const MAX_ATTEMPTS = 3;
 
@@ -93,19 +90,9 @@ const ImprovementModal: FC<Props> = ({
 }) => {
   const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
-  const [outputResolution, setOutputResolution] =
-    useState<PostPhotosAddlayerBodyOutputResolution>(
-      DEFAULT_OUTPUT_RESOLUTION,
-    );
 
   const lastRequestRef = useRef<LastRequest | null>(null);
   const prevStatusRef = useRef<PhotoStatus | undefined>(undefined);
-
-  useEffect(() => {
-    if (isOpen) {
-      setOutputResolution(DEFAULT_OUTPUT_RESOLUTION);
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -221,8 +208,6 @@ const ImprovementModal: FC<Props> = ({
       : undefined;
   // текст — только выбранного промпта категории; body категории не отправляется (R-38.5)
   const bodyForRequest = promptBodyOf(selectedPrompt, selectedVersion);
-  // привязка категории к цепочке (R-39): модель выбирает бэкенд, разрешение задано шагами
-  const boundProcessing = processingOf(selectedPrompt as CategoryWithProcessing | undefined);
 
   useEffect(() => {
     if (prevStatusRef.current === "processing" && status === "success") {
@@ -285,8 +270,6 @@ const ImprovementModal: FC<Props> = ({
           photoId,
           prompt: bodyForRequest,
           categoryId: selectedPromptId,
-          outputResolution,
-          processing: boundProcessing,
         }) as PostPhotosAddlayerBody
       );
     } else {
@@ -549,24 +532,6 @@ const ImprovementModal: FC<Props> = ({
                   {selectedHistoryItem.description}
                 </div>
               </div>
-            )}
-            {/* у привязанной категории разрешение задано шагами цепочки (R-39.2) */}
-            {!boundProcessing && (
-            <div className={css.resolutionGroup}>
-              <span className={css.resolutionLabel}>Разрешение:</span>
-              <Radio.Group
-                value={outputResolution}
-                onChange={(e) =>
-                  setOutputResolution(
-                    e.target.value as PostPhotosAddlayerBodyOutputResolution,
-                  )
-                }
-                disabled={allDisabled}
-              >
-                <Radio value="2K">2K (быстро)</Radio>
-                <Radio value="4K">4K (высокое качество)</Radio>
-              </Radio.Group>
-            </div>
             )}
             <div className={css.bottomContainerInner}>
               {hasImprovedVersion && (

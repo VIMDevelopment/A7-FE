@@ -1,6 +1,12 @@
 import type { CategoryProcessing, CategoryWithProcessing } from "../../api/processingApi";
 
-/** Привязка категории или null — без привязки обработка идёт nano-banana-pro (R-39.3). */
+/**
+ * Модель обработки по умолчанию — категория без привязки к цепочке (R-61, до 13.10 — nano-banana-pro).
+ * Только 2К: выбора разрешения в окне улучшения нет. Цена — как в справочнике цен бэкенда.
+ */
+export const DEFAULT_MODEL_LABEL = "grok-imagine-image-2 ($0.05 за фото, 2К)";
+
+/** Привязка категории или null — без привязки обработка идёт моделью по умолчанию (R-39.3, R-61). */
 export function processingOf(
   category: CategoryWithProcessing | undefined
 ): CategoryProcessing | null {
@@ -19,18 +25,14 @@ export function describeProcessing(processing: CategoryProcessing): string {
 }
 
 /**
- * Тело запроса улучшения (R-39.2): категория уходит всегда — по ней бэкенд берёт цепочку;
- * разрешение имеет смысл только без привязки (у цепочки оно задано шагами снимка).
+ * Тело запроса улучшения (R-39.2): категория уходит всегда — по ней бэкенд берёт цепочку.
+ * Разрешения нет (R-61): модель по умолчанию — только 2К, у цепочки оно задано шагами снимка.
  */
 export function addLayerPayload(args: {
   photoId: string;
   prompt: string;
   categoryId: string;
-  outputResolution: "2K" | "4K";
-  processing: CategoryProcessing | null;
-}): { photoId: string; prompt: string; categoryId: string; outputResolution?: "2K" | "4K" } {
-  const { photoId, prompt, categoryId, outputResolution, processing } = args;
-  return processing
-    ? { photoId, prompt, categoryId }
-    : { photoId, prompt, categoryId, outputResolution };
+}): { photoId: string; prompt: string; categoryId: string } {
+  const { photoId, prompt, categoryId } = args;
+  return { photoId, prompt, categoryId };
 }

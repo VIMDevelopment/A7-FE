@@ -6,6 +6,7 @@ import { showNotification } from "../../../components/ShowNotification";
 import { useGetPrompts } from "../../../apiV2/a7-service";
 import { defaultApiAxiosParams } from "../../../api/helpers";
 import { CategoryWithProcessing, useBindCategory } from "../../../api/processingApi";
+import { DEFAULT_MODEL_LABEL } from "../../../components/prompts/categoryProcessing";
 
 type Props = {
   open: boolean;
@@ -63,7 +64,8 @@ const BindCategoriesModal: FC<Props> = ({ open, chainId, chainTitle, onClose }) 
       isLoading={bind.isLoading}
     >
       <p>
-        Все промпты выбранных категорий будут обрабатываться этой цепочкой вместо nano-banana-pro.
+        Все промпты выбранных категорий будут обрабатываться этой цепочкой вместо модели по умолчанию —{" "}
+        {DEFAULT_MODEL_LABEL}.
         Сохраняется снимок шагов: правка цепочки в конфигураторе привязку не меняет.
       </p>
       <Select

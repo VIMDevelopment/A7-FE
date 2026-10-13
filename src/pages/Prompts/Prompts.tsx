@@ -25,7 +25,7 @@ import {
   useBindCategory,
   useUnbindCategory,
 } from "../../api/processingApi";
-import { describeProcessing, processingOf } from "../../components/prompts/categoryProcessing";
+import { DEFAULT_MODEL_LABEL, describeProcessing, processingOf } from "../../components/prompts/categoryProcessing";
 import {
   validateNewCategoryName,
   validateNewPromptName,
@@ -97,7 +97,7 @@ const PromptsPage = () => {
   });
   const unbindCategory = useUnbindCategory({
     onSuccess: () => {
-      showNotification({ type: "success", message: "Привязка снята — категория обрабатывается nano-banana-pro" });
+      showNotification({ type: "success", message: `Привязка снята — категория обрабатывается ${DEFAULT_MODEL_LABEL}` });
       void queryClient.invalidateQueries({ queryKey: ["/prompts"] });
     },
   });
@@ -456,7 +456,7 @@ const PromptsPage = () => {
                         </div>
                       ) : (
                         <div className={css.hint}>
-                          По умолчанию — nano-banana-pro ($0.15 за 2К, $0.30 за 4К). Привязка к цепочке из
+                          По умолчанию — {DEFAULT_MODEL_LABEL}. Привязка к цепочке из
                           конструктора меняет модель и цену для всех промптов категории.
                         </div>
                       )}
@@ -489,7 +489,7 @@ const PromptsPage = () => {
                             </Button>
                             {currentProcessing && (
                               <Popconfirm
-                                title="Снять привязку? Категория вернётся на nano-banana-pro."
+                                title={`Снять привязку? Категория вернётся на ${DEFAULT_MODEL_LABEL}.`}
                                 okText="Снять"
                                 cancelText="Отмена"
                                 onConfirm={() => selectedCategoryId && unbindCategory.mutate(selectedCategoryId)}
