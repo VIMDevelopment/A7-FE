@@ -1,5 +1,6 @@
 import {
   addLayerPayload,
+  DEFAULT_MODEL_LABEL,
   describeProcessing,
   processingOf,
 } from "./categoryProcessing";
@@ -29,12 +30,17 @@ describe("Привязка категории к цепочке обработк
     expect(describeProcessing(bound)).toBe("seedream-4.5 (2К) → recraft-crisp-upscale · ~$0.046 за фото");
   });
 
-  it("[R-39.2] payload улучшения: categoryId всегда; разрешение только без привязки (у цепочки оно в шагах)", () => {
-    expect(
-      addLayerPayload({ photoId: "ph", prompt: "p", categoryId: "cat", outputResolution: "4K", processing: null })
-    ).toEqual({ photoId: "ph", prompt: "p", categoryId: "cat", outputResolution: "4K" });
-    expect(
-      addLayerPayload({ photoId: "ph", prompt: "p", categoryId: "cat", outputResolution: "4K", processing: bound })
-    ).toEqual({ photoId: "ph", prompt: "p", categoryId: "cat" });
+  it("[R-39.2][R-61] payload улучшения: categoryId всегда, разрешения нет — модель по умолчанию только 2К, у цепочки оно в шагах", () => {
+    expect(addLayerPayload({ photoId: "ph", prompt: "p", categoryId: "cat" })).toStrictEqual({
+      photoId: "ph",
+      prompt: "p",
+      categoryId: "cat",
+    });
+  });
+});
+
+describe("Модель обработки по умолчанию [R-61]", () => {
+  it("[R-61] без привязки фото обрабатывает grok-imagine-image-2 за $0.05, только 2К", () => {
+    expect(DEFAULT_MODEL_LABEL).toBe("grok-imagine-image-2 ($0.05 за фото, 2К)");
   });
 });
