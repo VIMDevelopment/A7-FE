@@ -1,10 +1,10 @@
 import type { CategoryProcessing, CategoryWithProcessing } from "../../api/processingApi";
 
 /**
- * Модель обработки по умолчанию — категория без привязки к цепочке (R-61, до 13.10 — nano-banana-pro).
- * Только 2К: выбора разрешения в окне улучшения нет. Цена — как в справочнике цен бэкенда.
+ * Модель обработки по умолчанию — категория без привязки к цепочке: с 13.10 вечера grok-imagine-image v1 (R-62),
+ * днём — v2 (R-61), раньше — nano-banana-pro. Выбора разрешения в окне улучшения нет. Цена — как в справочнике бэкенда.
  */
-export const DEFAULT_MODEL_LABEL = "grok-imagine-image-2 ($0.05 за фото, 2К)";
+export const DEFAULT_MODEL_LABEL = "grok-imagine-image ($0.02 за фото, ~1 МП)";
 
 /** Привязка категории или null — без привязки обработка идёт моделью по умолчанию (R-39.3, R-61). */
 export function processingOf(

@@ -40,7 +40,7 @@ describe("Привязка категории к цепочке обработк
 });
 
 describe("Модель обработки по умолчанию [R-61]", () => {
-  it("[R-61] без привязки фото обрабатывает grok-imagine-image-2 за $0.05, только 2К", () => {
-    expect(DEFAULT_MODEL_LABEL).toBe("grok-imagine-image-2 ($0.05 за фото, 2К)");
+  it("[R-62] без привязки фото обрабатывает grok-imagine-image (v1) за $0.02, ~1 МП", () => {
+    expect(DEFAULT_MODEL_LABEL).toBe("grok-imagine-image ($0.02 за фото, ~1 МП)");
   });
 });
