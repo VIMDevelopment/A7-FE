@@ -87,6 +87,31 @@
   color: var(--color-text);
 }
 
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 8px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.quote {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-muted, rgba(0, 0, 0, 0.03));
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
 .tips {
   padding: 12px 14px;
   border-radius: var(--radius-md);

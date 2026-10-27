@@ -6,12 +6,12 @@ import Input from "../../components/Input/Input";
 import {
   KNOWLEDGE_CATEGORIES,
   KnowledgeArticle,
+  KnowledgeBlock,
   KnowledgeScreenshot,
 } from "./instructions";
 import { useShowPermissions } from "../../auth/userData";
 import { ROUTES } from "../../routes/constants";
-
-const normalizeSearch = (value: string) => value.trim().toLowerCase();
+import { articleMatchesQuery, blockTexts, normalizeSearch } from "./search";
 
 const highlightText = (text: string, query: string): React.ReactNode => {
   if (!query) {
@@ -45,23 +45,6 @@ const highlightText = (text: string, query: string): React.ReactNode => {
   return parts.length > 0 ? parts : text;
 };
 
-const articleMatchesQuery = (article: KnowledgeArticle, query: string) => {
-  if (!query) {
-    return true;
-  }
-
-  const searchableText = [
-    article.title,
-    ...(article.paragraphs ?? []),
-    ...(article.steps ?? []),
-    ...(article.tips ?? []),
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  return searchableText.includes(query);
-};
-
 const Screenshot: React.FC<KnowledgeScreenshot> = ({ src, caption }) => {
   const [hasError, setHasError] = useState(false);
   const fileName = src.split("/").pop() ?? src;
@@ -89,6 +72,33 @@ const Screenshot: React.FC<KnowledgeScreenshot> = ({ src, caption }) => {
   );
 };
 
+const SectionBlock: React.FC<{ block: KnowledgeBlock; query: string }> = ({
+  block,
+  query,
+}) => {
+  if (typeof block === "string") {
+    return <p className={css.paragraph}>{highlightText(block, query)}</p>;
+  }
+
+  if ("quote" in block) {
+    return (
+      <blockquote className={css.quote}>
+        {highlightText(block.quote, query)}
+      </blockquote>
+    );
+  }
+
+  const items = blockTexts(block).map((item) => (
+    <li key={item}>{highlightText(item, query)}</li>
+  ));
+
+  return "numbered" in block ? (
+    <ol className={css.steps}>{items}</ol>
+  ) : (
+    <ul className={css.steps}>{items}</ul>
+  );
+};
+
 const ArticleContent: React.FC<{
   article: KnowledgeArticle;
   query: string;
@@ -98,6 +108,17 @@ const ArticleContent: React.FC<{
       <p key={paragraph} className={css.paragraph}>
         {highlightText(paragraph, query)}
       </p>
+    ))}
+
+    {article.sections?.map((section) => (
+      <section key={section.title} className={css.section}>
+        <h3 className={css.sectionTitle}>
+          {highlightText(section.title, query)}
+        </h3>
+        {section.blocks.map((block, index) => (
+          <SectionBlock key={index} block={block} query={query} />
+        ))}
+      </section>
     ))}
 
     {article.screenshots && article.screenshots.length > 0 && (
