@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import { KNOWLEDGE_CATEGORIES } from "./instructions";
 import { PublicRoutes } from "../../routes/routes";
 
@@ -26,9 +28,18 @@ describe("[R-63] руководство по работе с нейросетя�
     ]);
   });
 
-  // Закон №1: в статье автора фото живого ребёнка до и после, а картинки public/knowledge-base отдаются без входа.
-  it("[R-63] без фото из статьи автора — картинки базы знаний открываются без входа", () => {
-    expect(guide?.screenshots ?? []).toEqual([]);
+  // Закон №1: на фото живой ребёнок, согласие родителей на публикацию подтвердил Макс 27.10;
+  // картинки public/knowledge-base отдаются без входа — в файлах не должно быть метаданных (камера, дата, геометка).
+  it("[R-63] фото примера — два файла из статьи автора в public/knowledge-base, без EXIF", () => {
+    const shots = guide?.screenshots ?? [];
+    expect(shots.map((shot) => shot.src)).toEqual([
+      "/knowledge-base/guide-example-before.jpg",
+      "/knowledge-base/guide-example-after.jpg",
+    ]);
+    for (const { src } of shots) {
+      const bytes = readFileSync(join(process.cwd(), "public", src));
+      expect(bytes.includes(Buffer.from("Exif\0\0"))).toBe(false);
+    }
   });
 
   it("[R-63] у примера с Человеком-пауком — совет-ссылка на статью об авторских правах, и она есть в разделе", () => {

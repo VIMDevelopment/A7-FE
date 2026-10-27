@@ -535,6 +535,16 @@ export const KNOWLEDGE_CATEGORIES: KnowledgeCategory[] = [
             ],
           },
         ],
+        screenshots: [
+          {
+            src: "/knowledge-base/guide-example-before.jpg",
+            caption: "Исходная фотография",
+          },
+          {
+            src: "/knowledge-base/guide-example-after.jpg",
+            caption: "Результат по промпту из примера",
+          },
+        ],
         tips: [
           "Пример выше прямо называет персонажа. Если нейросеть отклонит такой запрос из-за авторских прав, опишите персонажа через внешность — подробно в статье «Как обойти блокировку по авторским правам» в этом же разделе.",
         ],
