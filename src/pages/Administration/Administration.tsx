@@ -1,3 +1,4 @@
+import JournalDownload from "./JournalDownload";
 import React, { useEffect, useState } from "react";
 import cn from "classnames";
 import css from "./index.module.css";
@@ -183,6 +184,7 @@ const AdministrationPage = () => {
   return (
     <div className={css.container}>
       <div className={css.pageTitle}>Администрирование</div>
+      {(currentUser?.roles ?? []).includes("admin" as never) && <JournalDownload />}
 
       <Tabs
         className={css.tabs}
