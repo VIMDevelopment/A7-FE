@@ -143,6 +143,9 @@ const StatisticsPage = () => {
             {costTotal.warning && (
               <div className={css.cardHint}>{costTotal.warning}</div>
             )}
+            {costTotal.rateNote && (
+              <div className={css.cardHint}>{costTotal.rateNote}</div>
+            )}
             <div className={css.cardHint}>
               Сумма всех запусков ИИ-обработки за выбранный период. Стоимость
               запуска фиксируется в долларах в момент обработки и пересчитывается

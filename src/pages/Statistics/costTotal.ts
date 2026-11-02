@@ -6,6 +6,8 @@ export type CostTotalReport = {
   totalRub: number | null;
   totalUsd?: number;
   rateMissing?: boolean;
+  usdRub?: number;
+  rateUpdatedAt?: string;
 };
 
 const rubFormatter = new Intl.NumberFormat("ru-RU", {
@@ -14,12 +16,36 @@ const rubFormatter = new Intl.NumberFormat("ru-RU", {
   maximumFractionDigits: 0,
 });
 
-export function describeCostTotal(report: CostTotalReport | undefined): { value: string; warning?: string } {
+const rateFormatter = new Intl.NumberFormat("ru-RU", {
+  style: "currency",
+  currency: "RUB",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+const moscowDate = new Intl.DateTimeFormat("ru-RU", {
+  timeZone: "Europe/Moscow",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+function describeRate(report: CostTotalReport): string | undefined {
+  if (report.usdRub == null || !report.rateUpdatedAt) return undefined;
+  return `Курс ${rateFormatter.format(report.usdRub)} за $1 от ${moscowDate.format(new Date(report.rateUpdatedAt))}`;
+}
+
+export function describeCostTotal(report: CostTotalReport | undefined): {
+  value: string;
+  warning?: string;
+  rateNote?: string;
+} {
   if (report?.rateMissing) {
     return {
       value: `$${(report.totalUsd ?? 0).toFixed(2)}`,
       warning: "Курс USD/RUB не задан — сумма показана в долларах. Рубли появятся, когда курс обновится.",
     };
   }
-  return { value: rubFormatter.format(report?.totalRub ?? 0) };
+  const rateNote = report && describeRate(report);
+  return { value: rubFormatter.format(report?.totalRub ?? 0), ...(rateNote && { rateNote }) };
 }
