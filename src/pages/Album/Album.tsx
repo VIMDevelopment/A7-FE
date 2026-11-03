@@ -44,6 +44,7 @@ import {
   tilesForPreview,
   type PhotoTile,
 } from "./photoTiles";
+import { recordDownload, recordView } from "./journalEvents";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
 import ImprovementModal from "../../components/ImprovementModal/ImprovementModal";
 
@@ -189,6 +190,7 @@ const AlbumPage = () => {
   const handleDownloadPhotosClick = () => {
     // Скачиваем выбранные ПЛИТКИ: отмечены обе версии — нужны оба файла.
     const preparedFilesData = downloadFilesFromTileKeys(gridTiles, selectedTileKeys);
+    const downloadedPhotoIds = photoIdsFromTileKeys(gridTiles, selectedTileKeys);
 
     setIsDownloading(true);
     setDownloadProgress(0);
@@ -199,6 +201,7 @@ const AlbumPage = () => {
         setDownloadProgress(Math.round((100 / total) * done)),
     })
       .then(() => {
+        void recordDownload(downloadedPhotoIds, defaultApiAxiosParams);
         setDownloadProgress(100);
         setTimeout(() => {
           setIsDownloading(false);
@@ -429,7 +432,11 @@ const AlbumPage = () => {
             // Явный список превью в порядке плиток — тулбар адресует кадр индексом плитки.
             items={previewSourcesFromTiles(gridTiles)}
             preview={{
-              onVisibleChange: (visible) => setFrozenTiles(visible ? displayTiles : null),
+              onVisibleChange: (visible, _wasVisible, current) => {
+                setFrozenTiles(visible ? displayTiles : null);
+                if (visible) void recordView(gridTiles[current]?.photoId, defaultApiAxiosParams);
+              },
+              onChange: (current) => void recordView(gridTiles[current]?.photoId, defaultApiAxiosParams),
               toolbarRender: (_, info) => {
                 const currentTile = gridTiles[info.current];
                 const toolbarIcons = (
@@ -456,10 +463,11 @@ const AlbumPage = () => {
                       />
                       <DownloadOutlined
                         className={css.toolbarBtn}
-                        onClick={() =>
-                          currentTile &&
-                          downloadImageByUrl(currentTile.versions.original, currentTile.downloadFileName)
-                        }
+                        onClick={() => {
+                          if (!currentTile) return;
+                          downloadImageByUrl(currentTile.versions.original, currentTile.downloadFileName);
+                          void recordDownload([currentTile.photoId], defaultApiAxiosParams);
+                        }}
                       />
                       <DeleteOutlined
                         className={css.toolbarBtn}

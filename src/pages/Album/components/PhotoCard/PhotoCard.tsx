@@ -18,6 +18,7 @@ import { defaultApiAxiosParams } from "../../../../api/helpers";
 import { showNotification } from "../../../../components/ShowNotification";
 import Input from "../../../../components/Input/Input";
 import { downloadImageByUrl, handlePrintPhoto, makeFileName } from "./helpers";
+import { recordDownload } from "../../journalEvents";
 import { useMediaQuery } from "react-responsive";
 import ImprovementModal from "../../../../components/ImprovementModal/ImprovementModal";
 import cn from "classnames";
@@ -142,7 +143,10 @@ const PhotoCard: FC<Props> = ({
     {
       key: "2",
       label: "Скачать",
-      onClick: () => downloadImageByUrl(url, fileNameToSave),
+      onClick: () => {
+        downloadImageByUrl(url, fileNameToSave);
+        void recordDownload([id], defaultApiAxiosParams);
+      },
     },
     ...(canRename
       ? [
