@@ -45,6 +45,7 @@ import {
   type PhotoTile,
 } from "./photoTiles";
 import { recordDownload, recordView } from "./journalEvents";
+import { deletionFailedMessage, splitDeletion } from "./photoDeletion";
 import useBreadcrumbsBackButton from "../../lib/utils/useBreadcrumbsBackButton/useBreadcrumbsBackButton";
 import ImprovementModal from "../../components/ImprovementModal/ImprovementModal";
 
@@ -220,30 +221,31 @@ const AlbumPage = () => {
       setIsDeletePhotosModalOpen(false);
       return;
     }
-    try {
-      await Promise.all(photoIdsToDelete.map((id) => deletePhoto({ id })));
+    const results = await Promise.allSettled(photoIdsToDelete.map((id) => deletePhoto({ id })));
+    const { deleted, failed } = splitDeletion(photoIdsToDelete, results);
 
+    setSelectedTileKeys((prev) =>
+      prev.filter((key) => !gridTiles.some((t) => t.key === key && deleted.has(t.photoId)))
+    );
+    void queryClient.invalidateQueries({
+      queryKey: [`/photos/album/${albumId}`],
+    });
+
+    if (failed.length > 0) {
+      setPhotoIdsToDelete(failed);
       showNotification({
-        message: "Фото удалены",
-        type: "success",
-      });
-
-      const deleted = new Set(photoIdsToDelete);
-      setSelectedTileKeys((prev) =>
-        prev.filter((key) => !gridTiles.some((t) => t.key === key && deleted.has(t.photoId)))
-      );
-      setPhotoIdsToDelete([]);
-      setIsDeletePhotosModalOpen(false);
-
-      void queryClient.invalidateQueries({
-        queryKey: [`/photos/album/${albumId}`],
-      });
-    } catch {
-      showNotification({
-        message: "Ошибка при удалении некоторых фото",
+        message: deletionFailedMessage(failed.length),
         type: "error",
       });
+      return;
     }
+
+    showNotification({
+      message: "Фото удалены",
+      type: "success",
+    });
+    setPhotoIdsToDelete([]);
+    setIsDeletePhotosModalOpen(false);
   };
 
   const handleDeletePhotosCancel = () => {
